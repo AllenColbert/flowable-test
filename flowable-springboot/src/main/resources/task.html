@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<form action="/url" >
+<div class="control-group">
+     <label class="control-label" for="startDate">开始时间：</label>
+     <div class="controls">
+         <input type="text" id="startDate" name="startDate" class="datepicker" data-date-format="yyyy-mm-dd" required value="${startDate}" />
+     </div>
+ </div>
+ <div class="control-group">
+     <label class="control-label" for="endDate">结束时间：</label>
+     <div class="controls">
+         <input type="text" id="endDate" name="endDate" class="datepicker" data-date-format="yyyy-mm-dd" required  value="${endDate}"/>
+     </div>
+ </div>
+ <div class="control-group">
+     <label class="control-label" for="reason">请假原因：</label>
+     <div class="controls">
+         <textarea id="reason" name="reason" required  >
+         ${reason}
+         </textarea>
+     </div>
+ </div>
+</form>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+   mapper标签:配置各类声明
+   namespace：名称空间，由于映射文件可能有多个，为了防止crud语句的唯一标识被重复，需要设置空间名称。
+ -->
+
+<mapper namespace="com.power.mapper.ProcessMapper">
+    <!--
+        select:查询的statement（声明），用来编写查询语句
+        id:语句的唯一标识
+        resultType：配置返回的结果集类型
+        parameterType：传递的参数类型，可以省略
+    -->
+
+    <!--<resultMap id="PowerProcess" type=""-->
+
+    <!--TODO 待删除Mark-->
+    <select id="findProcessList" resultType="com.power.bean.PowerDeployment">
+        SELECT
+            ard.ID_ AS id,
+            ard.NAME_ AS name,
+            ard.KEY_ AS key1,
+            ard.CATEGORY_  AS category,
+            ard.TENANT_ID_ AS tenantId,
+            ard.DEPLOY_TIME_ AS deployTime
+        FROM
+            act_re_deployment ard
+
+
+    </select>
+
+
+    <select id="findProcdefList" resultType="com.power.bean.PowerProcdef">
+        SELECT
+            arp.ID_ AS id,
+            arp.REV_ AS rev,
+            arp.CATEGORY_ AS category,
+            arp.NAME_ AS	name,
+            arp.KEY_ AS key1,
+            arp.VERSION_ AS version,
+            arp.DEPLOYMENT_ID_ AS deploymentId,
+            arp.RESOURCE_NAME_ AS bpmnResource,
+            arp.DGRM_RESOURCE_NAME_ AS	PngResource
+        FROM
+            act_re_procdef arp
+    </select>
+</mapper>

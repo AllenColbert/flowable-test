@@ -1,0 +1,12 @@
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/flowable-springboot
+    username: root
+    password: 1234
+mybatis:
+
+  mapper-locations: classpath:/mapper/*
+server:
+  port: 8080

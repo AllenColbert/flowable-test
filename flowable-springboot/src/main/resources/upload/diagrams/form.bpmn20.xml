@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath"
+             targetNamespace="http://www.flowable.org/processdef">
+    <process id="form" name="form" isExecutable="true">
+        <startEvent id="startEvent1">
+            <extensionElements>
+                <flowable:formProperty id="start_date" name="开始时间" type="date" datePattern="yyyy-MM-dd"
+                                       required="true"></flowable:formProperty>
+                <flowable:formProperty id="end_date" name="结束时间" type="date" datePattern="yyyy-MM-dd"
+                                       required="true"></flowable:formProperty>
+                <flowable:formProperty id="reason" name="请假原因" type="string" required="true"></flowable:formProperty>
+                <flowable:formProperty id="days" name="请假的天数" type="long" required="true"></flowable:formProperty>
+            </extensionElements>
+        </startEvent>
+        <userTask id="sid-5E92DDC1-6F91-4FAD-82D5-49F1EDEF9094" name="请假申请">
+            <extensionElements>
+                <flowable:formProperty id="start_date" name="开始时间" type="date" datePattern="yyyy-MM-dd"
+                                       readable="true"></flowable:formProperty>
+                <flowable:formProperty id="end_date" name="结束时间" type="date" datePattern="yyyy-MM-dd"
+                                       readable="true"></flowable:formProperty>
+                <flowable:formProperty id="reason" name="请假原因" type="string" required="true"></flowable:formProperty>
+                <flowable:formProperty id="days" name="请假的天数" type="long" required="true"></flowable:formProperty>
+            </extensionElements>
+
+
+        </userTask>
+        <sequenceFlow id="sid-F60F8E40-938F-4E32-9958-1228AC8B7B4F" sourceRef="startEvent1"
+                      targetRef="sid-5E92DDC1-6F91-4FAD-82D5-49F1EDEF9094"></sequenceFlow>
+        <userTask id="sid-E906AC7B-F856-4E5E-8799-56D5213C9AFA" name="经理审批"></userTask>
+        <sequenceFlow id="sid-F1D5FFCE-C954-4EED-B87E-5B4B3E5A3D47" sourceRef="sid-5E92DDC1-6F91-4FAD-82D5-49F1EDEF9094"
+                      targetRef="sid-E906AC7B-F856-4E5E-8799-56D5213C9AFA"></sequenceFlow>
+        <endEvent id="sid-AB940DA3-B9F0-4EA8-90C9-5B382B71B3CD"></endEvent>
+        <sequenceFlow id="sid-E63416EF-75B0-4206-888C-9BCDFF679211" sourceRef="sid-E906AC7B-F856-4E5E-8799-56D5213C9AFA"
+                      targetRef="sid-AB940DA3-B9F0-4EA8-90C9-5B382B71B3CD"></sequenceFlow>
+    </process>
+    <bpmndi:BPMNDiagram id="BPMNDiagram_form">
+        <bpmndi:BPMNPlane bpmnElement="form" id="BPMNPlane_form">
+            <bpmndi:BPMNShape bpmnElement="startEvent1" id="BPMNShape_startEvent1">
+                <omgdc:Bounds height="30.0" width="30.0" x="75.0" y="75.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="sid-5E92DDC1-6F91-4FAD-82D5-49F1EDEF9094"
+                              id="BPMNShape_sid-5E92DDC1-6F91-4FAD-82D5-49F1EDEF9094">
+                <omgdc:Bounds height="80.0" width="100.0" x="150.0" y="50.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="sid-E906AC7B-F856-4E5E-8799-56D5213C9AFA"
+                              id="BPMNShape_sid-E906AC7B-F856-4E5E-8799-56D5213C9AFA">
+                <omgdc:Bounds height="80.0" width="100.0" x="285.0" y="45.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="sid-AB940DA3-B9F0-4EA8-90C9-5B382B71B3CD"
+                              id="BPMNShape_sid-AB940DA3-B9F0-4EA8-90C9-5B382B71B3CD">
+                <omgdc:Bounds height="28.0" width="28.0" x="430.0" y="71.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge bpmnElement="sid-F60F8E40-938F-4E32-9958-1228AC8B7B4F"
+                             id="BPMNEdge_sid-F60F8E40-938F-4E32-9958-1228AC8B7B4F">
+                <omgdi:waypoint x="104.94999848995758" y="90.0"></omgdi:waypoint>
+                <omgdi:waypoint x="150.0" y="90.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="sid-F1D5FFCE-C954-4EED-B87E-5B4B3E5A3D47"
+                             id="BPMNEdge_sid-F1D5FFCE-C954-4EED-B87E-5B4B3E5A3D47">
+                <omgdi:waypoint x="249.94999999999968" y="88.14814814814815"></omgdi:waypoint>
+                <omgdi:waypoint x="284.99999999999983" y="86.85000000000001"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="sid-E63416EF-75B0-4206-888C-9BCDFF679211"
+                             id="BPMNEdge_sid-E63416EF-75B0-4206-888C-9BCDFF679211">
+                <omgdi:waypoint x="384.95000000000005" y="85.0"></omgdi:waypoint>
+                <omgdi:waypoint x="430.0" y="85.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+</definitions>

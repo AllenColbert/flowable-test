@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 指定工作空间，要与接口名相同，源代码没有去看，猜测应该是通过"这里的namespace.下边方法的id"来定位方法的 -->
+<mapper namespace="com.power.mapper.UserMapper">
+
+	<select id= "findList" resultType="com.power.bean.User">
+		select *, user_name as userName
+		from tb_user
+	</select>
+
+	<!-- insert user -->
+	<insert id = "insert" parameterType="com.power.bean.User">
+		INSERT INTO tb_user(id,user_name,password,name,age,sex,birthday,created,updated)
+		VALUES(#{id},#{username},#{password},#{name},#{age},#{sex},#{birthday},now(),now());
+	</insert>
+
+	<!-- update user -->
+	<update id="update" parameterType="com.power.bean.User">
+		UPDATE tb_user
+		SET user_name = #{userName},
+			password = #{password},
+			name = #{name},
+			age = #{age},
+			sex = #{sex},
+			birthday = #{birthday},
+			updated = now()
+		WHERE
+			(id = #{id});
+	</update>
+
+	<!-- find user -->
+	<select id="find" parameterType="int" resultType="com.power.bean.User">
+		SELECT id,user_name,password,name,age,sex,birthday,created,updated FROM tb_user WHERE id=#{id};
+	</select>
+
+	<!-- delete user -->
+	<delete id="delete" parameterType="int">
+		delete from tb_user where id = #{id};
+	</delete>
+</mapper>
