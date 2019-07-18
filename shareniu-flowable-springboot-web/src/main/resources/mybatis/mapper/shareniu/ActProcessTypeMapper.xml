@@ -8,33 +8,34 @@
     <result column="pid" jdbcType="INTEGER" property="pid" />
     <result column="state_" jdbcType="BIGINT" property="state" />
   </resultMap>
+
   <sql id="Base_Column_List">
     id, code_id, name_, pid, state_
   </sql>
-  
+
     <select id="selectAll" resultMap="BaseResultMap">
-    select 
+    select
     <include refid="Base_Column_List" />
     from act_process_type
   </select>
-  
+
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-    select 
+    select
     <include refid="Base_Column_List" />
     from act_process_type
     where id = #{id,jdbcType=INTEGER}
   </select>
-  
-  
-  
+
+
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from act_process_type
     where id = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.shareniu.flowable.entity.ActProcessType">
-    insert into act_process_type (id, code_id, name_, 
+    insert into act_process_type (id, code_id, name_,
       pid, state_)
-    values (#{id,jdbcType=INTEGER}, #{codeId,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+    values (#{id,jdbcType=INTEGER}, #{codeId,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
       #{pid,jdbcType=INTEGER}, #{state,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="com.shareniu.flowable.entity.ActProcessType">

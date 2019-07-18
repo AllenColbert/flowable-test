@@ -47,7 +47,6 @@ public class ProcessController extends BaseController {
 	HistoryService historyService;
 	@Autowired
 	TaskService taskService;
-
 	@Autowired
 	ProcessDefService processDefService;
 

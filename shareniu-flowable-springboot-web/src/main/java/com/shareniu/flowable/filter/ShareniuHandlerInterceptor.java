@@ -34,7 +34,7 @@ public class ShareniuHandlerInterceptor  implements HandlerInterceptor{
 			return false;
 		}
 
-		return true;
+ 		return true;
 	}
 
 	@Override
