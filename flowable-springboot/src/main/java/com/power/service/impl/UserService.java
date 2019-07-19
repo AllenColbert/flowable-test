@@ -1,6 +1,6 @@
 package com.power.service.impl;
 
-import com.power.bean.User;
+import com.power.entity.User;
 import com.power.mapper.UserMapper;
 import com.power.service.UserIService;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.power.bean;
+package com.power.entity;
 
 import org.springframework.stereotype.Component;
 

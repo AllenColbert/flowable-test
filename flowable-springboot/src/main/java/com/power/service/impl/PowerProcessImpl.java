@@ -1,9 +1,9 @@
 package com.power.service.impl;
 
 
-import com.power.bean.PowerDeployEntity;
-import com.power.bean.PowerDeployment;
-import com.power.bean.PowerProcdef;
+import com.power.entity.PowerDeployEntity;
+import com.power.entity.PowerDeployment;
+import com.power.entity.PowerProcdef;
 import com.power.mapper.ProcessMapper;
 import com.power.service.PowerProcessService;
 import org.flowable.engine.RepositoryService;

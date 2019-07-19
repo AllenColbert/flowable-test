@@ -1,6 +1,6 @@
 package com.power.service;
 
-import com.power.bean.User;
+import com.power.entity.User;
 
 import java.util.List;
 

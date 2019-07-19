@@ -1,7 +1,7 @@
 package com.power.mapper;
 
-import com.power.bean.PowerDeployment;
-import com.power.bean.PowerProcdef;
+import com.power.entity.PowerDeployment;
+import com.power.entity.PowerProcdef;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

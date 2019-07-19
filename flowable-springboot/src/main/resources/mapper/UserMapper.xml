@@ -4,19 +4,19 @@
 <!-- 指定工作空间，要与接口名相同，源代码没有去看，猜测应该是通过"这里的namespace.下边方法的id"来定位方法的 -->
 <mapper namespace="com.power.mapper.UserMapper">
 
-	<select id= "findList" resultType="com.power.bean.User">
+	<select id= "findList" resultType="com.power.entity.User">
 		select *, user_name as userName
 		from tb_user
 	</select>
 
 	<!-- insert user -->
-	<insert id = "insert" parameterType="com.power.bean.User">
+	<insert id = "insert" parameterType="com.power.entity.User">
 		INSERT INTO tb_user(id,user_name,password,name,age,sex,birthday,created,updated)
 		VALUES(#{id},#{username},#{password},#{name},#{age},#{sex},#{birthday},now(),now());
 	</insert>
 
 	<!-- update user -->
-	<update id="update" parameterType="com.power.bean.User">
+	<update id="update" parameterType="com.power.entity.User">
 		UPDATE tb_user
 		SET user_name = #{userName},
 			password = #{password},
@@ -30,7 +30,7 @@
 	</update>
 
 	<!-- find user -->
-	<select id="find" parameterType="int" resultType="com.power.bean.User">
+	<select id="find" parameterType="int" resultType="com.power.entity.User">
 		SELECT id,user_name,password,name,age,sex,birthday,created,updated FROM tb_user WHERE id=#{id};
 	</select>
 

@@ -1,6 +1,6 @@
 package com.power.mapper;
 
-import com.power.bean.User;
+import com.power.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

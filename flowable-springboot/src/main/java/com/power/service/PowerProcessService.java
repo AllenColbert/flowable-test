@@ -1,9 +1,9 @@
 package com.power.service;
 
 
-import com.power.bean.PowerDeployment;
-import com.power.bean.PowerProcdef;
-import com.power.bean.PowerDeployEntity;
+import com.power.entity.PowerDeployment;
+import com.power.entity.PowerProcdef;
+import com.power.entity.PowerDeployEntity;
 
 import java.util.List;
 

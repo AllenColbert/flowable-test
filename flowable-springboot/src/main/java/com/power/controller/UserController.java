@@ -1,6 +1,6 @@
 package com.power.controller;
 
-import com.power.bean.User;
+import com.power.entity.User;
 import com.power.service.impl.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

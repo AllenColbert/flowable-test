@@ -18,7 +18,7 @@
     <!--<resultMap id="PowerProcess" type=""-->
 
     <!--TODO 待删除Mark-->
-    <select id="findProcessList" resultType="com.power.bean.PowerDeployment">
+    <select id="findProcessList" resultType="com.power.entity.PowerDeployment">
         SELECT
             ard.ID_ AS id,
             ard.NAME_ AS name,
@@ -33,7 +33,7 @@
     </select>
 
 
-    <select id="findProcdefList" resultType="com.power.bean.PowerProcdef">
+    <select id="findProcdefList" resultType="com.power.entity.PowerProcdef">
         SELECT
             arp.ID_ AS id,
             arp.REV_ AS rev,
