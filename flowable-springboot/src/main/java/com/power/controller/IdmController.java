@@ -7,18 +7,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
+
 /**
  * @author xuyunfeng
  *
  */
 @RestController
-@RequestMapping("test")
+@RequestMapping("idm")
 public class IdmController {
 
 
 	@Autowired
 	private IdmService idmService;
 
+
+	@Autowired
+	HttpSession session;
 
 	/**
 	 * 注册用户
@@ -86,5 +91,24 @@ public class IdmController {
 	public ResponseEntity deleteGroupById(@RequestParam("groupId")String groupId){
 		 Object result = idmService.deleteGroupById(groupId);
 		 return ResponseEntity.ok(result);
+	 }
+
+	 @PostMapping("login")
+	public ResponseEntity login(@RequestParam("userId") String userId,
+								@RequestParam("password") String password){
+	 	Object result = idmService.login(userId,password);
+	 	return ResponseEntity.ok(result);
+	 }
+
+	 @GetMapping("logout")
+	public ResponseEntity logout(){
+	 	Object result = idmService.logout();
+	 	return ResponseEntity.ok(result);
+	 }
+
+	 @GetMapping("checkSession")
+	public ResponseEntity checkSession(){
+		 System.out.println("IdmController处sessionId："+session.getId());
+		 return ResponseEntity.ok("输出的"+session.getId());
 	 }
 }

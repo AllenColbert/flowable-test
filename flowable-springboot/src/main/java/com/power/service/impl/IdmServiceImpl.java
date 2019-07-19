@@ -2,10 +2,13 @@ package com.power.service.impl;
 
 import com.power.service.IdmService;
 import org.flowable.idm.api.IdmIdentityService;
+import org.flowable.idm.api.User;
 import org.flowable.idm.engine.impl.persistence.entity.GroupEntityImpl;
 import org.flowable.idm.engine.impl.persistence.entity.UserEntityImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpSession;
 
 /**
  * @author : xuyunfeng
@@ -17,9 +20,32 @@ public class IdmServiceImpl implements IdmService {
     @Autowired
     private IdmIdentityService idmIdentityService;
 
+    @Autowired
+    HttpSession session;
+
 /*    public IdmServiceImpl(IdmIdentityService idmIdentityService) {
         this.idmIdentityService = idmIdentityService;
     }*/
+
+
+    @Override
+    public Object login(String userId, String password) {
+
+        if (idmIdentityService.checkPassword(userId, password)){
+            User user = (User) queryUserById(userId);
+            session.setAttribute("user",user);
+            return "登陆成功";
+        }else if (queryUserById(userId) == null){
+            return "用户不存在";
+        }
+        return "密码错误";
+    }
+
+    @Override
+    public Object logout() {
+        session.removeAttribute("user");
+        return "用户退出";
+    }
 
 
     @Override
@@ -77,6 +103,8 @@ public class IdmServiceImpl implements IdmService {
         idmIdentityService.deleteGroup(groupId);
         return "成功删除组织";
     }
+
+
 
 
 }

@@ -7,12 +7,15 @@ import com.power.entity.PowerProcdef;
 import com.power.mapper.ProcessMapper;
 import com.power.service.PowerProcessService;
 import org.flowable.engine.RepositoryService;
+import org.flowable.engine.RuntimeService;
 import org.flowable.engine.repository.DeploymentBuilder;
+import org.flowable.engine.runtime.ProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author xuyunfeng
@@ -28,12 +31,17 @@ public class PowerProcessImpl implements PowerProcessService {
     private RepositoryService repositoryService;
 
     @Autowired
+    private RuntimeService runtimeService;
+
+    @Autowired
     private ProcessMapper processMapper;
+
 
     @Override
     public Object deployProcess(String fileName, PowerDeployEntity powerDeploy) {
         if (powerDeploy == null) {return "请填写流程部署信息";}
-
+        //默认没有外置表单，临时属性，后期调整；
+        if (powerDeploy.getOuterForm() == null){ powerDeploy.setOuterForm(false); }
         ClassPathResource classPathResource = new ClassPathResource(BPMN_PREFIX + fileName);
         //判断是否有对应的流程文件
         if (classPathResource.exists()) {
@@ -68,6 +76,18 @@ public class PowerProcessImpl implements PowerProcessService {
     public List<PowerProcdef> findProcdefList() {
 
         return processMapper.findProcdefList();
+    }
+
+    @Override
+    public Object startProcessInstance(String procDefId) {
+        ProcessInstance processInstance = runtimeService.startProcessInstanceById(procDefId);
+        return "流程实例Id："+processInstance.getId();
+    }
+
+    @Override
+    public Object startProcessInstance(String procDefId, Map<String, Object> vars) {
+        ProcessInstance processInstance = runtimeService.startProcessInstanceById(procDefId, vars);
+        return "流程实例Id："+processInstance.getId();
     }
 
 

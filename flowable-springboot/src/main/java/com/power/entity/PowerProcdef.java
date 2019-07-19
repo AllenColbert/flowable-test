@@ -5,6 +5,8 @@ package com.power.entity;
  * @date :   2019/7/17 16:04
  * 流程定义信息
  */
+
+
 public class PowerProcdef {
     private static final long serialVersionUID = 1L;
 

@@ -81,7 +81,6 @@ public class FormController {
     public  String getDate(){
         SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
         String s = simpleDateFormat.format(new Date());
-
         return  s;
     }
 
@@ -155,6 +154,7 @@ public class FormController {
         Object startFormKey = formService.getRenderedStartForm(proDefId);
         return ResponseEntity.ok("开始节点表单key："+startFormKey);
     }
+
 
 
 }

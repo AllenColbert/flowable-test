@@ -22,4 +22,8 @@ public interface IdmService {
     Object deleteUserById(String userId);
 
     Object deleteGroupById(String groupId);
+
+    Object login(String userId, String password);
+
+    Object logout();
 }

@@ -6,6 +6,7 @@ import com.power.entity.PowerProcdef;
 import com.power.entity.PowerDeployEntity;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -28,4 +29,8 @@ public interface PowerProcessService {
 
 
     List<PowerProcdef> findProcdefList();
+
+    Object startProcessInstance(String procDefId);
+
+    Object startProcessInstance(String procDefId, Map<String,Object> vars);
 }

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+   mapper标签:配置各类声明
+   namespace：名称空间，由于映射文件可能有多个，为了防止crud语句的唯一标识被重复，需要设置空间名称。
+ -->
+
+<mapper namespace="com.power.mapper.TaskMapper">
+    <!--
+        select:查询的statement（声明），用来编写查询语句
+        id:语句的唯一标识
+        resultType：配置返回的结果集类型
+        parameterType：传递的参数类型，可以省略
+    -->
+
+    <select id="queryUserTask" resultType="com.power.entity.PowerTask" parameterType="String">
+        SELECT
+            art.ID_ AS id,
+            art.EXECUTION_ID_ AS executionId,
+            art.PROC_INST_ID_ AS processInstanceId,
+            art.PROC_DEF_ID_ AS processDefinitionId,
+            art.NAME_ AS name,
+            art.TASK_DEF_KEY_ AS taskDefinitionKey,
+            art.ASSIGNEE_ AS assignee,
+            art.CREATE_TIME_ AS createTime,
+            art.SUSPENSION_STATE_ AS suspensionState,
+            art.TENANT_ID_ AS tenantId,
+            art.FORM_KEY_ AS formKey
+        FROM
+            act_ru_task art
+        WHERE
+            art.ASSIGNEE_ = #{assignee}
+    </select>
+</mapper>
