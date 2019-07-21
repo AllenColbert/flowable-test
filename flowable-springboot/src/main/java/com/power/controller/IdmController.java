@@ -31,15 +31,15 @@ public class IdmController {
 	 * @return user or String
 	 * user JSON示例：
 	 * {
-	 * 	"id":"zhangsan",
-	 * 	"firstName":"san",
-	 * 	"lastName":"zhang",
-	 * 	"displayName":"Mrs.Zhang",
-	 * 	"email":"ZhangSan@gmail.com",
-	 * 	"password":"1234",
-	 * 	"tenantId":"11",
-	 * 	"revision":0
-	 * }
+	  	"id":"zhangsan",
+	  	"firstName":"san",
+	  	"lastName":"zhang",
+	  	"displayName":"Mrs.Zhang",
+	  	"email":"ZhangSan@gmail.com",
+	  	"password":"1234",
+	  	"tenantId":"11",
+	  	"revision":0
+	  }
 	 *
 	 */
 	 @PostMapping("userRegister")
@@ -54,11 +54,11 @@ public class IdmController {
 	 * @param group GroupEntityImpl
 	 * @return group or String
 	 * 示例：
-	 *{
-	 * 	"id":"开发组",
-	 * 	"name":"开发部",
-	 * 	"type":"开发",
-	 * }
+	 {
+	  	"id":"开发组",
+	  	"name":"开发部",
+	  	"type":"开发"
+	  }
 	 *
 	 */
 	 @PostMapping("groupRegister")
@@ -93,6 +93,14 @@ public class IdmController {
 		 return ResponseEntity.ok(result);
 	 }
 
+	/**
+	 * 登录
+	 * @param userId 用户id
+	 * @param password 密码
+	 * @return Object类型
+	 * 示例：
+	  localhost:9100/idm/login?userId=zhangsan&password=1234
+	 */
 	 @PostMapping("login")
 	public ResponseEntity login(@RequestParam("userId") String userId,
 								@RequestParam("password") String password){
@@ -100,13 +108,21 @@ public class IdmController {
 	 	return ResponseEntity.ok(result);
 	 }
 
-	 @GetMapping("logout")
+	/**
+	 * 登出，清除session
+	 * @return Object
+	 */
+	@GetMapping("logout")
 	public ResponseEntity logout(){
 	 	Object result = idmService.logout();
 	 	return ResponseEntity.ok(result);
 	 }
 
-	 @GetMapping("checkSession")
+	/**
+	 * 测试用
+	 * @return session.id
+	 */
+	@GetMapping("checkSession")
 	public ResponseEntity checkSession(){
 		 System.out.println("IdmController处sessionId："+session.getId());
 		 return ResponseEntity.ok("输出的"+session.getId());
