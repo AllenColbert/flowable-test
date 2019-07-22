@@ -12,16 +12,6 @@
  */
 package org.flowable.cmmn.test.persistence;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.flowable.cmmn.engine.CmmnEngineConfiguration;
 import org.flowable.cmmn.engine.impl.db.EntityDependencyOrder;
 import org.flowable.cmmn.engine.impl.persistence.entity.data.impl.TableDataManagerImpl;
@@ -30,11 +20,18 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.Assert.*;
+
 /**
  * @author Joram Barrez
  */
 public class EntitiesTest {
-    
+
     @Test
     public void verifyMappedEntitiesExist() {
         Set<String> mappedResources = getMappedResources();
@@ -53,7 +50,7 @@ public class EntitiesTest {
             assertTrue("No delete entry in EntityDependencyOrder for " + mappedResource, EntityDependencyOrder.DELETE_ORDER.contains(getAndAssertEntityImplClass(mappedResource)));
         }
     }
-    
+
     @Test
     public void verifyEntitiesInTableDataManager() {
         Set<String> mappedResources = getMappedResources();
@@ -61,7 +58,7 @@ public class EntitiesTest {
             assertTrue("No entry in TableDataManagerImpl for " + mappedResource, TableDataManagerImpl.entityToTableNameMap.containsKey(getAndAssertEntityInterfaceClass(mappedResource)));
         }
     }
-    
+
     protected Class getAndAssertEntityInterfaceClass(String mappedResource) {
         try {
             Class c = Class.forName("org.flowable.cmmn.engine.impl.persistence.entity." + mappedResource + "Entity");
@@ -72,7 +69,7 @@ public class EntitiesTest {
         }
         return null;
     }
-    
+
     protected Class getAndAssertEntityImplClass(String mappedResource) {
         try {
             Class c = Class.forName("org.flowable.cmmn.engine.impl.persistence.entity." + mappedResource + "EntityImpl");
@@ -83,7 +80,7 @@ public class EntitiesTest {
         }
         return null;
     }
-    
+
     private Set<String> getMappedResources() {
         try {
             DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -105,9 +102,9 @@ public class EntitiesTest {
                     resources.add(resource);
                 }
             }
-            
+
             resources.remove("TableData"); // not an entity
-            
+
             assertTrue(resources.size() > 0);
             return resources;
         } catch (Exception e) {
