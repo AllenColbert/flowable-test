@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             expressionLanguage="http://www.w3.org/1999/XPath"
+             id="m1563762164140" name=""
+             targetNamespace="http://www.activiti.org/test"
+             typeLanguage="http://www.w3.org/2001/XMLSchema">
+    <process id="myProcess" isClosed="false" isExecutable="true" name="My process" processType="None">
+        <startEvent id="startevent1" name="Start"/>
+        <userTask flowable:candidateUsers="shareniua,shareniub,shareniuc"
+                  flowable:exclusive="true" id="usertask1" name="User Task">
+            <!--isSequential = false 的时候表示当前实例节点为并行执行-->
+            <multiInstanceLoopCharacteristics isSequential="false">
+                <!--循环次数-->
+                <loopCardinality>3</loopCardinality>
+                <!--条件控制-会签？控制条件完成的个数大于等于三分之一及视为完成-->
+                <completionCondition>${nrOfCompletedInstances/nrOfInstances >= 0.3}</completionCondition>
+            </multiInstanceLoopCharacteristics>
+        </userTask>
+        <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="usertask1"/>
+        <endEvent id="endevent1" name="End"/>
+        <sequenceFlow id="flow2" sourceRef="usertask1" targetRef="endevent1"/>
+    </process>
+    <bpmndi:BPMNDiagram
+            documentation="background=#3C3F41;count=1;horizontalcount=1;orientation=0;width=842.4;height=1195.2;imageableWidth=832.4;imageableHeight=1185.2;imageableX=5.0;imageableY=5.0"
+            id="Diagram-_1" name="New Diagram">
+        <bpmndi:BPMNPlane bpmnElement="myProcess">
+            <bpmndi:BPMNShape bpmnElement="startevent1" id="Shape-startevent1">
+                <omgdc:Bounds height="32.0" width="32.0" x="140.0" y="90.0"/>
+                <bpmndi:BPMNLabel>
+                    <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+                </bpmndi:BPMNLabel>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="usertask1" id="Shape-usertask1">
+                <omgdc:Bounds height="55.0" width="105.0" x="220.0" y="80.0"/>
+                <bpmndi:BPMNLabel>
+                    <omgdc:Bounds height="55.0" width="105.0" x="0.0" y="0.0"/>
+                </bpmndi:BPMNLabel>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="endevent1" id="Shape-endevent1">
+                <omgdc:Bounds height="32.0" width="32.0" x="370.0" y="90.0"/>
+                <bpmndi:BPMNLabel>
+                    <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+                </bpmndi:BPMNLabel>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1" sourceElement="startevent1"
+                             targetElement="usertask1">
+                <omgdi:waypoint x="172.0" y="106.0"/>
+                <omgdi:waypoint x="220.0" y="107.5"/>
+                <bpmndi:BPMNLabel>
+                    <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+                </bpmndi:BPMNLabel>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2" sourceElement="usertask1"
+                             targetElement="endevent1">
+                <omgdi:waypoint x="325.0" y="107.5"/>
+                <omgdi:waypoint x="370.0" y="106.0"/>
+                <bpmndi:BPMNLabel>
+                    <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+                </bpmndi:BPMNLabel>
+            </bpmndi:BPMNEdge>
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+</definitions>

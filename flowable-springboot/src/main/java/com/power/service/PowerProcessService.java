@@ -33,4 +33,6 @@ public interface PowerProcessService {
     Object startProcessInstance(String procDefId);
 
     Object startProcessInstance(String procDefId, Map<String,Object> vars);
+
+    Object startProcessInstanceByKey(String procDefKey, Map<String, Object> vars);
 }

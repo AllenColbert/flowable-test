@@ -90,5 +90,13 @@ public class PowerProcessImpl implements PowerProcessService {
         return "流程实例Id："+processInstance.getId();
     }
 
+    //TODO 通过流程定义Key启动流程实例 失败
+    @Override
+    public Object startProcessInstanceByKey(String procDefKey, Map<String, Object> vars) {
+
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(procDefKey, vars);
+        return "流程实例Id"+processInstance.getId()+"--启动流程的userId"+processInstance.getStartUserId();
+    }
+
 
 }

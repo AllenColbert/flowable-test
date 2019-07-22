@@ -1,5 +1,7 @@
 package com.power.service;
 
+import org.flowable.task.api.Task;
+
 import java.util.Map;
 
 /**
@@ -10,4 +12,6 @@ public interface PowerTaskService {
     Object queryUserTask(String assignee);
 
     Object completeTask(String taskId, Map<String, Object> vars);
+
+    Task queryTaskByProcessInstanceId(String processInstanceId);
 }
