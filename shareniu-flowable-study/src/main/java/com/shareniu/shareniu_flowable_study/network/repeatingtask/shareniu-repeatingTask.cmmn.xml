@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+	xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:flowable="http://flowable.org/cmmn"
+	xmlns:cmmndi="http://www.omg.org/spec/CMMN/20151109/CMMNDI"
+	xmlns:dc="http://www.omg.org/spec/CMMN/20151109/DC"
+	xmlns:di="http://www.omg.org/spec/CMMN/20151109/DI"
+	targetNamespace="http://www.flowable.org/casedef">
+	<case id="shareniu-repeatingTask" name="shareniu-repeatingTask">
+		<documentation>shareniu-repeatingTask</documentation>
+		<casePlanModel id="casePlanModel">
+			<planItem id="planItem1" name="shareniu-repeatingTask"
+				definitionRef="sid-73A762B9-5205-4150-A2EB-6DB28AEFF8BF">
+				<itemControl>
+					<repetitionRule
+						flowable:counterVariable="repetitionCounter">
+						<condition><![CDATA[${repetitionCounter < 5}]]></condition>
+					</repetitionRule>
+				</itemControl>
+			</planItem>
+			<task id="sid-73A762B9-5205-4150-A2EB-6DB28AEFF8BF"
+				name="shareniu-repeatingTask">
+				<documentation>shareniu-repeatingTask</documentation>
+			</task>
+		</casePlanModel>
+	</case>
+	<cmmndi:CMMNDI>
+		<cmmndi:CMMNDiagram
+			id="CMMNDiagram_shareniu-repeatingTask">
+			<cmmndi:CMMNShape id="CMMNShape_casePlanModel"
+				cmmnElementRef="casePlanModel">
+				<dc:Bounds height="714.0" width="718.0" x="15.0" y="0.0"></dc:Bounds>
+				<cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+			</cmmndi:CMMNShape>
+			<cmmndi:CMMNShape id="CMMNShape_planItem1"
+				cmmnElementRef="planItem1">
+				<dc:Bounds height="89.0" width="253.0" x="240.0" y="105.0"></dc:Bounds>
+				<cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+			</cmmndi:CMMNShape>
+		</cmmndi:CMMNDiagram>
+	</cmmndi:CMMNDI>
+</definitions>

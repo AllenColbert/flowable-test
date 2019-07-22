@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:flowable="http://flowable.org/cmmn" xmlns:cmmndi="http://www.omg.org/spec/CMMN/20151109/CMMNDI" xmlns:dc="http://www.omg.org/spec/CMMN/20151109/DC" xmlns:di="http://www.omg.org/spec/CMMN/20151109/DI" targetNamespace="http://www.flowable.org/casedef">
+  <case id="exitCriterioncomlete" name="exitCriterioncomlete" >
+    <documentation>exitCriterioncomlete</documentation>
+    <casePlanModel id="casePlanModel">
+      <planItem id="planItem1" name="A" definitionRef="sid-DF30F129-5F3E-415B-A774-2699BCD95BE2"></planItem>
+      <planItem id="planItem2" name="B" definitionRef="sid-844104C7-189F-4A5D-B7D4-E7963ACB7437">
+        <exitCriterion id="sid-41695856-7CAB-477E-B308-C3117E12C982" sentryRef="sentry1"></exitCriterion>
+      </planItem>
+      <sentry id="sentry1">
+        <planItemOnPart id="sentryOnPart1" sourceRef="planItem1">
+          <standardEvent>complete</standardEvent>
+        </planItemOnPart>
+      </sentry>
+      <task id="sid-DF30F129-5F3E-415B-A774-2699BCD95BE2" name="A"></task>
+      <humanTask id="sid-844104C7-189F-4A5D-B7D4-E7963ACB7437" name="B"></humanTask>
+    </casePlanModel>
+  </case>
+  <cmmndi:CMMNDI>
+    <cmmndi:CMMNDiagram id="CMMNDiagram_k">
+      <cmmndi:CMMNShape id="CMMNShape_casePlanModel" cmmnElementRef="casePlanModel">
+        <dc:Bounds height="714.0" width="718.0" x="40.0" y="40.0"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_planItem1" cmmnElementRef="planItem1">
+        <dc:Bounds height="80.0" width="100.0" x="104.0" y="107.0"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_planItem2" cmmnElementRef="planItem2">
+        <dc:Bounds height="80.0" width="100.0" x="360.0" y="90.0"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_sid-41695856-7CAB-477E-B308-C3117E12C982" cmmnElementRef="sid-41695856-7CAB-477E-B308-C3117E12C982">
+        <dc:Bounds height="22.0" width="14.0" x="352.53602317690763" y="121.10266570096218"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNEdge id="CMMNEdge_sid-DE05504B-C80D-448E-8742-F8E39965B9E9" cmmnElementRef="sid-41695856-7CAB-477E-B308-C3117E12C982" targetCMMNElementRef="planItem1">
+        <di:waypoint x="352.79177519199703" y="131.6946541236713"></di:waypoint>
+        <di:waypoint x="203.94999999999996" y="143.1514378812695"></di:waypoint>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNEdge>
+    </cmmndi:CMMNDiagram>
+  </cmmndi:CMMNDI>
+</definitions>

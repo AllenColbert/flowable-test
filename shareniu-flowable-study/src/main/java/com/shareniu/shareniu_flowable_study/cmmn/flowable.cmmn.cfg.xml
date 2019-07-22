@@ -1,0 +1,52 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="cmmnEngineConfiguration"
+		class="org.flowable.cmmn.engine.CmmnEngineConfiguration">
+
+		<property name="dataSource" ref="dataSource"></property>
+
+		<property name="databaseSchemaUpdate" value="true" />
+
+
+		<property name="idGenerator" ref="idGenerator" />
+		<property name="taskIdGenerator">
+			<bean
+				class="com.shareniu.shareniu_flowable_study.cmmn.PrefixIdGenerator">
+				<constructor-arg name="idGenerator"
+					ref="idGenerator" />
+				<constructor-arg name="prefix" value="shareniu-" />
+			</bean>
+		</property>
+
+	</bean>
+	<bean id="testDelegateBean"
+		class="com.shareniu.shareniu_flowable_study.cmmn.task.serviceTask.TestJavaDelegate" />
+
+
+	<bean id="testBean"
+		class="com.shareniu.shareniu_flowable_study.cmmn.task.serviceTask.TestBean"></bean>
+	<bean id="testDelegateFieldsBean"
+		class="com.shareniu.shareniu_flowable_study.cmmn.task.serviceTask.TestFieldsJavaDelegate"></bean>
+	<bean id="timerBean"
+		class="com.shareniu.shareniu_flowable_study.cmmn.timereventlistener.TimerBean"></bean>
+
+
+	<bean id="idGenerator"
+		class="org.flowable.engine.common.impl.persistence.StrongUuidGenerator" />
+	<bean id="dataSource"
+		class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="driverClassName">
+			<value>com.mysql.jdbc.Driver</value>
+		</property>
+		<property name="url">
+			<value>jdbc:mysql://127.0.0.1:3306/flowable-cmmn?useUnicode=true&amp;characterEncoding=UTF-8
+			</value>
+		</property>
+		<property name="username">
+			<value>root</value>
+		</property>
+		<property name="password" value="123" />
+	</bean>
+</beans>

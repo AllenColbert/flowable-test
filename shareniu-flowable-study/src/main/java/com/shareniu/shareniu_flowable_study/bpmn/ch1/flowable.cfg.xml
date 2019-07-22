@@ -1,0 +1,36 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans   
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="dataSource"
+		class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="driverClassName">
+			<value>com.mysql.jdbc.Driver</value>
+		</property>
+		<property name="url">
+			<value>jdbc:mysql://127.0.0.1:3306/flowable?useUnicode=true&amp;characterEncoding=UTF-8
+			</value>
+		</property>
+		<property name="username">
+			<value>root</value>
+		</property>
+		<property name="password" value="123" />
+		<!-- -->
+	</bean>
+	<!--idm流程引擎配置类的使用 -->
+	<bean id="processEngineConfiguration"
+		class="org.flowable.engine.impl.cfg.StandaloneProcessEngineConfiguration">
+		<property name="databaseSchemaUpdate" value="true"></property>
+		<!-- <property name="customDefaultBpmnParseHandlers">
+
+			<list>
+
+				<bean
+					class="com.shareniu.shareniu_flowable_study.ch3.ShareniuUserTaskParseHandler"
+					id="shareniuUserTaskParseHandler"></bean>
+			</list>
+		</property> -->
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+</beans>

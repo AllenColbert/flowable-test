@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="jump">
+  <process id="jump" name="任意节点跳转测试" isExecutable="true">
+    <startEvent id="startevent1" name="Start"></startEvent>
+    <userTask id="shareniu-a" name="shareniu-a"></userTask>
+    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="shareniu-a"></sequenceFlow>
+    <userTask id="shareniu-b" name="shareniu-b"></userTask>
+    <sequenceFlow id="flow2" sourceRef="shareniu-a" targetRef="shareniu-b"></sequenceFlow>
+    <userTask id="shareniu-c" name="shareniu-c"></userTask>
+    <sequenceFlow id="flow3" sourceRef="shareniu-b" targetRef="shareniu-c"></sequenceFlow>
+    <userTask id="shareniu-d" name="shareniu-d"></userTask>
+    <sequenceFlow id="flow4" sourceRef="shareniu-c" targetRef="shareniu-d"></sequenceFlow>
+    <endEvent id="endevent1" name="End"></endEvent>
+    <sequenceFlow id="flow5" sourceRef="shareniu-d" targetRef="endevent1"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_jump">
+    <bpmndi:BPMNPlane bpmnElement="jump" id="BPMNPlane_jump">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="120.0" y="110.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="shareniu-a" id="BPMNShape_shareniu-a">
+        <omgdc:Bounds height="55.0" width="105.0" x="200.0" y="100.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="shareniu-b" id="BPMNShape_shareniu-b">
+        <omgdc:Bounds height="55.0" width="105.0" x="350.0" y="100.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="shareniu-c" id="BPMNShape_shareniu-c">
+        <omgdc:Bounds height="55.0" width="105.0" x="500.0" y="100.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="shareniu-d" id="BPMNShape_shareniu-d">
+        <omgdc:Bounds height="55.0" width="105.0" x="500.0" y="220.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="650.0" y="230.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+        <omgdi:waypoint x="155.0" y="127.0"></omgdi:waypoint>
+        <omgdi:waypoint x="200.0" y="127.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
+        <omgdi:waypoint x="305.0" y="127.0"></omgdi:waypoint>
+        <omgdi:waypoint x="350.0" y="127.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
+        <omgdi:waypoint x="455.0" y="127.0"></omgdi:waypoint>
+        <omgdi:waypoint x="500.0" y="127.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow4" id="BPMNEdge_flow4">
+        <omgdi:waypoint x="552.0" y="155.0"></omgdi:waypoint>
+        <omgdi:waypoint x="552.0" y="220.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5">
+        <omgdi:waypoint x="605.0" y="247.0"></omgdi:waypoint>
+        <omgdi:waypoint x="650.0" y="247.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

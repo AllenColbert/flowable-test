@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+	xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:flowable="http://flowable.org/cmmn"
+	xmlns:cmmndi="http://www.omg.org/spec/CMMN/20151109/CMMNDI"
+	xmlns:dc="http://www.omg.org/spec/CMMN/20151109/DC"
+	xmlns:di="http://www.omg.org/spec/CMMN/20151109/DI"
+	targetNamespace="http://www.flowable.org/casedef">
+	<case id="shareniu-repetitionTask" name="shareniu-repetitionTask"
+		flowable:initiatorVariableName="initiator">
+		<documentation>shareniu-repetitionTask</documentation>
+		<casePlanModel id="casePlanModel">
+			<planItem id="planItem1" name="shareniu-repetition"
+				definitionRef="sid-D230B625-3383-43F6-BAC8-16D33EE0FD4C">
+				<itemControl>
+					<repetitionRule
+						flowable:counterVariable="repetitionCounter_p1">
+						<condition><![CDATA[${repetitionCounter_p1_execution}]]></condition>
+					</repetitionRule>
+				</itemControl>
+			</planItem>
+			<planItem id="planItem2" name="shareniu-Human-repetition"
+				definitionRef="sid-97131442-FF7F-4888-9723-897895168341">
+				<itemControl>
+					<repetitionRule
+						flowable:counterVariable="repetitionCounter_p2">
+						<condition><![CDATA[${repetitionCounter_p2_execution}]]></condition>
+					</repetitionRule>
+				</itemControl>
+			</planItem>
+			<task id="sid-D230B625-3383-43F6-BAC8-16D33EE0FD4C"
+				name="shareniu-repetition"></task>
+			<humanTask id="sid-97131442-FF7F-4888-9723-897895168341"
+				name="shareniu-Human-repetition"></humanTask>
+		</casePlanModel>
+	</case>
+	<cmmndi:CMMNDI>
+		<cmmndi:CMMNDiagram id="CMMNDiagram_vvv">
+			<cmmndi:CMMNShape id="CMMNShape_casePlanModel"
+				cmmnElementRef="casePlanModel">
+				<dc:Bounds height="714.0" width="718.0" x="40.0" y="40.0"></dc:Bounds>
+				<cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+			</cmmndi:CMMNShape>
+			<cmmndi:CMMNShape id="CMMNShape_planItem1"
+				cmmnElementRef="planItem1">
+				<dc:Bounds height="93.0" width="157.0" x="150.0" y="90.0"></dc:Bounds>
+				<cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+			</cmmndi:CMMNShape>
+			<cmmndi:CMMNShape id="CMMNShape_planItem2"
+				cmmnElementRef="planItem2">
+				<dc:Bounds height="92.0" width="195.0" x="345.0" y="90.0"></dc:Bounds>
+				<cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+			</cmmndi:CMMNShape>
+			<cmmndi:CMMNEdge
+				id="CMMNEdge_sid-5144026D-0904-4BF4-BC5B-BF417B50D393"
+				cmmnElementRef="sid-D230B625-3383-43F6-BAC8-16D33EE0FD4C"
+				targetCMMNElementRef="sid-97131442-FF7F-4888-9723-897895168341">
+				<di:waypoint x="306.94999999999254"
+					y="136.31658878504672"></di:waypoint>
+				<di:waypoint x="344.9999999999944"
+					y="136.22768691588783"></di:waypoint>
+				<cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+			</cmmndi:CMMNEdge>
+		</cmmndi:CMMNDiagram>
+	</cmmndi:CMMNDI>
+</definitions>

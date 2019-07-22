@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+	xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:flowable="http://flowable.org/bpmn"
+	xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+	xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+	xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+	typeLanguage="http://www.w3.org/2001/XMLSchema"
+	expressionLanguage="http://www.w3.org/1999/XPath"
+	targetNamespace="http://www.flowable.org/processdef">
+	<process id="multiInstance" name="multiInstance"
+		isExecutable="true">
+		<documentation>multiInstance</documentation>
+		<startEvent id="startEvent1"></startEvent>
+		<userTask id="A" name="多实例测试"
+			flowable:candidateUsers="shareniu1,shareniu2,shareniu3,shareniu4">
+			<multiInstanceLoopCharacteristics
+				isSequential="false">
+				<loopCardinality>2</loopCardinality>
+			</multiInstanceLoopCharacteristics>
+		</userTask>
+		<sequenceFlow
+			id="sid-6D482A8A-F796-4E2B-AB2C-ABBFD2DA428D" sourceRef="startEvent1"
+			targetRef="A"></sequenceFlow>
+		<userTask id="shareniu-B" name="shareniu-B"
+			xmlns:shareniu="http://www.shareniu.com/" shareniu:shareniuext=""
+			shareniu:shareniuextboolen="false"></userTask>
+		<sequenceFlow
+			id="sid-BA8FC337-40DC-493B-805C-F213B7C4A17D" sourceRef="A"
+			targetRef="shareniu-B"></sequenceFlow>
+		<endEvent id="sid-4AC81F5B-49F8-4135-B68E-1C182D004080"></endEvent>
+		<sequenceFlow
+			id="sid-DF962BB4-EA4C-4D86-9A91-214EB2EC1A47" sourceRef="shareniu-B"
+			targetRef="sid-4AC81F5B-49F8-4135-B68E-1C182D004080"></sequenceFlow>
+	</process>
+	<bpmndi:BPMNDiagram id="BPMNDiagram_multiInstance">
+		<bpmndi:BPMNPlane bpmnElement="multiInstance"
+			id="BPMNPlane_multiInstance">
+			<bpmndi:BPMNShape bpmnElement="startEvent1"
+				id="BPMNShape_startEvent1">
+				<omgdc:Bounds height="30.0" width="30.0" x="100.0"
+					y="130.0"></omgdc:Bounds>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="A" id="BPMNShape_A">
+				<omgdc:Bounds height="80.0" width="100.0" x="165.0"
+					y="105.0"></omgdc:Bounds>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="shareniu-B"
+				id="BPMNShape_shareniu-B">
+				<omgdc:Bounds height="80.0" width="100.0" x="315.0"
+					y="120.0"></omgdc:Bounds>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape
+				bpmnElement="sid-4AC81F5B-49F8-4135-B68E-1C182D004080"
+				id="BPMNShape_sid-4AC81F5B-49F8-4135-B68E-1C182D004080">
+				<omgdc:Bounds height="28.0" width="28.0" x="442.0"
+					y="146.0"></omgdc:Bounds>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNEdge
+				bpmnElement="sid-DF962BB4-EA4C-4D86-9A91-214EB2EC1A47"
+				id="BPMNEdge_sid-DF962BB4-EA4C-4D86-9A91-214EB2EC1A47">
+				<omgdi:waypoint x="414.9499999999902" y="160.0"></omgdi:waypoint>
+				<omgdi:waypoint x="442.0" y="160.0"></omgdi:waypoint>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge
+				bpmnElement="sid-BA8FC337-40DC-493B-805C-F213B7C4A17D"
+				id="BPMNEdge_sid-BA8FC337-40DC-493B-805C-F213B7C4A17D">
+				<omgdi:waypoint x="264.95000000000005" y="145.0"></omgdi:waypoint>
+				<omgdi:waypoint x="290.0" y="145.0"></omgdi:waypoint>
+				<omgdi:waypoint x="290.0" y="160.0"></omgdi:waypoint>
+				<omgdi:waypoint x="314.99999999998477" y="160.0"></omgdi:waypoint>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge
+				bpmnElement="sid-6D482A8A-F796-4E2B-AB2C-ABBFD2DA428D"
+				id="BPMNEdge_sid-6D482A8A-F796-4E2B-AB2C-ABBFD2DA428D">
+				<omgdi:waypoint x="129.94999817301806" y="145.0"></omgdi:waypoint>
+				<omgdi:waypoint x="165.0" y="145.0"></omgdi:waypoint>
+			</bpmndi:BPMNEdge>
+		</bpmndi:BPMNPlane>
+	</bpmndi:BPMNDiagram>
+</definitions>
