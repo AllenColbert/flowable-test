@@ -16,31 +16,26 @@ import javax.servlet.http.HttpSession;
  */
 
 @Component
-public class RequestHandlerInterceptor  implements HandlerInterceptor {
-
+public class RequestHandlerInterceptor implements HandlerInterceptor {
 
     @Autowired
-    HttpSession session;
+    private HttpSession session;
 
-
+    //TODO 这里只是做了登录判断，没有考虑用户未登录状态下的注册活动
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
         System.out.println(request.getServletPath());
-        //System.out.println("拦截器处sessionId："+session.getId());
         Object user = null;
         try {
             user = session.getAttribute("user");
         } catch (Exception e) {
-            //e.printStackTrace();
-            System.out.println("获取Session异常/RequestHandlerInterceptor-36行");
+            System.out.println("获取Session异常");
         }
-        if (user != null){
-            System.out.println(((User)user).getId());
+        if (user != null) {
+            System.out.println(((User) user).getId());
             return true;
         }
-       // System.out.println("拦截成功");
-        //TODO 这里只是做了登录判断，没有考虑用户未登录状态下的注册活动
         return false;
     }
 
@@ -48,7 +43,6 @@ public class RequestHandlerInterceptor  implements HandlerInterceptor {
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
                            ModelAndView modelAndView) throws Exception {
-
     }
 
     @Override

@@ -36,10 +36,11 @@ public class PowerProcessImpl implements PowerProcessService {
     @Autowired
     private ProcessMapper processMapper;
 
-
     @Override
     public Object deployProcess(String fileName, PowerDeployEntity powerDeploy) {
-        if (!(fileName.endsWith("bpmn") || fileName.endsWith(".bpmn20.xml"))) {
+        String fileType1 = "bpmn";
+        String fileType2 = "xml";
+        if (!(fileName.endsWith(fileType1) || fileName.endsWith(fileType2))) {
             return "文件类型不符合";
         }
         if (powerDeploy == null ) {

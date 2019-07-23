@@ -21,9 +21,8 @@ public class IdmController {
 	@Autowired
 	private IdmService idmService;
 
-
 	@Autowired
-	HttpSession session;
+	private HttpSession session;
 
 	/**
 	 * 注册用户
