@@ -39,9 +39,16 @@ public class PowerProcessImpl implements PowerProcessService {
 
     @Override
     public Object deployProcess(String fileName, PowerDeployEntity powerDeploy) {
-        if (powerDeploy == null) {return "请填写流程部署信息";}
+        if (!(fileName.endsWith("bpmn") || fileName.endsWith(".bpmn20.xml"))) {
+            return "文件类型不符合";
+        }
+        if (powerDeploy == null ) {
+            return "请填写流程部署信息";
+        }
         //默认没有外置表单，临时属性，后期调整；
-        if (powerDeploy.getOuterForm() == null){ powerDeploy.setOuterForm(false); }
+        if (powerDeploy.getOuterForm() == null) {
+            powerDeploy.setOuterForm(false);
+        }
         ClassPathResource classPathResource = new ClassPathResource(BPMN_PREFIX + fileName);
         //判断是否有对应的流程文件
         if (classPathResource.exists()) {
@@ -81,13 +88,13 @@ public class PowerProcessImpl implements PowerProcessService {
     @Override
     public Object startProcessInstance(String procDefId) {
         ProcessInstance processInstance = runtimeService.startProcessInstanceById(procDefId);
-        return "流程实例Id："+processInstance.getId();
+        return "流程实例Id：" + processInstance.getId();
     }
 
     @Override
     public Object startProcessInstance(String procDefId, Map<String, Object> vars) {
         ProcessInstance processInstance = runtimeService.startProcessInstanceById(procDefId, vars);
-        return "流程实例Id："+processInstance.getId();
+        return "流程实例Id：" + processInstance.getId();
     }
 
     //TODO 通过流程定义Key启动流程实例 失败
@@ -95,7 +102,7 @@ public class PowerProcessImpl implements PowerProcessService {
     public Object startProcessInstanceByKey(String procDefKey, Map<String, Object> vars) {
 
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(procDefKey, vars);
-        return "流程实例Id"+processInstance.getId()+"--启动流程的userId"+processInstance.getStartUserId();
+        return "流程实例Id" + processInstance.getId() + "--启动流程的userId" + processInstance.getStartUserId();
     }
 
 

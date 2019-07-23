@@ -3,6 +3,7 @@ package com.power.controller;
 
 import com.power.entity.PowerDeployEntity;
 import com.power.entity.PowerDeployment;
+import com.power.entity.PowerProcdef;
 import com.power.service.PowerProcessService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
@@ -14,7 +15,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author xuyunfeng
@@ -38,109 +42,128 @@ public class ProcessController {
     private HttpSession session;
 
     /**
-     * 根据本地文件名部署流程
-     * @param fileName 文件名
-     * @return deploy
+     * 根据本地文件名部署流程（文件全名，默认匹配路径：resources/upload/diagrams/**）
+     *
+     * @param fileName    流程文件全名
+     * @param powerDeploy 流程部署信息，name，key。。。 等属性
+     * @return 流程部署对象 deploy
      */
     @GetMapping("deploy/{fileName}")
     public ResponseEntity<Object> deploy(@PathVariable String fileName,
-                                         @RequestBody(required = false) PowerDeployEntity powerDeploy) {
-        Object result =  powerProcessService.deployProcess(fileName,powerDeploy);
+                                         @RequestBody PowerDeployEntity powerDeploy) {
+        Object result = powerProcessService.deployProcess(fileName, powerDeploy);
 
         return ResponseEntity.ok(result);
     }
 
     /**
      * 根据流程定义Id启动流程;
-     * @param procDefId 流程定义ID
+     *
+     * @param procDefId 流程定义ID：processDefinitionId；
      * @return 流程执行ID
      */
-    @GetMapping("run/{procDefId}")
-    public ResponseEntity runProcessById(@PathVariable String procDefId){
+    @GetMapping("runProcessById/{procDefId}")
+    public ResponseEntity runProcessById(@PathVariable String procDefId) {
         Map<String, Object> vars = new HashMap<>();
 
         User user = (User) session.getAttribute("user");
-        vars.put("userId",user.getId());
-        Object result =  powerProcessService.startProcessInstance(procDefId,vars);
-        //ProcessInstance processInstance = runtimeService.startProcessInstanceById(deployId);
+        vars.put("userId", user.getId());
+
+        Object result = powerProcessService.startProcessInstance(procDefId, vars);
         return ResponseEntity.ok(result);
     }
 
-
-
-
     /**
      * 查询流程部署情况
-     * 通过mybatis 创建SQL语句直接从数据库中查询，封装到自定义实体类
+     * 通过mybatis 创建SQL语句直接从数据库表 act_re_deployment 中查询
+     * 将结果封装到自定义实体类  PowerDeployment
+     * TODO Pageable分页
+     * @return 流程部署列表 deploymentList
      */
     @GetMapping("deploymentList")
-    public ResponseEntity<List<PowerDeployment>> processList(){
+    public ResponseEntity<List<PowerDeployment>> processList() {
         List<PowerDeployment> list = powerProcessService.findProcessList();
         return ResponseEntity.ok(list);
     }
 
 
     /**
-     * 查询流程定义表 act_re_procdef
+     * 查询流程定义列表 在表 act_re_procdef 中
+     * @return 流程定义list
      */
     @GetMapping("procdefList")
-    public ResponseEntity<List<com.power.entity.PowerProcdef>> ProcedefList(){
-        return ResponseEntity.ok(powerProcessService.findProcdefList());
+    public ResponseEntity<List<com.power.entity.PowerProcdef>> ProcedefList() {
+        List<PowerProcdef> list = powerProcessService.findProcdefList();
+        return ResponseEntity.ok(list);
     }
 
 
     /**
-     *  从参数上分清楚流程部署ID：deployment表中的Id 和 流程定义ID procdef表中的Id的区别；
-     *  此处使用流程部署Id deploymentId；
+     * 此处使用流程部署Id deploymentId；
      * 根据流程部署Id删除流程，级联删除
-     * @param deployId  流程部署Id
+     *
+     * @param deploymentId      流程部署Id
      * @param concatenation 是否开启级联删除，默认开启
+     * @return 删除提示
      */
-    @DeleteMapping("delete/{deployId}")
-    public ResponseEntity<String> deleteProcessById(@PathVariable String deployId,
-                                                    @RequestParam(defaultValue = "true") Boolean concatenation){
-        repositoryService.deleteDeployment(deployId,concatenation);
-        return ResponseEntity.ok("删除流程成功，Id："+deployId);
+    @DeleteMapping("deleteProcessById/{deploymentId}")
+    public ResponseEntity<String> deleteProcessById(@PathVariable String deploymentId,
+                                                    @RequestParam(defaultValue = "true") Boolean concatenation) {
+        repositoryService.deleteDeployment(deploymentId, concatenation);
+        return ResponseEntity.ok("删除流程成功，Id：" + deploymentId);
     }
 
 
     /**
      * 测试动态设置 assignee
-     * 目前 数据库中设置的都是 List的编号0，1，2，而不是对应的Value
-     * @param procDefId
-     * @return
+     * 注意
+     * @param procDefId 流程定义Id
+     * @return 标记
      */
     @GetMapping("runMultiInstance4/{procDefId}")
-    public ResponseEntity runMultiInstance4(@PathVariable String procDefId){
-        String [] strings = {"ZhangSan","LiSi","WangWu"};
+    public ResponseEntity runMultiInstance4(@PathVariable String procDefId) {
+        String[] strings = {"ZhangSan","LiSi","WangWu"};
+        List<String> list = Arrays.asList(strings);
 
-        Map<String,Object> vars = new HashMap<>();
-        vars.put("assigneeList", Arrays.asList(strings));
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("assigneeList",list);
 
         Object result = powerProcessService.startProcessInstance(procDefId, vars);
+        //TODO 通过流程定义key启动流程 -- 启动失败，根据key找不到对应的流程实例；
 
         // Object result = powerProcessService.startProcessInstanceByKey(procDefKey, vars);
 
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("addMulti")
-    public ResponseEntity addMulti(){
-       // String [] strings = {"ZhangSan","LiSi"};
-        Map<String, Object> vars =new HashMap<>();
-        String activityId = "usertask1";
-        String parentExecutionId ="35aca5d2-ac57-11e9-9144-c8f7502bee8b";
+    /**
+     * 多实例节点加签操作
+     * @param activityId 待加签的多实例节点Id  act_ru_task表中的 TASK_DEF_KEY_
+     * @param parentExecutionId 父任务Id act_ru_task表中的PROC_INST_ID_ 或 act_ru_execution中的ID_ where PARENT_ID_ == null;
+     * @return execution_Id 执行实例Id；
+     */
+    @GetMapping("addMultiInstance")
+    public ResponseEntity addMulti(@RequestParam String activityId,
+                                   @RequestParam String parentExecutionId) {
+        // String [] strings = {"ZhangSan","LiSi"};
+        Map<String, Object> vars = new HashMap<>();
         //vars.put("assigneeList",Arrays.asList(strings));
-        vars.put("assignee","LiSi");
+        vars.put("assignee", "LiSi");
 
         Execution execution = runtimeService.addMultiInstanceExecution(activityId, parentExecutionId, vars);
 
         return ResponseEntity.ok(execution.getId());
     }
 
-    @GetMapping("deleteMulti")
-    public ResponseEntity deleteMulti(@RequestParam String executionId){
-        runtimeService.deleteMultiInstanceExecution(executionId,true);
+
+    /**
+     * 多实例节点减签操作
+     * @param executionId 多实例节点任务ID
+     * @return  标记
+     */
+    @GetMapping("deleteMultiInstance")
+    public ResponseEntity deleteMulti(@RequestParam String executionId) {
+        runtimeService.deleteMultiInstanceExecution(executionId, true);
         return ResponseEntity.ok("减签");
     }
 }

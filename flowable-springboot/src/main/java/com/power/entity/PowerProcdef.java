@@ -3,9 +3,8 @@ package com.power.entity;
 /**
  * @author : xuyunfeng
  * @date :   2019/7/17 16:04
- * 流程定义信息
+ * 流程定义信息实体类
  */
-
 
 public class PowerProcdef {
     private static final long serialVersionUID = 1L;
@@ -14,6 +13,7 @@ public class PowerProcdef {
     private String rev;
     private String category;
     private String name;
+    //此处设置为key 查询时SQL语句会报错
     private String key1;
     private String version;
     private String deploymentId;
