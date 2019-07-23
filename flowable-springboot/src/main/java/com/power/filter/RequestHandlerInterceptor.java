@@ -33,7 +33,7 @@ public class RequestHandlerInterceptor implements HandlerInterceptor {
             System.out.println("获取Session异常");
         }
         if (user != null) {
-            System.out.println(((User) user).getId());
+            System.out.println("当前登陆用户Id："+((User) user).getId());
             return true;
         }
         return false;

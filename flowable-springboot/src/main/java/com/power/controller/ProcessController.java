@@ -1,14 +1,19 @@
 package com.power.controller;
 
 
+import com.power.cmd.GetProcessCmd;
 import com.power.cmd.PowerJumpCmd;
 import com.power.entity.PowerDeployEntity;
 import com.power.entity.PowerDeployment;
 import com.power.entity.PowerProcdef;
 import com.power.service.PowerProcessService;
+import org.flowable.bpmn.model.Process;
+import org.flowable.bpmn.model.UserTask;
 import org.flowable.engine.ManagementService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
+import org.flowable.engine.impl.bpmn.behavior.MultiInstanceActivityBehavior;
+import org.flowable.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
 import org.flowable.engine.runtime.Execution;
 import org.flowable.idm.api.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,8 +156,8 @@ public class ProcessController {
     @GetMapping("addMultiInstance")
     public ResponseEntity addMulti(@RequestParam String activityId,
                                    @RequestParam String parentExecutionId) {
-        // String [] strings = {"ZhangSan","LiSi"};
         Map<String, Object> vars = new HashMap<>();
+        // String [] strings = {"ZhangSan","LiSi"};
         //vars.put("assigneeList",Arrays.asList(strings));
         vars.put("assignee", "LiSi");
 
@@ -185,5 +190,32 @@ public class ProcessController {
                                    @RequestParam String targetNodeId) {
         managementService.executeCommand(new PowerJumpCmd(taskId, targetNodeId));
         return ResponseEntity.ok("跳转成功");
+    }
+
+    /**
+     * 根据流程实例ID 判断流程中任务节点的类型
+     *
+     * @param procDefId 流程实例ID
+     * @return 标记
+     */
+    @GetMapping("validateTaskNodeType")
+    public ResponseEntity validateTaskNodeType(@RequestParam String procDefId) {
+        Process process = managementService.executeCommand(new GetProcessCmd(procDefId));
+
+        List<UserTask> userTasks = process.findFlowElementsOfType(UserTask.class);
+        for (UserTask userTask : userTasks) {
+            validate(userTask);
+        }
+        return ResponseEntity.ok("标记");
+    }
+
+    private void validate(UserTask userTask) {
+        Object behavior = userTask.getBehavior();
+        if (behavior instanceof MultiInstanceActivityBehavior) {
+            System.out.println(userTask.getId() + "是多实例任务节点");
+        }
+        if (behavior instanceof UserTaskActivityBehavior) {
+            System.out.println(userTask.getId() + "是普通任务节点");
+        }
     }
 }
