@@ -84,7 +84,7 @@ public class TaskController {
 
         String processDefinitionId = "";
         List<String> highLightedActivities = new ArrayList<String>();
-        //TODO 怎么获取当前执行中的流程flows？
+        //TODO 怎么获取当前执行中的流程线集合？
         List<String> highLightedFlows = new ArrayList<String>();
 
         Task task = taskService.queryTaskByProcessInstanceId(processInstanceId);
@@ -105,7 +105,7 @@ public class TaskController {
                 .generateDiagram(bpmnModel, "PNG", "宋体", "宋体", "宋体", null, 1.0D, true);
 
         //TODO 动态生成到项目目录下
-        File file = new File("C:\\DemoSpace\\GitHub\\flowable-shareniu\\flowable-springboot\\src\\main\\resources\\upload\\html\\test.png");
+        File file = new File("C:\\FFOutput\\test2.png");
         OutputStream out = new FileOutputStream(file, true);
         IOUtils.copy(in, out);
     }

@@ -27,15 +27,12 @@ public class RequestHandlerInterceptor implements HandlerInterceptor {
 
         System.out.println(request.getServletPath());
         Object user = null;
-        try {
-            user = session.getAttribute("user");
-        } catch (Exception e) {
-            System.out.println("获取Session异常");
-        }
+        user = session.getAttribute("user");
         if (user != null) {
             System.out.println("当前登陆用户Id："+((User) user).getId());
             return true;
         }
+        System.out.println("拦截到请求："+request.getServletPath()+"状态："+response.getStatus());
         return false;
     }
 

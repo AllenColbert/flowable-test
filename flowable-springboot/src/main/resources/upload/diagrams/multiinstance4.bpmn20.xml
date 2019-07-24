@@ -14,7 +14,12 @@
         <userTask  id="usertask1" name="User Task"
                    flowable:assignee="${assignee}">
             <!--isSequential = false 的时候表示当前实例节点为并行执行-->
-            <!--!!!注意此处是：flowable:elementVariable  而不是 flowable:elementIndexVariable!!!!!-->
+            <!--!!!注意此处是：flowable:elementVariable  而不是 flowable:elementIndexVariable!
+            关于 flowable:elementVariable :
+            要在multiInstanceLoopCharacteristics元素上使用，与activiti：collection属性一起使用。
+            表示将在每个创建的实例上设置的过程变量的名称，该变量包含指定集合的​​元素。
+
+            !-->
             <multiInstanceLoopCharacteristics
                     isSequential="false"
                     flowable:collection="assigneeList"

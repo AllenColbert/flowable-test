@@ -103,7 +103,7 @@ public class ProcessController {
      * @return 流程定义list
      */
     @GetMapping("procdefList")
-    public ResponseEntity<List<com.power.entity.PowerProcdef>> ProcedefList() {
+    public ResponseEntity<List<com.power.entity.PowerProcdef>> procedefList() {
         List<PowerProcdef> list = powerProcessService.findProcdefList();
         return ResponseEntity.ok(list);
     }
@@ -124,24 +124,20 @@ public class ProcessController {
     }
 
     /**
-     * 测试动态设置 assignee
-     * 注意
+     * 测试包含多实例节点流程启动
+     * 注意  此处任务执行人列表硬编码 只是为了测试方法
      *
      * @param procDefId 流程定义Id
      * @return 标记
      */
-    @GetMapping("runMultiInstance4/{procDefId}")
+    @GetMapping("runTest/{procDefId}")
     public ResponseEntity runMultiInstance4(@PathVariable String procDefId) {
         String[] strings = {"ZhangSan", "LiSi", "WangWu"};
         List<String> list = Arrays.asList(strings);
-
         Map<String, Object> vars = new HashMap<>();
+
         vars.put("assigneeList", list);
-
         Object result = powerProcessService.startProcessInstance(procDefId, vars);
-        //TODO 通过流程定义key启动流程 -- 启动失败，根据key找不到对应的流程实例；
-
-        // Object result = powerProcessService.startProcessInstanceByKey(procDefKey, vars);
 
         return ResponseEntity.ok(result);
     }
@@ -180,6 +176,7 @@ public class ProcessController {
 
     /**
      * 任意节点跳转操作
+     * 这里只是在普通节点之间跳转；多实例节点跳转到普通节点会出问题
      *
      * @param taskId       当前任务节点ID act_ru_task 表中的ID；
      * @param targetNodeId 目标节点id 已部署的流程文件中的 <userTask id="shareniu-b"/> 标签中的Id；
@@ -192,6 +189,40 @@ public class ProcessController {
         return ResponseEntity.ok("跳转成功");
     }
 
+
+    /**
+     * 普通节点之间跳转操作
+     * @param procDefId 流程实例Id
+     * @param currentActivityId 当前节点id  流程标签中的id属性 <userTask id="xxx"/>
+     * @param newActivityId 目标节点id
+     * @return 标记
+     */
+    @GetMapping("jump2")
+    public ResponseEntity jump2(@RequestParam String procDefId,
+                                @RequestParam String currentActivityId,
+                                @RequestParam String newActivityId){
+        runtimeService.createChangeActivityStateBuilder()
+                .processInstanceId(procDefId)
+                .moveActivityIdTo(currentActivityId,newActivityId)
+                .changeState();
+
+        return ResponseEntity.ok("跳转成功");
+    }
+
+    /**
+     * 从多实例节点跳转到普通节点
+     * @param executionId 执行实例Id
+     * @param activityId 跳转目标Id   <userTask id="xxx"/>；
+     * @return 标记
+     */
+    @GetMapping("jump3")
+    public ResponseEntity jump3(@RequestParam String executionId,
+                                @RequestParam String activityId){
+        runtimeService.createChangeActivityStateBuilder()
+                .moveExecutionToActivityId(executionId, activityId)
+                .changeState();
+        return ResponseEntity.ok("跳转成功");
+    }
     /**
      * 根据流程实例ID 判断流程中任务节点的类型
      *
@@ -206,6 +237,10 @@ public class ProcessController {
         for (UserTask userTask : userTasks) {
             validate(userTask);
         }
+        /*runtimeService.createChangeActivityStateBuilder().processInstanceId(task.getProcessInstanceId())
+                .moveActivityIdTo(task.getTaskDefinitionKey(), operationContext.getTargetNodeId())
+                .processVariables(operationContext.getFormData()).changeState();*/
+
         return ResponseEntity.ok("标记");
     }
 
