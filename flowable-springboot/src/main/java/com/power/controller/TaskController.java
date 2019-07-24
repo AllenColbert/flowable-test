@@ -79,9 +79,9 @@ public class TaskController {
      * @param processInstanceId 流程实例Id
      * @throws IOException Io流报错
      */
-    @GetMapping("showActivityImageDetailPage")
+    @GetMapping("showImage")
     public void showActivityImageDetailPage(String processInstanceId) throws IOException {
-
+        //TODO 逻辑有问题 设值之后又清空，怎么写出来的？
         String processDefinitionId = "";
         List<String> highLightedActivities = new ArrayList<String>();
         //TODO 怎么获取当前执行中的流程线集合？
