@@ -138,6 +138,14 @@
 		    <artifactId>spring-boot-starter-freemarker</artifactId>
 		</dependency>
 
+		<!--解决启动项目异常 AbstractMethodError-->
+		<dependency>
+			<groupId>javax.websocket</groupId>
+			<artifactId>javax.websocket-api</artifactId>
+			<version>1.0</version>
+			<scope>provided</scope>
+		</dependency>
+
 	</dependencies>
 
 </project>

@@ -14,4 +14,6 @@ public interface PowerTaskService {
     Object completeTask(String taskId, Map<String, Object> vars);
 
     Task queryTaskByProcessInstanceId(String processInstanceId);
+
+    Object queryAllTask(String assignee);
 }

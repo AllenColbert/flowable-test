@@ -33,7 +33,7 @@ import java.util.Map;
 public class TaskController {
 
     @Autowired
-    private PowerTaskService taskService;
+    private PowerTaskService powerTaskService;
 
     @Autowired
     private HistoryService historyService;
@@ -44,10 +44,10 @@ public class TaskController {
     @Autowired
     private HttpSession session;
 
-    @GetMapping("queryTask")
+    @GetMapping("queryAllTask")
     public ResponseEntity findMyTask(
             @RequestParam("assignee") String assignee) {
-        Object result = taskService.queryUserTask(assignee);
+        Object result = powerTaskService.queryAllTask(assignee);
         return ResponseEntity.ok(result);
     }
 
@@ -57,7 +57,8 @@ public class TaskController {
     @GetMapping("myTask")
     public ResponseEntity myTask() {
         User user = (User) session.getAttribute("user");
-        Object result = taskService.queryUserTask(user.getId());
+        Object result = powerTaskService.queryUserTask(user.getId());
+
         return ResponseEntity.ok(result);
 
     }
@@ -68,7 +69,7 @@ public class TaskController {
                                        @RequestParam(value = "assignee", required = false, defaultValue = "admin") String assignee) {
         Map<String, Object> vars = new HashMap<>();
         vars.put("userId", assignee);
-        Object result = taskService.completeTask(taskId, vars);
+        Object result = powerTaskService.completeTask(taskId, vars);
         return ResponseEntity.ok(result);
     }
 
@@ -80,31 +81,32 @@ public class TaskController {
      * @throws IOException Io流报错
      */
     @GetMapping("showImage")
-    public void showActivityImageDetailPage(String processInstanceId) throws IOException {
-        //TODO 逻辑有问题 设值之后又清空，怎么写出来的？
+    public void showActivityImageDetailPage(@RequestParam String processInstanceId) throws IOException {
+        //通过流程实例Id查询当前执行中的任务对象，如果没有的话就去历史记录中查询，再通过返回结果查询流程定义Id
+        //通过流程定义Id获取BpmnModel对象
         String processDefinitionId = "";
         List<String> highLightedActivities = new ArrayList<String>();
-        //TODO 怎么获取当前执行中的流程线集合？
+        //TODO 怎么获取当前执行的task中的流程节点和流程线？
         List<String> highLightedFlows = new ArrayList<String>();
 
-        Task task = taskService.queryTaskByProcessInstanceId(processInstanceId);
+        Task task = powerTaskService.queryTaskByProcessInstanceId(processInstanceId);
         if (task == null) {
             HistoricProcessInstance hp = historyService.createHistoricProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
             processDefinitionId = hp.getProcessDefinitionId();
         } else {
             processDefinitionId = task.getProcessDefinitionId();
             highLightedActivities.add(task.getTaskDefinitionKey());
-
         }
 
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
 
+
         DefaultProcessDiagramGenerator defaultProcessDiagramGenerator = new DefaultProcessDiagramGenerator();
 
         InputStream in = defaultProcessDiagramGenerator
-                .generateDiagram(bpmnModel, "PNG", "宋体", "宋体", "宋体", null, 1.0D, true);
+                .generateDiagram(bpmnModel, "PNG",highLightedActivities,highLightedFlows, "宋体", "宋体", "宋体", null, 1.0D, true);
 
-        //TODO 动态生成到项目目录下
+        //TODO 如何修改路径让它动态生成到项目目录下
         File file = new File("C:\\FFOutput\\test2.png");
         OutputStream out = new FileOutputStream(file, true);
         IOUtils.copy(in, out);

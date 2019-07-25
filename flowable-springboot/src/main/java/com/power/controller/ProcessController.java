@@ -2,18 +2,24 @@ package com.power.controller;
 
 
 import com.power.cmd.GetProcessCmd;
+import com.power.cmd.GetProcessDefinitionCacheEntryCmd;
 import com.power.cmd.PowerJumpCmd;
 import com.power.entity.PowerDeployEntity;
 import com.power.entity.PowerDeployment;
 import com.power.entity.PowerProcdef;
 import com.power.service.PowerProcessService;
 import org.flowable.bpmn.model.Process;
+import org.flowable.bpmn.model.SequenceFlow;
 import org.flowable.bpmn.model.UserTask;
 import org.flowable.engine.ManagementService;
+import org.flowable.engine.ProcessEngine;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.impl.bpmn.behavior.MultiInstanceActivityBehavior;
 import org.flowable.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
+import org.flowable.engine.impl.bpmn.parser.factory.ActivityBehaviorFactory;
+import org.flowable.engine.impl.cfg.ProcessEngineConfigurationImpl;
+import org.flowable.engine.impl.persistence.deploy.ProcessDefinitionCacheEntry;
 import org.flowable.engine.runtime.Execution;
 import org.flowable.idm.api.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +28,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author xuyunfeng
@@ -35,6 +38,9 @@ import java.util.Map;
 @Controller
 @RequestMapping("process")
 public class ProcessController {
+
+    @Autowired
+    private ProcessEngine processEngine;
 
     @Autowired
     private RepositoryService repositoryService;
@@ -192,7 +198,7 @@ public class ProcessController {
 
     /**
      * 普通节点之间跳转操作
-     * @param procDefId 流程实例Id
+     * @param procDefId 流程实例Id  注意不是processDefinitionId，而是act_ru_task 表中的 PROC_INST_ID_字段
      * @param currentActivityId 当前节点id  流程标签中的id属性 <userTask id="xxx"/>
      * @param newActivityId 目标节点id
      * @return 标记
@@ -223,9 +229,10 @@ public class ProcessController {
                 .changeState();
         return ResponseEntity.ok("跳转成功");
     }
+
     /**
-     * 根据流程实例ID 判断流程中任务节点的类型
-     *
+     * 根据流程实例ID获取任务节点列表
+     * 并判断流程中任务节点的类型
      * @param procDefId 流程实例ID
      * @return 标记
      */
@@ -234,23 +241,61 @@ public class ProcessController {
         Process process = managementService.executeCommand(new GetProcessCmd(procDefId));
 
         List<UserTask> userTasks = process.findFlowElementsOfType(UserTask.class);
+        List<String> list = new ArrayList<>();
         for (UserTask userTask : userTasks) {
-            validate(userTask);
+            Object behavior = userTask.getBehavior();
+            if (behavior instanceof MultiInstanceActivityBehavior) {
+                list.add("任务Id为"+userTask.getId() + "的任务，是多实例节点");
+            }
+            if (behavior instanceof UserTaskActivityBehavior) {
+                list.add("任务Id为"+userTask.getId() + "的任务，是普通节点");
+            }
         }
-        /*runtimeService.createChangeActivityStateBuilder().processInstanceId(task.getProcessInstanceId())
-                .moveActivityIdTo(task.getTaskDefinitionKey(), operationContext.getTargetNodeId())
-                .processVariables(operationContext.getFormData()).changeState();*/
-
-        return ResponseEntity.ok("标记");
+        return ResponseEntity.ok(list);
     }
 
-    private void validate(UserTask userTask) {
-        Object behavior = userTask.getBehavior();
-        if (behavior instanceof MultiInstanceActivityBehavior) {
-            System.out.println(userTask.getId() + "是多实例任务节点");
-        }
-        if (behavior instanceof UserTaskActivityBehavior) {
-            System.out.println(userTask.getId() + "是普通任务节点");
-        }
+
+    @GetMapping("addNode")
+    public ResponseEntity addNode(@RequestParam String procDefId){
+        Process process = managementService.executeCommand(new GetProcessCmd(procDefId));
+
+        //创建任务节点
+        UserTask userTask = new UserTask();
+        userTask.setId("addNode");
+        userTask.setName("加签测试");
+        userTask.setAssignee("ZhangSan");
+        userTask.setBehavior(createUserTaskBehavior(userTask));
+
+        //设置sequenceFlow
+        SequenceFlow sequenceFlow = new SequenceFlow();
+
+        String targetRef = "userTask2";
+        sequenceFlow.setId("addNodeFlow");
+        sequenceFlow.setTargetRef(targetRef);
+        sequenceFlow.setTargetFlowElement(process.getFlowElement(targetRef));
+
+        process.addFlowElement(userTask);
+        process.addFlowElement(sequenceFlow);
+
+        ProcessDefinitionCacheEntry processCacheEntry = managementService
+                .executeCommand(new GetProcessDefinitionCacheEntryCmd(procDefId));
+
+        processCacheEntry.setProcess(process);
+
+        return ResponseEntity.ok(process);
+    }
+
+    /**
+     * 创建任务节点行为类
+     *
+     * @param userTask 用户任务节点
+     * @return 任务节点行为类
+     */
+    private Object createUserTaskBehavior(UserTask userTask) {
+        //获取流程引擎配置类
+        ProcessEngineConfigurationImpl engineConfiguration = (ProcessEngineConfigurationImpl) processEngine.getProcessEngineConfiguration();
+        // 获取活动行为工厂
+        ActivityBehaviorFactory activityBehaviorFactory = engineConfiguration.getActivityBehaviorFactory();
+        return activityBehaviorFactory.createUserTaskActivityBehavior(userTask);
     }
 }

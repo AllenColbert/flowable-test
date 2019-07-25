@@ -8,6 +8,7 @@ import org.flowable.task.api.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,5 +47,16 @@ public class TaskServiceImpl implements PowerTaskService {
 
     }
 
+    @Override
+    public Object queryAllTask(String assignee) {
+        List<Task> list = taskService.createTaskQuery().taskAssignee(assignee).list();
+        for (Task task : list) {
+            System.out.println(task.getId());
+            System.out.println(task.getTaskDefinitionKey());
+            System.out.println(task.getName());
+        }
+
+        return list;
+    }
 
 }

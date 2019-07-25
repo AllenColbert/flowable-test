@@ -13,6 +13,7 @@ import org.flowable.task.service.impl.persistence.entity.TaskEntity;
 import org.flowable.task.service.impl.persistence.entity.TaskEntityManager;
 
 /**
+ * 普通节点跳转执行对象
  * @author : xuyunfeng
  * @date :   2019/7/23 11:29
  */
