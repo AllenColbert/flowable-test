@@ -20,8 +20,7 @@ public class GetProcessDefinitionCacheEntryCmd implements Command<ProcessDefinit
 
     @Override
     public ProcessDefinitionCacheEntry execute(CommandContext commandContext) {
-        DeploymentManager deploymentManager = CommandContextUtil
-                .getProcessEngineConfiguration().getDeploymentManager();
+        DeploymentManager deploymentManager = CommandContextUtil.getProcessEngineConfiguration().getDeploymentManager();
 
         return deploymentManager.getProcessDefinitionCache().get(processDefinitionId);
     }

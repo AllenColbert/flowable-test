@@ -107,7 +107,7 @@ public class TaskController {
                 .generateDiagram(bpmnModel, "PNG",highLightedActivities,highLightedFlows, "宋体", "宋体", "宋体", null, 1.0D, true);
 
         //TODO 如何修改路径让它动态生成到项目目录下
-        File file = new File("C:\\FFOutput\\test2.png");
+        File file = new File("C:\\FFOutput\\test1.png");
         OutputStream out = new FileOutputStream(file, true);
         IOUtils.copy(in, out);
     }

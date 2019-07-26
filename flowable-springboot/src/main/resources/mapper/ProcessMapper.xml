@@ -16,8 +16,6 @@
     -->
 
     <!--<resultMap id="PowerProcess" type=""-->
-
-    <!--TODO 待删除Mark-->
     <select id="findProcessList" resultType="com.power.entity.PowerDeployment">
         SELECT
             ard.ID_ AS id,

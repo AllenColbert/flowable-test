@@ -7,7 +7,9 @@ import com.power.cmd.PowerJumpCmd;
 import com.power.entity.PowerDeployEntity;
 import com.power.entity.PowerDeployment;
 import com.power.entity.PowerProcdef;
+import com.power.entity.PowerTask;
 import com.power.service.PowerProcessService;
+import org.flowable.bpmn.model.Artifact;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.SequenceFlow;
 import org.flowable.bpmn.model.UserTask;
@@ -63,6 +65,15 @@ public class ProcessController {
      * @param fileName    流程文件全名
      * @param powerDeploy 流程部署信息，name，key。。。 等属性
      * @return 流程部署对象 deploy
+    JSON示例：
+    {
+    "name":"XXX测试",
+    "category":"测试类",
+    "key":"XXX",
+    "tenantId":"1",
+    "outerForm":false,
+    "formResource":["XXX","XXX","XXX"]
+    }
      */
     @GetMapping("deploy/{fileName}")
     public ResponseEntity<Object> deploy(@PathVariable String fileName,
@@ -117,7 +128,6 @@ public class ProcessController {
     /**
      * 此处使用流程部署Id deploymentId；
      * 根据流程部署Id删除流程，级联删除
-     *
      * @param deploymentId  流程部署Id
      * @param concatenation 是否开启级联删除，默认开启
      * @return 删除提示
@@ -153,7 +163,7 @@ public class ProcessController {
      *
      * @param activityId        待加签的多实例节点Id  act_ru_task表中的 TASK_DEF_KEY_
      * @param parentExecutionId 父任务Id act_ru_task表中的PROC_INST_ID_ 或 act_ru_execution中的ID_ where PARENT_ID_ == null;
-     * @return execution_Id 执行实例Id；
+     * @return execution_Id     执行实例Id；
      */
     @GetMapping("addMultiInstance")
     public ResponseEntity addMulti(@RequestParam String activityId,
@@ -177,14 +187,14 @@ public class ProcessController {
     @GetMapping("deleteMultiInstance")
     public ResponseEntity deleteMulti(@RequestParam String executionId) {
         runtimeService.deleteMultiInstanceExecution(executionId, true);
-        return ResponseEntity.ok("减签");
+        return ResponseEntity.ok("多实例节点减签操作");
     }
 
     /**
      * 任意节点跳转操作
      * 这里只是在普通节点之间跳转；多实例节点跳转到普通节点会出问题
      *
-     * @param taskId       当前任务节点ID act_ru_task 表中的ID；
+     * @param taskId        当前任务节点ID act_ru_task 表中的ID；
      * @param targetNodeId 目标节点id 已部署的流程文件中的 <userTask id="shareniu-b"/> 标签中的Id；
      * @return 标记
      */
@@ -197,18 +207,18 @@ public class ProcessController {
 
 
     /**
-     * 普通节点之间跳转操作
-     * @param procDefId 流程实例Id  注意不是processDefinitionId，而是act_ru_task 表中的 PROC_INST_ID_字段
-     * @param currentActivityId 当前节点id  流程标签中的id属性 <userTask id="xxx"/>
-     * @param newActivityId 目标节点id
+     * 普通节点之间跳转操作，flowable 6.4更新后提供的方法
+     * @param procInstanceId            流程实例Id  act_ru_task 表中的 PROC_INST_ID_字段
+     * @param currentActivityId    当前节点id  流程标签中的id属性 <userTask id="xxx"/>
+     * @param newActivityId        目标节点id
      * @return 标记
      */
     @GetMapping("jump2")
-    public ResponseEntity jump2(@RequestParam String procDefId,
+    public ResponseEntity jump2(@RequestParam String procInstanceId,
                                 @RequestParam String currentActivityId,
                                 @RequestParam String newActivityId){
         runtimeService.createChangeActivityStateBuilder()
-                .processInstanceId(procDefId)
+                .processInstanceId(procInstanceId)
                 .moveActivityIdTo(currentActivityId,newActivityId)
                 .changeState();
 
@@ -217,8 +227,8 @@ public class ProcessController {
 
     /**
      * 从多实例节点跳转到普通节点
-     * @param executionId 执行实例Id
-     * @param activityId 跳转目标Id   <userTask id="xxx"/>；
+     * @param executionId 执行实例Id  act_ru_execution表中最上层执行实例的Id
+     * @param activityId 跳转目标Id   <userTask id="xxx"/>标签中的节点Id
      * @return 标记
      */
     @GetMapping("jump3")
@@ -255,33 +265,105 @@ public class ProcessController {
     }
 
 
+    /**
+     * 增加节点
+     * @param procDefId 流程定义Id
+     * @return
+     */
     @GetMapping("addNode")
-    public ResponseEntity addNode(@RequestParam String procDefId){
+    public ResponseEntity addNode(@RequestParam String procDefId,
+                                  @RequestBody PowerTask powerTask){
         Process process = managementService.executeCommand(new GetProcessCmd(procDefId));
 
         //创建任务节点
         UserTask userTask = new UserTask();
-        userTask.setId("addNode");
-        userTask.setName("加签测试");
-        userTask.setAssignee("ZhangSan");
+        userTask.setId(powerTask.getId());
+        userTask.setName(powerTask.getName());
+        userTask.setAssignee(powerTask.getAssignee());
         userTask.setBehavior(createUserTaskBehavior(userTask));
+        /*
+        {
+        "id":"addNode",
+        "name":"添加节点",
+        "assignee":"ZhangSan"
+        }
+         */
+        //先将添加的节点写入process缓存中
+        process.addFlowElementToMap(userTask);
 
-        //设置sequenceFlow
-        SequenceFlow sequenceFlow = new SequenceFlow();
+        //设置写入流程sequenceFlow1 本次测试：从userTask1流向addNode
+        SequenceFlow sequenceFlow1 = new SequenceFlow();
+        String sourceRef1 = "userTask1";
+        String targetRef1 = powerTask.getId();
+        sequenceFlow1.setId(powerTask.getId()+"Flow_In");
+        sequenceFlow1.setSourceRef(sourceRef1);
+        sequenceFlow1.setSourceFlowElement(process.getFlowElement(sourceRef1));
+        sequenceFlow1.setTargetRef(targetRef1);
+        sequenceFlow1.setTargetFlowElement(process.getFlowElement(targetRef1));
+        userTask.setIncomingFlows(Collections.singletonList(sequenceFlow1));
 
-        String targetRef = "userTask2";
-        sequenceFlow.setId("addNodeFlow");
-        sequenceFlow.setTargetRef(targetRef);
-        sequenceFlow.setTargetFlowElement(process.getFlowElement(targetRef));
-
+        //设置写出流程sequenceFlow2，本次测试：从addNode流向userTask2
+        SequenceFlow sequenceFlow2 = new SequenceFlow();
+        String sourceRef2 = powerTask.getId();
+        String targetRef2 = "userTask2";
+        sequenceFlow2.setId(powerTask.getId()+"Flow_Out");
+        sequenceFlow2.setSourceRef(sourceRef2);
+        sequenceFlow2.setSourceFlowElement(process.getFlowElement(sourceRef2));
+        sequenceFlow2.setTargetRef(targetRef2);
+        sequenceFlow2.setTargetFlowElement(process.getFlowElement(targetRef2));
+        //将流程顺序写入userTask中
+        userTask.setOutgoingFlows(Collections.singletonList(sequenceFlow2));
+        //更新Process中的信息
         process.addFlowElement(userTask);
-        process.addFlowElement(sequenceFlow);
+        process.addFlowElement(sequenceFlow1);
+        process.addFlowElement(sequenceFlow2);
 
-        ProcessDefinitionCacheEntry processCacheEntry = managementService
-                .executeCommand(new GetProcessDefinitionCacheEntryCmd(procDefId));
+/*       process.addFlowElement(userTask);
+         process.addFlowElement(sequenceFlow);*/
 
+        //获取ProcessCache缓存管理对象
+        ProcessDefinitionCacheEntry processCacheEntry = managementService.executeCommand(new GetProcessDefinitionCacheEntryCmd(procDefId));
+
+        //设置缓存
         processCacheEntry.setProcess(process);
 
+        Collection<Artifact> artifacts = process.getArtifacts();
+        System.out.println(artifacts);
+        return ResponseEntity.ok(process);
+    }
+
+    /**
+     * 这里修改的是全局流程实例模板 -/.\-！
+     * 风险太大，不能用，需要将其改成正在执行中的执行实例模板
+     * @param procDefId
+     * @param targetNode
+     * @return
+     */
+    @GetMapping("deleteNode")
+    public ResponseEntity deleteNode(@RequestParam String procDefId,
+                                     @RequestParam String targetNode){
+        Process process = managementService.executeCommand(new GetProcessCmd(procDefId));
+        //移除节点;
+        process.removeFlowElementFromMap(targetNode);
+        process.removeFlowElement(targetNode);
+        //获取ProcessCache缓存管理对象
+        ProcessDefinitionCacheEntry processCacheEntry = managementService.executeCommand(new GetProcessDefinitionCacheEntryCmd(procDefId));
+
+        //设置缓存
+        processCacheEntry.setProcess(process);
+
+        return ResponseEntity.ok(process);
+    }
+
+    /**
+     * 检查Process缓存
+     * @param procDefId
+     * @return
+     */
+    @GetMapping("checkProcess")
+    public ResponseEntity checkProcess(@RequestParam String procDefId){
+        ProcessDefinitionCacheEntry processCacheEntry = managementService.executeCommand(new GetProcessDefinitionCacheEntryCmd(procDefId));
+        Process process = processCacheEntry.getProcess();
         return ResponseEntity.ok(process);
     }
 
