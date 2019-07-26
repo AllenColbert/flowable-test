@@ -31,7 +31,7 @@
     </select>
 
 
-    <select id="findProcdefList" resultType="com.power.entity.PowerProcdef">
+    <select id="findProcdefList" resultType="com.power.entity.PowerProcessDefinition">
         SELECT
             arp.ID_ AS id,
             arp.REV_ AS rev,
@@ -41,7 +41,7 @@
             arp.VERSION_ AS version,
             arp.DEPLOYMENT_ID_ AS deploymentId,
             arp.RESOURCE_NAME_ AS bpmnResource,
-            arp.DGRM_RESOURCE_NAME_ AS	PngResource
+            arp.DGRM_RESOURCE_NAME_ AS	pngResource
         FROM
             act_re_procdef arp
     </select>

@@ -6,7 +6,7 @@ import com.power.cmd.GetProcessDefinitionCacheEntryCmd;
 import com.power.cmd.PowerJumpCmd;
 import com.power.entity.PowerDeployEntity;
 import com.power.entity.PowerDeployment;
-import com.power.entity.PowerProcdef;
+import com.power.entity.PowerProcessDefinition;
 import com.power.entity.PowerTask;
 import com.power.service.PowerProcessService;
 import org.flowable.bpmn.model.Artifact;
@@ -62,9 +62,8 @@ public class ProcessController {
     /**
      * 根据本地文件名部署流程（文件全名，默认匹配路径：resources/upload/diagrams/**）
      *
-     * @param fileName    流程文件全名
+     * @param fileName    流程文件全名 如 test.bpmn20.xml 或者 test.bpmn
      * @param powerDeploy 流程部署信息，name，key。。。 等属性
-     * @return 流程部署对象 deploy
     JSON示例：
     {
     "name":"XXX测试",
@@ -74,6 +73,7 @@ public class ProcessController {
     "outerForm":false,
     "formResource":["XXX","XXX","XXX"]
     }
+     * @return 流程部署对象 deploy属性  or 其他提示信息;
      */
     @GetMapping("deploy/{fileName}")
     public ResponseEntity<Object> deploy(@PathVariable String fileName,
@@ -85,28 +85,45 @@ public class ProcessController {
 
     /**
      * 根据流程定义Id启动流程;
+     * 默认当前登陆用户为流程启动人
      *
-     * @param procDefId 流程定义ID：processDefinitionId；
+     * @param processDefinitionId 流程定义ID：processDefinitionId；
      * @return 流程执行ID
      */
-    @GetMapping("runProcessById/{procDefId}")
-    public ResponseEntity runProcessById(@PathVariable String procDefId) {
-        Map<String, Object> vars = new HashMap<>();
+    @GetMapping("runNormalById/{processDefinitionId}")
+    public ResponseEntity runProcessById(@PathVariable String processDefinitionId) {
+        Map<String, Object> vars = new HashMap<>(255);
 
         User user = (User) session.getAttribute("user");
         vars.put("userId", user.getId());
 
-        Object result = powerProcessService.startProcessInstance(procDefId, vars);
+        Object result = powerProcessService.startProcessInstanceById(processDefinitionId, vars);
         return ResponseEntity.ok(result);
     }
 
+
+    /**
+     * 根据流程定义key启动流程 失败 --tmd 为什么？
+     * @param processDefinitionKey 流程定义key
+     * @return
+     */
+    @GetMapping("runNormalByKey")
+    public ResponseEntity runNormalByKey(@RequestParam String processDefinitionKey){
+        Map<String, Object> vars = new HashMap<>(255);
+
+        User user = (User) session.getAttribute("user");
+        vars.put("userId", user.getId());
+        Object result = powerProcessService.startProcessInstanceByKey(processDefinitionKey, vars);
+
+        return ResponseEntity.ok(result);
+    }
     /**
      * 查询流程部署情况
      * 通过mybatis 创建SQL语句直接从数据库表 act_re_deployment 中查询
      * 将结果封装到自定义实体类  PowerDeployment
      * TODO Pageable分页
      *
-     * @return 流程部署列表 deploymentList
+     * @return 流程部署列表 processDeploymentList
      */
     @GetMapping("deploymentList")
     public ResponseEntity<List<PowerDeployment>> processList() {
@@ -115,13 +132,13 @@ public class ProcessController {
     }
 
     /**
-     * 查询流程定义列表 在表 act_re_procdef 中
+     * 自定义mybatis --mapper 查询流程定义列表    数据在表 act_re_procdef
      *
-     * @return 流程定义list
+     * @return 流程定义列表 processDefinitionList
      */
-    @GetMapping("procdefList")
-    public ResponseEntity<List<com.power.entity.PowerProcdef>> procedefList() {
-        List<PowerProcdef> list = powerProcessService.findProcdefList();
+    @GetMapping("processDefinitionList")
+    public ResponseEntity<List<PowerProcessDefinition>> procedefList() {
+        List<PowerProcessDefinition> list = powerProcessService.findProcdefList();
         return ResponseEntity.ok(list);
     }
 
@@ -143,17 +160,17 @@ public class ProcessController {
      * 测试包含多实例节点流程启动
      * 注意  此处任务执行人列表硬编码 只是为了测试方法
      *
-     * @param procDefId 流程定义Id
+     * @param processDefinition 流程定义Id
      * @return 标记
      */
-    @GetMapping("runTest/{procDefId}")
-    public ResponseEntity runMultiInstance4(@PathVariable String procDefId) {
+    @GetMapping("runMultiInstance/{processDefinition}")
+    public ResponseEntity runMultiInstance(@PathVariable String processDefinition) {
         String[] strings = {"ZhangSan", "LiSi", "WangWu"};
         List<String> list = Arrays.asList(strings);
-        Map<String, Object> vars = new HashMap<>();
+        Map<String, Object> vars = new HashMap<>(255);
 
         vars.put("assigneeList", list);
-        Object result = powerProcessService.startProcessInstance(procDefId, vars);
+        Object result = powerProcessService.startProcessInstanceById(processDefinition, vars);
 
         return ResponseEntity.ok(result);
     }
@@ -163,19 +180,17 @@ public class ProcessController {
      *
      * @param activityId        待加签的多实例节点Id  act_ru_task表中的 TASK_DEF_KEY_
      * @param parentExecutionId 父任务Id act_ru_task表中的PROC_INST_ID_ 或 act_ru_execution中的ID_ where PARENT_ID_ == null;
-     * @return execution_Id     执行实例Id；
+     * @return execution_Id     多实例节点任务ID；
      */
-    @GetMapping("addMultiInstance")
+    @GetMapping("addMultiInstanceNode")
     public ResponseEntity addMulti(@RequestParam String activityId,
                                    @RequestParam String parentExecutionId) {
-        Map<String, Object> vars = new HashMap<>();
-        // String [] strings = {"ZhangSan","LiSi"};
-        //vars.put("assigneeList",Arrays.asList(strings));
+        Map<String, Object> vars = new HashMap<>(255);
         vars.put("assignee", "LiSi");
 
         Execution execution = runtimeService.addMultiInstanceExecution(activityId, parentExecutionId, vars);
 
-        return ResponseEntity.ok(execution.getId());
+        return ResponseEntity.ok("多实例节点任务ID："+execution.getId());
     }
 
     /**
@@ -184,18 +199,19 @@ public class ProcessController {
      * @param executionId 多实例节点任务ID
      * @return 标记
      */
-    @GetMapping("deleteMultiInstance")
+    @GetMapping("deleteMultiInstanceNode")
     public ResponseEntity deleteMulti(@RequestParam String executionId) {
         runtimeService.deleteMultiInstanceExecution(executionId, true);
-        return ResponseEntity.ok("多实例节点减签操作");
+        return ResponseEntity.ok("完成多实例节点减签操作");
     }
 
     /**
-     * 任意节点跳转操作
+     * 任意节点跳转操作 Flowable 6.3--- Cmd模式
      * 这里只是在普通节点之间跳转；多实例节点跳转到普通节点会出问题
+     * (又测了几次，好像多实例节点也能跑的通ε=ε=ε=(~￣▽￣)~)
      *
-     * @param taskId        当前任务节点ID act_ru_task 表中的ID；
-     * @param targetNodeId 目标节点id 已部署的流程文件中的 <userTask id="shareniu-b"/> 标签中的Id；
+     * @param taskId        当前任务节点ID    表act_ru_task中的ID；
+     * @param targetNodeId  目标节点id   已部署的流程文件中的 <userTask id="shareniu-b"/> 标签中的Id；
      * @return 标记
      */
     @GetMapping("jump")
@@ -208,7 +224,7 @@ public class ProcessController {
 
     /**
      * 普通节点之间跳转操作，flowable 6.4更新后提供的方法
-     * @param procInstanceId            流程实例Id  act_ru_task 表中的 PROC_INST_ID_字段
+     * @param procInstanceId       流程实例Id  act_ru_task 表中的 PROC_INST_ID_字段
      * @param currentActivityId    当前节点id  流程标签中的id属性 <userTask id="xxx"/>
      * @param newActivityId        目标节点id
      * @return 标记
@@ -226,7 +242,7 @@ public class ProcessController {
     }
 
     /**
-     * 从多实例节点跳转到普通节点
+     * 从多实例节点跳转到普通节点  flowable 6.4更新后提供的方法
      * @param executionId 执行实例Id  act_ru_execution表中最上层执行实例的Id
      * @param activityId 跳转目标Id   <userTask id="xxx"/>标签中的节点Id
      * @return 标记
@@ -241,8 +257,8 @@ public class ProcessController {
     }
 
     /**
-     * 根据流程实例ID获取任务节点列表
-     * 并判断流程中任务节点的类型
+     * 根据流程实例ID获取任务节点列表，并判断流程中任务节点的类型
+     *
      * @param procDefId 流程实例ID
      * @return 标记
      */
@@ -267,13 +283,13 @@ public class ProcessController {
 
     /**
      * 增加节点
-     * @param procDefId 流程定义Id
+     * @param processDefinitionId 流程定义Id
      * @return
      */
     @GetMapping("addNode")
-    public ResponseEntity addNode(@RequestParam String procDefId,
+    public ResponseEntity addNode(@RequestParam String processDefinitionId,
                                   @RequestBody PowerTask powerTask){
-        Process process = managementService.executeCommand(new GetProcessCmd(procDefId));
+        Process process = managementService.executeCommand(new GetProcessCmd(processDefinitionId));
 
         //创建任务节点
         UserTask userTask = new UserTask();
@@ -322,7 +338,8 @@ public class ProcessController {
          process.addFlowElement(sequenceFlow);*/
 
         //获取ProcessCache缓存管理对象
-        ProcessDefinitionCacheEntry processCacheEntry = managementService.executeCommand(new GetProcessDefinitionCacheEntryCmd(procDefId));
+        ProcessDefinitionCacheEntry processCacheEntry = managementService
+                        .executeCommand(new GetProcessDefinitionCacheEntryCmd(processDefinitionId));
 
         //设置缓存
         processCacheEntry.setProcess(process);
@@ -335,19 +352,20 @@ public class ProcessController {
     /**
      * 这里修改的是全局流程实例模板 -/.\-！
      * 风险太大，不能用，需要将其改成正在执行中的执行实例模板
-     * @param procDefId
-     * @param targetNode
+     * @param processDefinitionId 流程定义Id
+     * @param targetNodeId 目标节点Id
      * @return
      */
     @GetMapping("deleteNode")
-    public ResponseEntity deleteNode(@RequestParam String procDefId,
-                                     @RequestParam String targetNode){
-        Process process = managementService.executeCommand(new GetProcessCmd(procDefId));
+    public ResponseEntity deleteNode(@RequestParam String processDefinitionId,
+                                     @RequestParam String targetNodeId){
+        Process process = managementService.executeCommand(new GetProcessCmd(processDefinitionId));
         //移除节点;
-        process.removeFlowElementFromMap(targetNode);
-        process.removeFlowElement(targetNode);
+        process.removeFlowElementFromMap(targetNodeId);
+        process.removeFlowElement(targetNodeId);
         //获取ProcessCache缓存管理对象
-        ProcessDefinitionCacheEntry processCacheEntry = managementService.executeCommand(new GetProcessDefinitionCacheEntryCmd(procDefId));
+        ProcessDefinitionCacheEntry processCacheEntry = managementService
+                .executeCommand(new GetProcessDefinitionCacheEntryCmd(processDefinitionId));
 
         //设置缓存
         processCacheEntry.setProcess(process);
@@ -357,18 +375,20 @@ public class ProcessController {
 
     /**
      * 检查Process缓存
-     * @param procDefId
-     * @return
+     * @param processDefinitionId 流程定义Id
+     * @return process
      */
     @GetMapping("checkProcess")
-    public ResponseEntity checkProcess(@RequestParam String procDefId){
-        ProcessDefinitionCacheEntry processCacheEntry = managementService.executeCommand(new GetProcessDefinitionCacheEntryCmd(procDefId));
+    public ResponseEntity checkProcess(@RequestParam String processDefinitionId){
+        ProcessDefinitionCacheEntry processCacheEntry = managementService
+                .executeCommand(new GetProcessDefinitionCacheEntryCmd(processDefinitionId));
         Process process = processCacheEntry.getProcess();
         return ResponseEntity.ok(process);
     }
 
     /**
      * 创建任务节点行为类
+     * 可能会复用，单独抽出来
      *
      * @param userTask 用户任务节点
      * @return 任务节点行为类

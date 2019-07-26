@@ -1,7 +1,7 @@
 package com.power.mapper;
 
 import com.power.entity.PowerDeployment;
-import com.power.entity.PowerProcdef;
+import com.power.entity.PowerProcessDefinition;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -14,6 +14,6 @@ import java.util.List;
 public interface ProcessMapper {
     List<PowerDeployment> findProcessList();
 
-    List<PowerProcdef> findProcdefList();
+    List<PowerProcessDefinition> findProcdefList();
 
 }

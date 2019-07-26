@@ -3,7 +3,7 @@ package com.power.service.impl;
 
 import com.power.entity.PowerDeployEntity;
 import com.power.entity.PowerDeployment;
-import com.power.entity.PowerProcdef;
+import com.power.entity.PowerProcessDefinition;
 import com.power.mapper.ProcessMapper;
 import com.power.service.PowerProcessService;
 import org.flowable.engine.RepositoryService;
@@ -24,8 +24,8 @@ import java.util.Map;
 @Service
 public class PowerProcessImpl implements PowerProcessService {
 
+    //默认将流程文件放在此目录下
     private static final String BPMN_PREFIX = "upload/diagrams/";
-
 
     @Autowired
     private RepositoryService repositoryService;
@@ -75,35 +75,32 @@ public class PowerProcessImpl implements PowerProcessService {
 
     @Override
     public List<PowerDeployment> findProcessList() {
-
         return processMapper.findProcessList();
-
     }
 
     @Override
-    public List<PowerProcdef> findProcdefList() {
-
+    public List<PowerProcessDefinition> findProcdefList() {
         return processMapper.findProcdefList();
     }
 
     @Override
-    public Object startProcessInstance(String procDefId) {
-        ProcessInstance processInstance = runtimeService.startProcessInstanceById(procDefId);
+    public Object startProcessInstanceById(String processDefinitionId) {
+        ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId);
         return "流程实例Id：" + processInstance.getId();
     }
 
     @Override
-    public Object startProcessInstance(String procDefId, Map<String, Object> vars) {
-        ProcessInstance processInstance = runtimeService.startProcessInstanceById(procDefId, vars);
+    public Object startProcessInstanceById(String processDefinitionId, Map<String, Object> vars) {
+        ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId, vars);
         return "流程实例Id：" + processInstance.getId();
     }
 
     //TODO 通过流程定义Key启动流程实例 失败
     @Override
-    public Object startProcessInstanceByKey(String procDefKey, Map<String, Object> vars) {
-
-        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(procDefKey, vars);
-        return "流程实例Id" + processInstance.getId() + "--启动流程的userId" + processInstance.getStartUserId();
+    public Object startProcessInstanceByKey(String processDefinitionKey, Map<String, Object> vars) {
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(processDefinitionKey, vars);
+        String userId  = "--启动流程的userId" + processInstance.getStartUserId();
+        return "流程实例Id" + processInstance.getId() +userId;
     }
 
 

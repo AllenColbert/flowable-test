@@ -8,6 +8,8 @@ import org.flowable.idm.engine.impl.persistence.entity.UserEntityImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -21,7 +23,7 @@ public class IdmServiceImpl implements IdmService {
     private IdmIdentityService idmIdentityService;
 
     @Autowired
-    HttpSession session;
+    private HttpSession session;
 
 /*    public IdmServiceImpl(IdmIdentityService idmIdentityService) {
         this.idmIdentityService = idmIdentityService;
@@ -29,11 +31,11 @@ public class IdmServiceImpl implements IdmService {
 
 
     @Override
-    public Object login(String userId, String password) {
+    public Object login(String userId, String password, HttpServletRequest request, HttpServletResponse response) {
 
         if (idmIdentityService.checkPassword(userId, password)){
             User user = (User) queryUserById(userId);
-            session.setAttribute("user",user);
+            request.getSession().setAttribute("user",user);
             return "登陆成功";
         }else if (queryUserById(userId) == null){
             return "用户不存在";

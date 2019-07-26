@@ -33,6 +33,5 @@
         WHERE
             art.ASSIGNEE_ = #{assignee}
         order by id
-        limit 1;
     </select>
 </mapper>

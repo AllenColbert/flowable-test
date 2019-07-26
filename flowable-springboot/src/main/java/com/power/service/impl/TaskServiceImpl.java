@@ -8,6 +8,7 @@ import org.flowable.task.api.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,13 +27,11 @@ public class TaskServiceImpl implements PowerTaskService {
 
     @Override
     public Object queryUserTask(String assignee) {
-        PowerTask task = taskMapper.queryUserTask(assignee);
-
-        if (task == null){
+        List<PowerTask> list = taskMapper.queryUserTask(assignee);
+        if (list == null || list.size() == 0){
             return "当前用户没有任务";
         }
-
-        return task;
+        return list;
     }
 
     @Override
@@ -43,20 +42,28 @@ public class TaskServiceImpl implements PowerTaskService {
 
     @Override
     public Task queryTaskByProcessInstanceId(String processInstanceId) {
-        return  taskService.createTaskQuery().processInstanceId(processInstanceId).singleResult();
+        return  taskService.createTaskQuery().processInstanceId(processInstanceId).list().get(0);
 
     }
 
     @Override
     public Object queryAllTask(String assignee) {
-        List<Task> list = taskService.createTaskQuery().taskAssignee(assignee).list();
+        List<Task> list = new ArrayList<>();
+        if (assignee == null){
+            list = taskService.createTaskQuery().list();
+        }else {
+            list = taskService.createTaskQuery().taskAssignee(assignee).list();
+        }
+        //没办法呀，Task不能序列化
+        List<String> infoList =  new ArrayList<>();
+
         for (Task task : list) {
-            System.out.println(task.getId());
-            System.out.println(task.getTaskDefinitionKey());
-            System.out.println(task.getName());
+            infoList.add("taskId："+task.getId());
+            infoList.add("taskName："+task.getName());
+            infoList.add("taskDefinitionKey："+task.getTaskDefinitionKey());
         }
 
-        return list;
+        return infoList;
     }
 
 }

@@ -2,7 +2,7 @@ package com.power.service;
 
 
 import com.power.entity.PowerDeployment;
-import com.power.entity.PowerProcdef;
+import com.power.entity.PowerProcessDefinition;
 import com.power.entity.PowerDeployEntity;
 
 import java.util.List;
@@ -17,15 +17,13 @@ public interface PowerProcessService {
 
     Object deployProcess(String fileName, PowerDeployEntity processDeploy);
 
-
     List<PowerDeployment> findProcessList();
 
+    List<PowerProcessDefinition> findProcdefList();
 
-    List<PowerProcdef> findProcdefList();
+    Object startProcessInstanceById(String processDefinitionId);
 
-    Object startProcessInstance(String procDefId);
+    Object startProcessInstanceById(String processDefinitionId, Map<String,Object> vars);
 
-    Object startProcessInstance(String procDefId, Map<String,Object> vars);
-
-    Object startProcessInstanceByKey(String procDefKey, Map<String, Object> vars);
+    Object startProcessInstanceByKey(String processDefinitionKey, Map<String, Object> vars);
 }

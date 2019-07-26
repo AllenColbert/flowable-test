@@ -1,7 +1,12 @@
 package com.power.service;
 
+
 import org.flowable.idm.engine.impl.persistence.entity.GroupEntityImpl;
 import org.flowable.idm.engine.impl.persistence.entity.UserEntityImpl;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 
 /**
  * @author : xuyunfeng
@@ -23,7 +28,7 @@ public interface IdmService {
 
     Object deleteGroupById(String groupId);
 
-    Object login(String userId, String password);
+    Object login(String userId, String password, HttpServletRequest request, HttpServletResponse response);
 
     Object logout();
 }

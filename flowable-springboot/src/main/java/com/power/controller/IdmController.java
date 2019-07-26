@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -102,8 +104,10 @@ public class IdmController {
 	 */
 	 @PostMapping("login")
 	public ResponseEntity login(@RequestParam("userId") String userId,
-								@RequestParam("password") String password){
-	 	Object result = idmService.login(userId,password);
+								@RequestParam("password") String password,
+								HttpServletRequest request,
+								HttpServletResponse response){
+	 	Object result = idmService.login(userId,password,request,response);
 	 	return ResponseEntity.ok(result);
 	 }
 

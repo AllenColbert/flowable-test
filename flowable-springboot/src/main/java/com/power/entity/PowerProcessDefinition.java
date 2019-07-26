@@ -6,7 +6,7 @@ package com.power.entity;
  * 流程定义信息实体类
  */
 
-public class PowerProcdef {
+public class PowerProcessDefinition {
     private static final long serialVersionUID = 1L;
 
     private String id;
@@ -18,11 +18,11 @@ public class PowerProcdef {
     private String version;
     private String deploymentId;
     private String bpmnResource;
-    private String PngResource;
+    private String pngResource;
 
     @Override
     public String toString() {
-        return "PowerProcdef{" +
+        return "PowerProcessDefinition{" +
                 "id='" + id + '\'' +
                 ", rev='" + rev + '\'' +
                 ", category='" + category + '\'' +
@@ -31,7 +31,7 @@ public class PowerProcdef {
                 ", version='" + version + '\'' +
                 ", deploymentId='" + deploymentId + '\'' +
                 ", bpmnResource='" + bpmnResource + '\'' +
-                ", PngResource='" + PngResource + '\'' +
+                ", pngResource='" + pngResource + '\'' +
                 '}';
     }
 
@@ -100,10 +100,10 @@ public class PowerProcdef {
     }
 
     public String getPngResource() {
-        return PngResource;
+        return pngResource;
     }
 
     public void setPngResource(String pngResource) {
-        PngResource = pngResource;
+        this.pngResource = pngResource;
     }
 }
