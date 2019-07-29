@@ -9,10 +9,8 @@ import com.power.entity.PowerDeployment;
 import com.power.entity.PowerProcessDefinition;
 import com.power.entity.PowerTask;
 import com.power.service.PowerProcessService;
-import org.flowable.bpmn.model.Artifact;
+import org.flowable.bpmn.model.*;
 import org.flowable.bpmn.model.Process;
-import org.flowable.bpmn.model.SequenceFlow;
-import org.flowable.bpmn.model.UserTask;
 import org.flowable.engine.ManagementService;
 import org.flowable.engine.ProcessEngine;
 import org.flowable.engine.RepositoryService;
@@ -104,8 +102,9 @@ public class ProcessController {
 
     /**
      * 根据流程定义key启动流程 失败 --tmd 为什么？
+     * 参数问题： --目前来看跟参数没关系
      * @param processDefinitionKey 流程定义key
-     * @return
+     * @return 标记
      */
     @GetMapping("runNormalByKey")
     public ResponseEntity runNormalByKey(@RequestParam String processDefinitionKey){
@@ -113,7 +112,10 @@ public class ProcessController {
 
         User user = (User) session.getAttribute("user");
         vars.put("userId", user.getId());
-        Object result = powerProcessService.startProcessInstanceByKey(processDefinitionKey, vars);
+        System.out.println(vars);
+
+
+        Object result = powerProcessService.startProcessInstanceByKey(processDefinitionKey);
 
         return ResponseEntity.ok(result);
     }

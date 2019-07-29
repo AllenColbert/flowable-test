@@ -26,4 +26,6 @@ public interface PowerProcessService {
     Object startProcessInstanceById(String processDefinitionId, Map<String,Object> vars);
 
     Object startProcessInstanceByKey(String processDefinitionKey, Map<String, Object> vars);
+
+    Object startProcessInstanceByKey(String processDefinitionKey);
 }

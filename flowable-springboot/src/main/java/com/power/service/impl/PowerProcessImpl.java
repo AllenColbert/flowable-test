@@ -103,5 +103,11 @@ public class PowerProcessImpl implements PowerProcessService {
         return "流程实例Id" + processInstance.getId() +userId;
     }
 
+    @Override
+    public Object startProcessInstanceByKey(String processDefinitionKey) {
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(processDefinitionKey);
+        return "流程实例Id：" + processInstance.getId();
+    }
+
 
 }
