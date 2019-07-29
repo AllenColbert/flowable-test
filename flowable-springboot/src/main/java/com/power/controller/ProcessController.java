@@ -9,8 +9,10 @@ import com.power.entity.PowerDeployment;
 import com.power.entity.PowerProcessDefinition;
 import com.power.entity.PowerTask;
 import com.power.service.PowerProcessService;
-import org.flowable.bpmn.model.*;
+import org.flowable.bpmn.model.Artifact;
 import org.flowable.bpmn.model.Process;
+import org.flowable.bpmn.model.SequenceFlow;
+import org.flowable.bpmn.model.UserTask;
 import org.flowable.engine.ManagementService;
 import org.flowable.engine.ProcessEngine;
 import org.flowable.engine.RepositoryService;
@@ -335,9 +337,6 @@ public class ProcessController {
         process.addFlowElement(userTask);
         process.addFlowElement(sequenceFlow1);
         process.addFlowElement(sequenceFlow2);
-
-/*       process.addFlowElement(userTask);
-         process.addFlowElement(sequenceFlow);*/
 
         //获取ProcessCache缓存管理对象
         ProcessDefinitionCacheEntry processCacheEntry = managementService
