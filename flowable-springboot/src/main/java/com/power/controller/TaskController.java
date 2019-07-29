@@ -2,10 +2,12 @@ package com.power.controller;
 
 import com.power.service.PowerTaskService;
 import org.flowable.bpmn.model.BpmnModel;
-import org.flowable.engine.HistoryService;
-import org.flowable.engine.RepositoryService;
+import org.flowable.engine.*;
 import org.flowable.engine.history.HistoricProcessInstance;
+import org.flowable.engine.runtime.Execution;
+import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.idm.api.User;
+import org.flowable.image.ProcessDiagramGenerator;
 import org.flowable.image.impl.DefaultProcessDiagramGenerator;
 import org.flowable.task.api.Task;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.util.ArrayList;
@@ -43,6 +46,14 @@ public class TaskController {
     @Autowired
     private HttpSession session;
 
+    @Autowired
+    private RuntimeService runtimeService;
+
+    @Autowired
+    private ProcessEngine processEngine;
+
+    @Autowired
+    private TaskService taskService;
     @GetMapping("queryAllTask")
     public ResponseEntity queryAllTask(
             @RequestParam(value = "assignee",required = false) String assignee) {
@@ -117,6 +128,54 @@ public class TaskController {
         out.close();
         in.close();
         return ResponseEntity.ok("标记");
+    }
+
+
+    @GetMapping(value = "processDiagram")
+    public void genProcessDiagram(HttpServletResponse httpServletResponse, String processId) throws Exception {
+        ProcessInstance pi = runtimeService.createProcessInstanceQuery().processInstanceId(processId).singleResult();
+
+        //流程走完的不显示图
+        if (pi == null) {
+            return;
+        }
+        Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+        //使用流程实例ID，查询正在执行的执行对象表，返回流程实例对象
+        String instanceId = task.getProcessInstanceId();
+        List<Execution> executions = runtimeService
+                .createExecutionQuery()
+                .processInstanceId(instanceId)
+                .list();
+
+        //得到正在执行的Activity的Id
+        List<String> activityIds = new ArrayList<>();
+        List<String> flows = new ArrayList<>();
+        for (Execution exe : executions) {
+            List<String> ids = runtimeService.getActiveActivityIds(exe.getId());
+            activityIds.addAll(ids);
+        }
+
+        //获取流程图
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(pi.getProcessDefinitionId());
+        ProcessEngineConfiguration engconf = processEngine.getProcessEngineConfiguration();
+        ProcessDiagramGenerator diagramGenerator = engconf.getProcessDiagramGenerator();
+        InputStream in = diagramGenerator.generateDiagram(bpmnModel, "png", activityIds, flows,"宋体", "宋体", "宋体", null,1.0D,true);
+        OutputStream out = null;
+        byte[] buf = new byte[1024];
+        int length = 0;
+        try {
+            out = httpServletResponse.getOutputStream();
+            while ((length = in.read(buf)) != -1) {
+                out.write(buf, 0, length);
+            }
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+            if (out != null) {
+                out.close();
+            }
+        }
     }
 
 }
