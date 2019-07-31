@@ -24,6 +24,7 @@ public class RequestHandlerInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String servletPath = request.getServletPath();
+        //释放静态资源文件
         if (servletPath.endsWith(".png")||servletPath.endsWith(".json")||servletPath.endsWith("css")||
                 servletPath.endsWith("js")||servletPath.endsWith("woff")||servletPath.endsWith("ttf")){
             return true;
@@ -32,12 +33,13 @@ public class RequestHandlerInterceptor implements HandlerInterceptor {
         System.out.println(request.getServletPath());
         Object user = null;
         user = session.getAttribute("user");
+
         if (user != null) {
             System.out.println("当前登陆用户Id："+((User) user).getId());
             return true;
         }
-        System.out.println("拦截到请求："+servletPath+"，状态："+response.getStatus());
-        return false;
+        System.out.println("拦截到请求："+servletPath+"，状态："+response.getContentType());
+        return true;
     }
 
 

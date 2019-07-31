@@ -24,6 +24,7 @@ import java.util.Map;
 /**
  * @author : xuyunfeng
  * @date :   2019/7/18 14:17
+ * 表单模块
  */
 @Controller
 @RequestMapping("form")
@@ -34,13 +35,19 @@ public class FormController {
     @Autowired
     private TaskService taskService;
 
-    @GetMapping("formData/{proDefId}")
-    public ResponseEntity getStartFormData(@PathVariable String proDefId){
+    /**
+     * 通过流程定义Id获取表单信息
+     * @param processDefinitionId 流程定义Id
+     * @return 表单信息列表
+     */
+    @GetMapping("formData/{processDefinitionId}")
+    public ResponseEntity getStartFormData(@PathVariable String processDefinitionId){
 
-        StartFormData startFormData = formService.getStartFormData(proDefId);
+        StartFormData startFormData = formService.getStartFormData(processDefinitionId);
         System.out.println("ProcessDefinition:"+startFormData.getProcessDefinition());
         System.out.println(startFormData.getDeploymentId());
         System.out.println(startFormData.getFormKey());
+
         List<FormProperty> formProperties = startFormData.getFormProperties();
 
         for (FormProperty fm : formProperties){
@@ -66,25 +73,37 @@ public class FormController {
     }
 
 
-    @GetMapping("submitStartFormData/{proDefId}")
-    public ResponseEntity submitStartFormData(@PathVariable String proDefId){
+    /**
+     * 提交自定义表单，通过流程定义ID进行绑定
+     * @param processDefinitionId 流程定义ID
+     * @return  自定义表单信息
+     */
+    @GetMapping("submitStartFormData/{processDefinitionId}")
+    public ResponseEntity submitStartFormData(@PathVariable String processDefinitionId){
         Map<String, String> vars=new HashMap<String, String>();
         vars.put("start_date",getDate());
         vars.put("end_date",getDate());
         vars.put("reason","我想出去玩玩");
         vars.put("days","3");
-        formService.submitStartFormData(proDefId,vars);
+        formService.submitStartFormData(processDefinitionId,vars);
         return ResponseEntity.ok(vars);
     }
 
-
+    /**
+     * 日期方法
+     * @return 日期格式
+     */
     public  String getDate(){
         SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
-        String s = simpleDateFormat.format(new Date());
-        return  s;
+        return simpleDateFormat.format(new Date());
     }
 
 
+    /**
+     * 通过任务Id获取对应的表单信息
+     * @param taskId 任务Id
+     * @return 表单信息
+     */
     @GetMapping("taskFormData/{taskId}")
     public ResponseEntity getTaskFormData(@PathVariable("taskId")String taskId){
         TaskFormData taskFormData = formService.getTaskFormData(taskId);
@@ -114,7 +133,7 @@ public class FormController {
 
     /**
      * 任务节点中填充值，不会自动完成当前任务节点
-     * @param taskId
+     * @param taskId 任务Id
      */
     @GetMapping("saveFormData/{taskId}")
     public void saveFormData(@PathVariable("taskId")String taskId) {
@@ -128,7 +147,7 @@ public class FormController {
 
     /**
      * 填充值，并自动完成当前任务节点
-     * @param taskId
+     * @param taskId 任务Id
      */
     @GetMapping("submitTaskFormData/{taskId}")
     public void submitTaskFormData(@PathVariable("taskId")String taskId) {

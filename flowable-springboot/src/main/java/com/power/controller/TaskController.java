@@ -11,6 +11,7 @@ import org.flowable.image.ProcessDiagramGenerator;
 import org.flowable.image.impl.DefaultProcessDiagramGenerator;
 import org.flowable.task.api.Task;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +29,7 @@ import java.util.Map;
 /**
  * @author : xuyunfeng
  * @date :   2019/7/17 16:36
+ * 任务模块
  */
 
 @Controller
@@ -49,11 +51,18 @@ public class TaskController {
     @Autowired
     private RuntimeService runtimeService;
 
+    @Qualifier("processEngine")
     @Autowired
     private ProcessEngine processEngine;
 
     @Autowired
     private TaskService taskService;
+
+    /**
+     * 查询assignee的全部任务
+     * @param assignee  任务代理人
+     * @return 任务列表
+     */
     @GetMapping("queryAllTask")
     public ResponseEntity queryAllTask(
             @RequestParam(value = "assignee",required = false) String assignee) {
@@ -67,12 +76,21 @@ public class TaskController {
     @GetMapping("myTask")
     public ResponseEntity myTask() {
         User user = (User) session.getAttribute("user");
+        if(user == null){
+            return ResponseEntity.badRequest().body("代理人不能为空");
+        }
         Object result = powerTaskService.queryUserTask(user.getId());
 
         return ResponseEntity.ok(result);
 
     }
 
+    /**
+     * 完成当前任务
+     * @param taskId 任务Id
+     * @param assignee 任务代理人
+     * @return 完成标记
+     */
     @GetMapping("completeTask")
     public ResponseEntity completeTask(@RequestParam String taskId,
                                        @RequestParam(value = "assignee", required = false, defaultValue = "admin") String assignee) {
@@ -131,6 +149,12 @@ public class TaskController {
     }
 
 
+    /**
+     * 直接在浏览器上显示当前任务图
+     * @param httpServletResponse Response
+     * @param processId 流程Id
+     * @throws Exception
+     */
     @GetMapping(value = "processDiagram")
     public void genProcessDiagram(HttpServletResponse httpServletResponse, String processId) throws Exception {
         ProcessInstance pi = runtimeService.createProcessInstanceQuery().processInstanceId(processId).singleResult();

@@ -1,34 +1,54 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>网易云音乐主页面</title>
-<script src="http://www.java1234.com/jquery-easyui-1.3.3/jquery.min.js"></script>
-
-<style>
-	div{font-size:14px;font-style:normal:}
-	
-	#program>ul>li>a{
-		
-	}
-</style>	
-
+<script type="text/javascript" src="../js/jquery-2.1.0.min.js"></script>
 </head>
+<style>
+	.card {
+		box-shadow: 0 4px 10px 1px rgba(0,0,0,0.2);
+		transition: 0.3s;
+		width: 100%;
+
+	}
+
+	.card:hover {
+		box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+	}
+
+
+	.container {
+		padding: 200px 100px;
+	}
+</style>
+
 <body>
- <!-- 最大的div开头 -->
- <div>
- 	<div id="program">
- 		<ul>
- 			<li><a href="">发现音乐</a></li>
- 			<li><a href="">我的音乐</a></li>
- 			<li><a href="">朋友</a></li>
- 			<li><a href="">商城</a></li>
- 			<li><a href="">音乐人</a></li>
- 			<li><a href="">下载客户端</a></li>
- 		</ul>
- 	</div>
- 
- </div><!--  最大的div结尾-->
- 
+
+<div class="card" >
+	<div class="container">
+		<form method="post" id="login" action="#">
+
+			<table border="0px" width="20%" height="30%" cellspacing="5" cellpadding="5" align="center">
+				<tr>
+					<td>用户名：</td>
+					<td><input type="text"  id="userId"></td>
+				</tr>
+				<tr>
+					<td>密&nbsp;&nbsp;&nbsp;  码：</td>
+					<td><input type="password"  id="password"></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><input type="submit" align="center"  value="提交"></td>
+				</tr>
+			</table>
+		</form>
+	</div>
+</div>
+
 </body>
+<script type="text/javascript">
+
+</script>
 </html>

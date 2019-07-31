@@ -25,6 +25,7 @@ import org.flowable.engine.impl.persistence.deploy.ProcessDefinitionCacheEntry;
 import org.flowable.engine.runtime.Execution;
 import org.flowable.idm.api.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +42,7 @@ import java.util.*;
 @RequestMapping("process")
 public class ProcessController {
 
+    @Qualifier("processEngine")
     @Autowired
     private ProcessEngine processEngine;
 
@@ -141,7 +143,7 @@ public class ProcessController {
      * @return 流程定义列表 processDefinitionList
      */
     @GetMapping("processDefinitionList")
-    public ResponseEntity<List<PowerProcessDefinition>> procedefList() {
+    public ResponseEntity<List<PowerProcessDefinition>> processDefinitionList() {
         List<PowerProcessDefinition> list = powerProcessService.findProcdefList();
         return ResponseEntity.ok(list);
     }

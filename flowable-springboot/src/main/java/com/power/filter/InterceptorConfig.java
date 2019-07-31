@@ -20,7 +20,9 @@ public class InterceptorConfig  implements WebMvcConfigurer {
         registry.addInterceptor(requestHandlerInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns("/idm/login**",
+                        "/task/processDiagram",
                         "/index.html",
+                        "/**/*.html",
                         "/idm/logout",
                         "idm/userRegister",
                         "/task/processDiagram",
