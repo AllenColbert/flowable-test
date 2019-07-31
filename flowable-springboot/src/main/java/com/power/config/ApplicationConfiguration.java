@@ -1,11 +1,6 @@
 package com.power.config;
 
-/**
- * Created by xiongyizhou on 2019/3/26 10:55
- * E-mail: xiongyizhou@powerpms.com
- *
- * @author xiongyizhou
- */
+
 
 import org.flowable.ui.modeler.properties.FlowableModelerAppProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -16,6 +11,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+
+/**
+ * Created by xiongyizhou on 2019/3/26 10:55
+ * E-mail: xiongyizhou@powerpms.com
+ *
+ * @author xiongyizhou
+ */
 
 @Configuration
 @EnableConfigurationProperties(FlowableModelerAppProperties.class)
