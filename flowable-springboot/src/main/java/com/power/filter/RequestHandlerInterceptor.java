@@ -21,9 +21,13 @@ public class RequestHandlerInterceptor implements HandlerInterceptor {
     @Autowired
     private HttpSession session;
 
-    //TODO 这里只是做了登录判断，没有考虑用户未登录状态下的注册活动
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        String servletPath = request.getServletPath();
+        if (servletPath.endsWith(".png")||servletPath.endsWith(".json")||servletPath.endsWith("css")||
+                servletPath.endsWith("js")||servletPath.endsWith("woff")||servletPath.endsWith("ttf")){
+            return true;
+        }
 
         System.out.println(request.getServletPath());
         Object user = null;
@@ -32,7 +36,7 @@ public class RequestHandlerInterceptor implements HandlerInterceptor {
             System.out.println("当前登陆用户Id："+((User) user).getId());
             return true;
         }
-        System.out.println("拦截到请求："+request.getServletPath()+"状态："+response.getStatus());
+        System.out.println("拦截到请求："+servletPath+"，状态："+response.getStatus());
         return false;
     }
 

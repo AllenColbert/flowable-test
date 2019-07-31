@@ -6,11 +6,12 @@ spring:
     password: 1234
     hikari:
       maximum-pool-size: 100
-mybatis:
-  mapper-locations: classpath:/mapper/*
 server:
   port: 9200
 flowable:
+  common:
+    app:
+      idm-url: index.html
   idm:
     enabled: true
   #自动部署验证设置 true:开启（默认）/false：关闭
@@ -22,5 +23,5 @@ flowable:
   async-executor-activate: false
   #将databaseSchemaUpdate设置为true。
   #当Flowable发现库与数据库表结构不一致时，会自动将数据库表结构升级至新版本。
-  database-schema-update: false
+  database-schema-update: true
 

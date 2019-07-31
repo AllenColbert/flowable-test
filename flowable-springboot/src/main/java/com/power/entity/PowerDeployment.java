@@ -1,5 +1,8 @@
 package com.power.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Date;
 
 /**
@@ -7,6 +10,8 @@ import java.util.Date;
  * @date :   2019/7/17 15:28
  * @描述 ：流程部署信息,目前来看没什么用，用最多就只是deploymentId
  */
+@Getter
+@Setter
 public class PowerDeployment {
     private static final long serialVersionUID = 1L;
 
@@ -29,51 +34,4 @@ public class PowerDeployment {
                 '}';
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getKey() {
-        return key1;
-    }
-
-    public void setKey(String key) {
-        this.key1 = key;
-    }
-
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(String tenant_id) {
-        this.tenantId = tenant_id;
-    }
-
-    public Date getDeployTime() {
-        return deployTime;
-    }
-
-    public void setDeploy_time(Date deploy_time) {
-        this.deployTime = deploy_time;
-    }
 }

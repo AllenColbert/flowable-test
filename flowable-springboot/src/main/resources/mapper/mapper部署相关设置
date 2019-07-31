@@ -1,0 +1,5 @@
+为了在项目中插入在线流程编辑器，
+在com.power.config.DatabaseConfiguration类中修改了Mapper的映射
+导致application.yml中的mybatis.mapper-location的配置会被覆盖掉
+具体位置在sqlSessionFactory方法中
+修改resource2的值 可以去自定义mapper的位置

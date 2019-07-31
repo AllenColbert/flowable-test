@@ -11,27 +11,12 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.1.6.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 
 	<build>
 		<finalName>flowable-springboot</finalName>
 		<plugins>
-			<plugin>
-				<inherited>true</inherited>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
-				<configuration>
-					<source>${compiler.source}</source>
-					<target>${compiler.target}</target>
-					<encoding>${project.build.sourceEncoding}</encoding>
-					<compilerArguments>
-						<extdirs>${project.basedir}/src/main/webapp/WEB-INF/lib</extdirs>
-					</compilerArguments>
-				</configuration>
-			</plugin>
-
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -39,23 +24,13 @@
 		</plugins>
 	</build>
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<compiler.source>1.8</compiler.source>
-		<compiler.target>1.8</compiler.target>
 		<servlet.version>3.1.0</servlet.version>
 		<jsp.version>2.3.1</jsp.version>
-		<jstl.version>1.2</jstl.version>
-		<junit.version>4.12</junit.version>
 		<flowable.version>6.4.1</flowable.version>
 	</properties>
+
 	<dependencies>
 
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -68,25 +43,20 @@
 			<version>${jsp.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>jstl</artifactId>
-			<version>${jstl.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.objenesis</groupId>
-			<artifactId>objenesis</artifactId>
-			<version>1.2</version>
-		</dependency>
 
 		<dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>1.2.0</version>
+			<exclusions>
+			<exclusion>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-logging</artifactId>
+			</exclusion>
+			</exclusions>
 		</dependency>
 
-		<!--移除多余的Tomcat,登陆时侯老是报错的原因-->
+		<!--移除多余的Tomcat,登陆时报错的原因-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -98,16 +68,6 @@
 			</exclusions>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-configuration-processor</artifactId>
-			<optional>true</optional>
-		</dependency>
 
 		<dependency>
 			<groupId>mysql</groupId>
@@ -127,6 +87,14 @@
 			<artifactId>flowable-idm-spring-configurator</artifactId>
 			<version>${flowable.version}</version>
 		</dependency>
+
+		<!--apache-common包 目前用到的ArrayUtils-->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.9</version>
+		</dependency>
+
 		<!--lombok-->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -134,20 +102,24 @@
 			<version>1.18.8</version>
 		</dependency>
 
-	<!-- freemarker jar包导入 -->
-	   <dependency>
-		    <groupId>org.springframework.boot</groupId>
-		    <artifactId>spring-boot-starter-freemarker</artifactId>
-		</dependency>
-
-		<!--解决启动项目异常 AbstractMethodError-->
+		<!--################新增的jar包######################-->
 		<dependency>
-			<groupId>javax.websocket</groupId>
-			<artifactId>javax.websocket-api</artifactId>
-			<version>1.0</version>
-			<scope>provided</scope>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-actuator-autoconfigure</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.flowable</groupId>
+			<artifactId>flowable-ui-modeler-rest</artifactId>
+			<version>${flowable.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
+			<version>3.6.3</version>
+		</dependency>
+		<!--################新增的jar包######################-->
 	</dependencies>
 
 </project>

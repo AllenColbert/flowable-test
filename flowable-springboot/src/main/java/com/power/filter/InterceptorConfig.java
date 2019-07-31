@@ -14,11 +14,31 @@ public class InterceptorConfig  implements WebMvcConfigurer {
     @Autowired
     private RequestHandlerInterceptor requestHandlerInterceptor;
 
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(requestHandlerInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/idm/login**","/idm/logout","idm/userRegister","/task/processDiagram");
+                .excludePathPatterns("/idm/login**",
+                        "/index.html",
+                        "/idm/logout",
+                        "idm/userRegister",
+                        "/task/processDiagram",
+                        "/display/**",
+                        "/display-cmmn/**",
+                        "/editor-app/**",
+                        "/fonts/**",
+                        "/i18n/**",
+                        "/images/**",
+                        "/libs/**",
+                        "/scripts/**",
+                        "/styles/**",
+                        "/views/**",
+                        "/favicon.ico/**",
+                        "/manifest.json",
+                        "/browserconfig.xml",
+                        "/app/**"
+                       );
     }
 
 }
