@@ -39,7 +39,8 @@ public class InterceptorConfig  implements WebMvcConfigurer {
                         "/favicon.ico/**",
                         "/manifest.json",
                         "/browserconfig.xml",
-                        "/app/**"
+                        "/app/**",
+                        "/css/**"
                        );
     }
 

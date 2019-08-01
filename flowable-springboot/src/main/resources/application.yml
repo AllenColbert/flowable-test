@@ -1,4 +1,12 @@
 spring:
+  mvc:
+    static-path-pattern: /**                #所有的访问都要通过这里
+  resources:
+    static-locations: classpath:/static/    #静态资源文件位置
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false #关闭缓存
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost:3306/flowable-springboot?useUnicode=true&amp;characterEncoding=UTF-8

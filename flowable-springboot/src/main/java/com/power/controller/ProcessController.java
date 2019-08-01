@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
@@ -77,9 +78,9 @@ public class ProcessController {
     }
      * @return 流程部署对象 deploy属性  or 其他提示信息;
      */
-    @GetMapping("deploy/{fileName}")
-    public ResponseEntity<Object> deploy(@PathVariable String fileName,
-                                         @RequestBody PowerDeployEntity powerDeploy) {
+    @GetMapping("deploy")
+    public ResponseEntity<Object> deploy(@RequestParam String fileName,
+                                         @RequestBody(required = false)PowerDeployEntity powerDeploy) {
         Object result = powerProcessService.deployProcess(fileName, powerDeploy);
 
         return ResponseEntity.ok(result);
@@ -92,12 +93,21 @@ public class ProcessController {
      * @param processDefinitionId 流程定义ID：processDefinitionId；
      * @return 流程执行ID
      */
-    @GetMapping("runNormalById/{processDefinitionId}")
-    public ResponseEntity runProcessById(@PathVariable String processDefinitionId) {
+    @GetMapping("runNormalById")
+    public ResponseEntity runProcessById(@RequestParam String processDefinitionId) {
         Map<String, Object> vars = new HashMap<>(255);
 
+        String userId = "admin";
         User user = (User) session.getAttribute("user");
-        vars.put("userId", user.getId());
+        if (user != null) {
+            userId = user.getId();
+        }
+        vars.put("userId", userId);
+        String specialCharacters  = "%3A";
+        String newChar =":";
+        if (processDefinitionId .contains(specialCharacters)){
+            processDefinitionId  = processDefinitionId.replaceAll(specialCharacters, newChar);
+        }
 
         Object result = powerProcessService.startProcessInstanceById(processDefinitionId, vars);
         return ResponseEntity.ok(result);
@@ -148,6 +158,21 @@ public class ProcessController {
         return ResponseEntity.ok(list);
     }
 
+
+
+    @GetMapping("processList")
+    public String processList(Model model){
+        List<PowerProcessDefinition> list = powerProcessService.findProcdefList();
+
+        if (list.size()==0){
+            String msg  = "流程定义列表为空";
+            model.addAttribute("errorMsg",msg);
+            return "errorPage";
+        }
+        model.addAttribute("processList",list);
+        return "processList";
+    }
+
     /**
      * 此处使用流程部署Id deploymentId；
      * 根据流程部署Id删除流程，级联删除
@@ -155,8 +180,8 @@ public class ProcessController {
      * @param concatenation 是否开启级联删除，默认开启
      * @return 删除提示
      */
-    @DeleteMapping("deleteProcessById/{deploymentId}")
-    public ResponseEntity<String> deleteProcessById(@PathVariable String deploymentId,
+    @DeleteMapping("deleteProcessById")
+    public ResponseEntity<String> deleteProcessById(@RequestParam String deploymentId,
                                                     @RequestParam(defaultValue = "true") Boolean concatenation) {
         repositoryService.deleteDeployment(deploymentId, concatenation);
         return ResponseEntity.ok("删除流程成功，Id：" + deploymentId);

@@ -41,7 +41,7 @@ module("selector", { teardown: moduleTeardown });
 
 	url( "some/url.php" );
 		Add random number to url to stop caching
-		@example url("data/test.html") => "data/test.html?10538358428943"
+		@example url("data/login.html") => "data/login.html?10538358428943"
 		@example url("data/test.php?foo=bar") => "data/test.php?foo=bar&10538358345554"
 */
 

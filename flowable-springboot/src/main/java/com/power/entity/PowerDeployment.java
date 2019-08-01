@@ -18,7 +18,7 @@ public class PowerDeployment {
     private String id;
     private String name;
     private String category;
-    private String key1;
+    private String keyWord;
     private String tenantId;
     private Date deployTime;
 
@@ -28,7 +28,7 @@ public class PowerDeployment {
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", category='" + category + '\'' +
-                ", key='" + key1 + '\'' +
+                ", key='" + keyWord + '\'' +
                 ", tenant_id='" + tenantId + '\'' +
                 ", deploy_time=" + deployTime +
                 '}';

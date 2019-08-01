@@ -1,5 +1,6 @@
 package com.power.controller;
 
+import com.power.entity.PowerTask;
 import com.power.service.PowerTaskService;
 import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.engine.*;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -74,14 +76,24 @@ public class TaskController {
      * @return 结合Session，直接查询当前登陆用户的任务
      */
     @GetMapping("myTask")
-    public ResponseEntity myTask() {
+    public String myTask(Model model) {
         User user = (User) session.getAttribute("user");
-        if(user == null){
-            return ResponseEntity.badRequest().body("代理人不能为空");
-        }
-        Object result = powerTaskService.queryUserTask(user.getId());
+        Map<String, Object> map = new HashMap<>();
 
-        return ResponseEntity.ok(result);
+        if(user == null){
+            String msg = "任务代理人不能为空";
+            model.addAttribute("errorMsg",msg);
+            return "errorPage";
+        }
+        List<PowerTask> result = powerTaskService.queryUserTask(user.getId());
+        if (result == null || result.size()==0){
+            String msg  = "当前用户没有任务";
+            model.addAttribute("errorMsg",msg);
+            return "errorPage";
+        }
+
+        model.addAttribute("taskList",result);
+        return "taskList";
 
     }
 
@@ -152,8 +164,8 @@ public class TaskController {
     /**
      * 直接在浏览器上显示当前任务图
      * @param httpServletResponse Response
-     * @param processId 流程Id
-     * @throws Exception
+     * @param processId processInstanceId流程Id
+     * @throws Exception IOException
      */
     @GetMapping(value = "processDiagram")
     public void genProcessDiagram(HttpServletResponse httpServletResponse, String processId) throws Exception {

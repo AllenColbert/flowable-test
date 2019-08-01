@@ -20,7 +20,7 @@
         SELECT
             ard.ID_ AS id,
             ard.NAME_ AS name,
-            ard.KEY_ AS key1,
+            ard.KEY_ AS keyWord,
             ard.CATEGORY_  AS category,
             ard.TENANT_ID_ AS tenantId,
             ard.DEPLOY_TIME_ AS deployTime
@@ -37,7 +37,7 @@
             arp.REV_ AS rev,
             arp.CATEGORY_ AS category,
             arp.NAME_ AS	name,
-            arp.KEY_ AS key1,
+            arp.KEY_ AS keyWord,
             arp.VERSION_ AS version,
             arp.DEPLOYMENT_ID_ AS deploymentId,
             arp.RESOURCE_NAME_ AS bpmnResource,

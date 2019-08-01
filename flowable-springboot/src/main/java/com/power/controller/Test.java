@@ -1,8 +1,8 @@
 package com.power.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * 测试向Controller
@@ -12,8 +12,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class Test {
 
-    @GetMapping("test")
+    @Autowired
+
+    @GetMapping("/")
     public String login(){
-        return "test";
+        return "login";
+    }
+
+    @GetMapping("releaseProcess")
+    public String processList(){
+        return "releaseProcess";
     }
 }

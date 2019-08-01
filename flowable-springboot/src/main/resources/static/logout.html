@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script th:src="@{/js/jquery-3.3.1.js}"></script>
+</head>
+<body>
+<div>在这里输入Assignee：
+    <input type="text"  id="assignee" placeholder="任务代办人">
+    <input type="button" onclick="logout()" value="登出"/>
+</div>
+</body>
+<script>
+    function logout() {
+        $.ajax({
+            url:"/idm/logout",
+            success:function (data) {
+                console.log(data);
+                alert("成功退出");
+                window.location.href="/";
+
+            },
+            error:function (data) {
+                console.log(data);
+            }
+        })
+    }
+</script>
+</html>

@@ -1,10 +1,12 @@
 package com.power.controller;
 
 import com.power.service.IdmService;
+import org.flowable.idm.api.User;
 import org.flowable.idm.engine.impl.persistence.entity.GroupEntityImpl;
 import org.flowable.idm.engine.impl.persistence.entity.UserEntityImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,7 +17,7 @@ import javax.servlet.http.HttpSession;
  * @author xuyunfeng
  *
  */
-@RestController
+@Controller
 @RequestMapping("idm")
 public class IdmController {
 
@@ -116,9 +118,10 @@ public class IdmController {
 	 * @return Object
 	 */
 	@GetMapping("logout")
-	public ResponseEntity logout(){
+	public String logout(){
 	 	Object result = idmService.logout();
-	 	return ResponseEntity.ok(result);
+
+	 	return "logout";
 	 }
 
 	/**
@@ -128,6 +131,11 @@ public class IdmController {
 	@GetMapping("checkSession")
 	public ResponseEntity checkSession(){
 		 System.out.println("IdmController处sessionId："+session.getId());
-		 return ResponseEntity.ok("输出的"+session.getId());
+		Object user = session.getAttribute("user");
+		if (user==null){
+			return ResponseEntity.ok("当前没有用户登陆");
+		}
+		User user1 = 	(User) user;
+		return ResponseEntity.ok("输出的"+user1.getId());
 	 }
 }

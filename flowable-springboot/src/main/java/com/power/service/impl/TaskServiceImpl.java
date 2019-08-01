@@ -26,12 +26,9 @@ public class TaskServiceImpl implements PowerTaskService {
     private TaskMapper taskMapper;
 
     @Override
-    public Object queryUserTask(String assignee) {
-        List<PowerTask> list = taskMapper.queryUserTask(assignee);
-        if (list == null || list.size() == 0){
-            return "当前用户没有任务";
-        }
-        return list;
+    public List<PowerTask> queryUserTask(String assignee) {
+
+        return taskMapper.queryUserTask(assignee);
     }
 
     @Override

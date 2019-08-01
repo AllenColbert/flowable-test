@@ -59,8 +59,8 @@ function t( a, b, c ) {
 /**
  * Add random number to url to stop caching
  *
- * @example url("data/test.html")
- * @result "data/test.html?10538358428943"
+ * @example url("data/login.html")
+ * @result "data/login.html?10538358428943"
  *
  * @example url("data/test.php?foo=bar")
  * @result "data/test.php?foo=bar&10538358345554"
