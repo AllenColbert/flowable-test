@@ -99,6 +99,7 @@ public class TaskController {
 
     /**
      * 完成当前任务
+     * 完成任务前需要检测一下任务是否被挂起
      * @param taskId 任务Id
      * @param assignee 任务代理人
      * @return 完成标记
@@ -108,13 +109,17 @@ public class TaskController {
                                        @RequestParam(value = "assignee", required = false, defaultValue = "admin") String assignee) {
         Map<String, Object> vars = new HashMap<>(255);
         vars.put("userId", assignee);
+        if (powerTaskService.checkTaskStatus(taskId)){
+            return ResponseEntity.status(403).body("任务已经被挂起");
+        }
+
         Object result = powerTaskService.completeTask(taskId, vars);
         return ResponseEntity.ok(result);
     }
 
 
     /**
-     * 根据实例查询，实例结束则查询绘制的流程图
+     * 根据实例查询，实例结束则查询绘制的流程图，并保存在本地
      * 执行没问题，老是在结束的时候报错是什么鬼？
      * 跟拦截器有关--测一下
      *

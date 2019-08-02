@@ -1,39 +1,47 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>任务列表</title>
     <script th:src="@{/js/jquery-3.3.1.js}"></script>
+
+    <style type="text/css">
+        table {
+            border: 1px solid black;
+            text-align: center;
+            border-collapse: collapse;
+        }
+        table thead th {
+            border: 1px solid #7b2380;
+        }
+        table tbody td {
+            border: 1px solid black;
+        }
+    </style>
 </head>
 <body>
 <h2></h2>
-<style type="text/css">
-    table {
-        border: 1px solid black;
-        text-align: center;
-        border-collapse: collapse;
-    }
-    table thead th {
-        border: 1px solid #7b2380;
-    }
-    table tbody td {
-        border: 1px solid black;
-    }
-</style>
+
 
 <div id="heard"  th:replace="header.html :: header"></div>
-<div>
-    <table cellpadding="1" cellspacing="1" align="center">
+<div style=" empty-cells: show;margin: auto ">
+    <div id="heardBox" style=" padding-left: 5% ; margin: 14px">
+        <label for="assignee">在这里输入Assignee：</label>
+        <input type="text" id="assignee" placeholder="设置任务代办人">
+    </div>
+
+<div id="mainBox" style="margin: 4px">
+    <table style="text-align:center; empty-cells: show;margin: auto;border: 3px" >
         <thead>
         <th>任务Id</th>
         <th>任务名称</th>
     <!--<th>任务执行Id</th>-->
-        <th>流程实例Id</th>
-        <th>流程定义Id</th>
+        <!--<th>流程实例Id</th>-->
+        <!--<th>流程定义Id</th>-->
     <!--<th>任务定义Id</th>-->
         <th>代理人</th>
         <th>创建时间</th>
-        <th>任务挂起</th>
+        <th>任务是否挂起</th>
         <th>租户Id</th>
     <!--<th>表单key</th>-->
         <th>操作空间</th>
@@ -43,22 +51,23 @@
             <td th:text="${task.id}" ></td>
             <td th:text="${task.name}"></td>
             <!--<td th:text="${task.executionId}"></td>-->
-            <td th:text="${task.processInstanceId}"></td>
-            <td th:text="${task.processDefinitionId}"></td>
+            <!--<td th:text="${task.processInstanceId}"></td>-->
+            <!--<td th:text="${task.processDefinitionId}"></td>-->
             <!--<td th:text="${task.taskDefinitionKey}"></td>-->
             <td th:text="${task.assignee}"></td>
             <td th:text="${task.createTime}"></td>
-            <td th:text="${task.suspensionState}"></td>
+            <td th:text="${task.suspensionState} eq 1? '运行中':'已挂起'"></td>
             <td th:text="${task.tenantId}"></td>
             <!--<td th:text="${task.formKey}"></td>-->
             <td >
-                <button  th:value="${task.id}"  onclick="completeTask(value)">完成任务</button>
-                <button  th:value="${task.id}"  onclick="completeTaskWithAssignee(value)">完成任务,并设置assignee</button>
+                <!--<button  th:value="${task.id}"  onclick="completeTask(value)">完成任务</button>-->
+                <button  th:value="${task.id}"  onclick="completeTaskWithAssignee(value)">设置任务办理人并完成任务</button>
                 <button th:value="${task.processInstanceId}" onclick="showImage(value)">显示流程图</button>
             </td>
         </tr>
         </tbody>
     </table>
+</div>
 
     <div id="imgDiv"></div>
 
@@ -92,27 +101,28 @@
 
     function showImage(data) {
         console.log(data);
-        $("#imgDiv").append("<img src='/task/processDiagram?processId="+data+"'>");
-
+        $("#imgDiv").empty().append("<img src='/task/processDiagram?processId="+data+"'>")
+       /* $("#imgDiv").append("<img src='/task/processDiagram?processId="+data+"'>");*/
     };
 
-    function completeTaskWithAssignee(data) {
-        var taskId = data;
+    function completeTaskWithAssignee(taskId) {
+
         var assignee = $("#assignee").val();
 
         $.ajax({
             url:"/task/completeTask",
             data:{"taskId":taskId,"assignee":assignee},
             type:"GET",
-            dataType:"text",
+            /*dataType:"text",*/
             async:true,
             success:function (data) {
                 console.log(data);
-                alert("完成任务");
+
                 window.location.reload();
 
             },
             error:function (data) {
+                alert(data.get(responseText));
                 console.log(data);
             }
 

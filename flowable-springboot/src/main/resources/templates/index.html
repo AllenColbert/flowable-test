@@ -1,33 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title>网易云音乐主页面</title>
-<script type="text/javascript" src="../js/jquery-2.1.0.min.js"></script>
+	<meta charset="UTF-8">
+	<title>index页面</title>
+	<script th:src="@{/js/jquery-3.3.1.js}"></script>
 </head>
-<style>
-	.card {
-		box-shadow: 0 4px 10px 1px rgba(0,0,0,0.2);
-		transition: 0.3s;
-		width: 100%;
-
-	}
-	.card:hover {
-		box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-	}
-	.container {
-		padding: 200px 100px;
-	}
-</style>
-
 <body>
 
-<div class="card" >
-	<div class="container">
-		<h2>成功退出</h2>
-	</div>
-</div>
 
 </body>
-
+<script>
+	$(function () {
+		$.get("/idm/checkSession",function (data) {
+			if (data.user == null){
+				window.location.href="/login"
+			}
+			if (data.user != null) {
+				window.location.href="/task/myTask"
+			}
+		});
+	})
+</script>
 </html>

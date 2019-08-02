@@ -103,6 +103,7 @@ public class ProcessController {
             userId = user.getId();
         }
         vars.put("userId", userId);
+        /*前端直接传流程定义Id时，会将 ':'编码为'%3A',这里加个判断将其恢复*/
         String specialCharacters  = "%3A";
         String newChar =":";
         if (processDefinitionId .contains(specialCharacters)){

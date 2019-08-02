@@ -1,7 +1,6 @@
 package com.power.controller;
 
 import com.power.service.IdmService;
-import org.flowable.idm.api.User;
 import org.flowable.idm.engine.impl.persistence.entity.GroupEntityImpl;
 import org.flowable.idm.engine.impl.persistence.entity.UserEntityImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author xuyunfeng
@@ -130,10 +131,14 @@ public class IdmController {
 	@GetMapping("checkSession")
 	public ResponseEntity checkSession(){
 		Object user = session.getAttribute("user");
-		if (user==null){
-			return ResponseEntity.ok("当前没有用户登陆");
-		}
-		User user1 = 	(User) user;
-		return ResponseEntity.ok(user1.getId());
+        Map<String, Object> map = new HashMap<>();
+        if (user==null){
+            map.put("user",null);
+            map.put("msg","当前没有用户登陆");
+		}else{
+            map.put("user", user);
+        }
+
+		return ResponseEntity.ok(map);
 	 }
 }

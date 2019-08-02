@@ -63,4 +63,10 @@ public class TaskServiceImpl implements PowerTaskService {
         return infoList;
     }
 
+    @Override
+    public Boolean checkTaskStatus(String taskId) {
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        return task.isSuspended();
+    }
+
 }

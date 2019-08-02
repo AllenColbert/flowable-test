@@ -18,4 +18,6 @@ public interface PowerTaskService {
     Task queryTaskByProcessInstanceId(String processInstanceId);
 
     Object queryAllTask(String assignee);
+
+    Boolean checkTaskStatus(String taskId);
 }

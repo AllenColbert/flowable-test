@@ -10,10 +10,7 @@
 
 <div th:fragment="header" style="margin: 2%">
 
-    <p>当前登陆用户：<span id="userId" style="font-size: large ; color: red"></span></p>
-    <label for="assignee">在这里输入Assignee：</label>
-    <input type="text" id="assignee" placeholder="设置任务代办人">
-    <span style="float: right"> -- </span>
+    <span>当前登陆用户：<span id="userId" style="font-size: large ; color: red"></span></span>
     <input style="float: right" type="button" onclick="logout()" value="登出"/>
 
     <script>
@@ -22,7 +19,12 @@
             /*加载页面的时候自动查询用户登陆信息*/
             $.get("/idm/checkSession",function (data) {
                 console.log(data);
-               $("#userId").html(data);
+                if (data.user == null){
+                    $("#userId").html(data.msg);
+                }
+                if (data.user != null){
+                    $("#userId").html(data.user.id);
+                }
             });
         });
 
