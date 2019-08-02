@@ -11,7 +11,10 @@
 <div th:fragment="header" style="margin: 2%">
 
     <span>当前登陆用户：<span id="userId" style="font-size: large ; color: red"></span></span>
-    <input style="float: right" type="button" onclick="logout()" value="登出"/>
+    <button style="float: right; size: 25px;background-color: #c02731;box-shadow:#76c199" onclick="logout()">登出</button>
+    <button style="float: right; size: 25px;background-color: #a0c01e;box-shadow:#76c199" onclick="showProcessList()">流程列表</button>
+    <button style="float: right; size: 25px;background-color: #72c0b6;box-shadow:#76c199" onclick="showMyTask()">我的任务</button>
+
 
     <script>
 
@@ -40,6 +43,14 @@
                     console.log(data);
                 }
             })
+        }
+
+        function showProcessList() {
+            window.location.href="/process/processList"
+        }
+
+        function showMyTask() {
+            window.location.href="/task/myTask"
         }
     </script>
 </div>

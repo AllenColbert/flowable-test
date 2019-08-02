@@ -160,7 +160,11 @@ public class ProcessController {
     }
 
 
-
+    /**
+     * 显示流程定义列表
+     * @param model model对象
+     * @return html文件名
+     */
     @GetMapping("processList")
     public String processList(Model model){
         List<PowerProcessDefinition> list = powerProcessService.findProcdefList();
