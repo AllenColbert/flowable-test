@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script th:src="@{/js/jquery-3.3.1.js}"></script>
+</head>
+
+<body>
+
+<div th:fragment="header" style="margin: 2%">
+
+    <p>当前登陆用户：<span id="userId" style="font-size: large ; color: red"></span></p>
+    <label for="assignee">在这里输入Assignee：</label>
+    <input type="text" id="assignee" placeholder="设置任务代办人">
+    <span style="float: right"> -- </span>
+    <input style="float: right" type="button" onclick="logout()" value="登出"/>
+
+    <script>
+
+        $(function () {
+            /*加载页面的时候自动查询用户登陆信息*/
+            $.get("/idm/checkSession",function (data) {
+                console.log(data);
+               $("#userId").html(data);
+            });
+        });
+
+        function logout() {
+            $.ajax({
+                url:"/idm/logout",
+                success:function (data) {
+                    console.log(data);
+                    alert("成功退出");
+                    window.location.href="/";
+                },
+                error:function (data) {
+                    console.log(data);
+                }
+            })
+        }
+    </script>
+</div>
+
+</body>
+
+</html>

@@ -38,7 +38,7 @@ public class RequestHandlerInterceptor implements HandlerInterceptor {
             System.out.println("当前登陆用户Id："+((User) user).getId());
             return true;
         }
-        System.out.println("拦截到请求："+servletPath+"，状态："+response.getContentType());
+        System.out.println("拦截到请求："+servletPath);
         return true;
     }
 

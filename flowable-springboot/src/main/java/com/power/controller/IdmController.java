@@ -118,10 +118,9 @@ public class IdmController {
 	 * @return Object
 	 */
 	@GetMapping("logout")
-	public String logout(){
+	public ResponseEntity logout(){
 	 	Object result = idmService.logout();
-
-	 	return "logout";
+	 	return ResponseEntity.ok(result);
 	 }
 
 	/**
@@ -130,12 +129,11 @@ public class IdmController {
 	 */
 	@GetMapping("checkSession")
 	public ResponseEntity checkSession(){
-		 System.out.println("IdmController处sessionId："+session.getId());
 		Object user = session.getAttribute("user");
 		if (user==null){
 			return ResponseEntity.ok("当前没有用户登陆");
 		}
 		User user1 = 	(User) user;
-		return ResponseEntity.ok("输出的"+user1.getId());
+		return ResponseEntity.ok(user1.getId());
 	 }
 }

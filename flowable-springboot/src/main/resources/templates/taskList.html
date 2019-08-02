@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>任务列表</title>
     <script th:src="@{/js/jquery-3.3.1.js}"></script>
-    <link rel="import" th:href="@{/logout.html}" id="logout">
 </head>
 <body>
 <h2></h2>
@@ -22,7 +21,7 @@
     }
 </style>
 
-<div id="heard"></div>
+<div id="heard"  th:replace="header.html :: header"></div>
 <div>
     <table cellpadding="1" cellspacing="1" align="center">
         <thead>

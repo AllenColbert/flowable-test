@@ -1,12 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>错误页面</title>
     <script th:src="@{/js/jquery-3.3.1.js}"></script>
 </head>
 <body>
-<h2 th:align="center" th:text="${errorMsg}"></h2>
+<div th:replace="header.html :: header"></div>
+<div id="msgPart" style="text-align: center">
+    <h2 th:align="center" th:text="${errorMsg}"></h2>
+</div>
+
 </body>
 <script>
 </script>
