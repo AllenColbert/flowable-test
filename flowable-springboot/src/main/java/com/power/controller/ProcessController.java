@@ -398,15 +398,34 @@ public class ProcessController {
         //获取模型
         org.flowable.ui.modeler.domain.Model modelData =modelService.getModel(modelId);
 
-     byte[] bytes = modelService.getBpmnXML(modelData);
+        Map<String, Object> map = new HashMap<>(255);
+        //错误信息
+        String message ;
+        //状态
+        Integer status;
+        byte[] bytes = modelService.getBpmnXML(modelData);
 
      if (bytes == null) {
-         return ResponseEntity.ok("模型数据为空，请先设计流程并成功保存，再进行发布。");
+
+         message = "模型数据为空，请先设计流程并成功保存，再进行发布。";
+         status=404;
+
+         map.put("message",message);
+
+         map.put("status",status);
+
+         return ResponseEntity.ok(map);
      }
 
     BpmnModel model=modelService.getBpmnModel(modelData);
     if(model.getProcesses().size()==0){
-        return ResponseEntity.ok("数据模型不符要求，请至少设计一条主线流程。");
+        message="数据模型不符要求，请至少设计一条主线流程。";
+        status=500;
+
+        map.put("message",message);
+        map.put("status",status);
+
+        return ResponseEntity.ok(map);
     }
         byte[] bpmnBytes = new BpmnXMLConverter().convertToXML(model);
         //发布流程
@@ -415,7 +434,15 @@ public class ProcessController {
                 .name(modelData.getName())
                 .addString(processName, new String(bpmnBytes, "UTF-8"))
                 .deploy();
-        return (ResponseEntity.ok(deploy));
+
+        message = "成功部署";
+        status=200;
+        Object data = deploy;
+
+        map.put("message",message);
+        map.put("status",status);
+        map.put("data",data);
+        return (ResponseEntity.ok(map));
     }
 
 

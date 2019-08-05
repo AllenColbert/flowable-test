@@ -34,7 +34,7 @@
         <th>创建者</th>
         <th>最后更新者</th>
         <th>版本</th>
-        <th>模型type</th>
+        <!--<th>模型种类</th>-->
         <th>租户Id</th>
         <th>操作空间</th>
         </thead>
@@ -45,12 +45,12 @@
             <td th:text="${model.name}" ></td>
             <td th:text="${model.key}" ></td>
             <td th:text="${model.description}" ></td>
-            <td th:text="${#dates.format(model.created, 'yyyy-MM-dd:HH-mm-ss')}" ></td>
-            <td th:text="${#dates.format(model.lastUpdated, 'yyyy-MM-dd:HH-mm-ss')}" ></td>
+            <td th:text="${#dates.format(model.created, 'yyyy-MM-dd HH:mm:ss')}" ></td>
+            <td th:text="${#dates.format(model.lastUpdated, 'yyyy-MM-dd HH:mm:ss')}" ></td>
             <td th:text="${model.createdBy}" ></td>
             <td th:text="${model.lastUpdatedBy}" ></td>
             <td th:text="${model.version}" ></td>
-            <td th:text="${model.modelType}" ></td>
+            <!--<td th:text="${model.modelType}" ></td>-->
             <td th:text="${model.tenantId}" ></td>
             <td >
                 <button  th:value="${model.id}"  onclick="deploy(value)">部署流程模型</button>
@@ -64,8 +64,8 @@
 </body>
 <script>
     function deploy(data) {
-        console.log(data);
         $.get("/process/deployModelById",{"modelId":data},function (result) {
+
             console.log(result);
         })
     }

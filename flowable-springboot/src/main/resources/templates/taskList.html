@@ -55,7 +55,7 @@
             <!--<td th:text="${task.processDefinitionId}"></td>-->
             <!--<td th:text="${task.taskDefinitionKey}"></td>-->
             <td th:text="${task.assignee}"></td>
-            <td th:text="${task.createTime}"></td>
+            <td th:text="${#dates.format(task.createTime, 'yyyy-MM-dd HH:mm:ss')}" ></td>
             <td th:text="${task.suspensionState} eq 1? '运行中':'已挂起'"></td>
             <td th:text="${task.tenantId}"></td>
             <!--<td th:text="${task.formKey}"></td>-->
