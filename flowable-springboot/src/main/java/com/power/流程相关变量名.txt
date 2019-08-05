@@ -6,3 +6,13 @@ processDeploymentId 流程部署Id，删除流程定义的时候需要用；
 processDefinitionId 流程定义Id，用的地方挺多
                     表 act_re_procdef 中的id字段；
 
+
+
+
+        Process process = commonService.queryProcessById(processDefinitionId);
+
+        //创建任务节点
+        UserTask userTask = commonService.createUserTask(powerTask);
+
+        //创建SequenceFlow
+        SequenceFlow sequenceFlow = commonService.createSequenceFlow(sourceRef, targetRef, processDefinitionId);

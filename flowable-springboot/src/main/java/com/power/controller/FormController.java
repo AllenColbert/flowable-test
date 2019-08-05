@@ -72,7 +72,6 @@ public class FormController {
         return ResponseEntity.ok(formProperties);
     }
 
-
     /**
      * 提交自定义表单，通过流程定义ID进行绑定
      * @param processDefinitionId 流程定义ID
@@ -97,7 +96,6 @@ public class FormController {
         SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
         return simpleDateFormat.format(new Date());
     }
-
 
     /**
      * 通过任务Id获取对应的表单信息

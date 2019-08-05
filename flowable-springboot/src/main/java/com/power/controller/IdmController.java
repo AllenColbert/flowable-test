@@ -52,7 +52,6 @@ public class IdmController {
 		 return ResponseEntity.ok(result);
 	 }
 
-
 	/**
 	 * 注册组织
 	 * @param group GroupEntityImpl
@@ -131,7 +130,7 @@ public class IdmController {
 	@GetMapping("checkSession")
 	public ResponseEntity checkSession(){
 		Object user = session.getAttribute("user");
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(255);
         if (user==null){
             map.put("user",null);
             map.put("msg","当前没有用户登陆");

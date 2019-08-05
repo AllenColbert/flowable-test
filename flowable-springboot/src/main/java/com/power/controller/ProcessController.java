@@ -8,30 +8,30 @@ import com.power.entity.PowerDeployEntity;
 import com.power.entity.PowerDeployment;
 import com.power.entity.PowerProcessDefinition;
 import com.power.entity.PowerTask;
+import com.power.service.CommonService;
 import com.power.service.PowerProcessService;
-import org.flowable.bpmn.model.Artifact;
+import org.flowable.bpmn.converter.BpmnXMLConverter;
 import org.flowable.bpmn.model.Process;
-import org.flowable.bpmn.model.SequenceFlow;
-import org.flowable.bpmn.model.UserTask;
+import org.flowable.bpmn.model.*;
 import org.flowable.engine.ManagementService;
-import org.flowable.engine.ProcessEngine;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.impl.bpmn.behavior.MultiInstanceActivityBehavior;
 import org.flowable.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
-import org.flowable.engine.impl.bpmn.parser.factory.ActivityBehaviorFactory;
-import org.flowable.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.flowable.engine.impl.persistence.deploy.ProcessDefinitionCacheEntry;
+import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.runtime.Execution;
 import org.flowable.idm.api.User;
+import org.flowable.ui.modeler.domain.AbstractModel;
+import org.flowable.ui.modeler.serviceapi.ModelService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -42,10 +42,6 @@ import java.util.*;
 @Controller
 @RequestMapping("process")
 public class ProcessController {
-
-    @Qualifier("processEngine")
-    @Autowired
-    private ProcessEngine processEngine;
 
     @Autowired
     private RepositoryService repositoryService;
@@ -60,7 +56,13 @@ public class ProcessController {
     private ManagementService managementService;
 
     @Autowired
+    private CommonService commonService;
+
+    @Autowired
     private HttpSession session;
+
+    @Autowired
+    private ModelService modelService;
 
     /**
      * 根据本地文件名部署流程（文件全名，默认匹配路径：resources/upload/diagrams/**）
@@ -114,7 +116,6 @@ public class ProcessController {
         return ResponseEntity.ok(result);
     }
 
-
     /**
      * 根据流程定义key启动流程 失败 --tmd 为什么？
      * 参数问题： --目前来看跟参数没关系
@@ -134,6 +135,7 @@ public class ProcessController {
 
         return ResponseEntity.ok(result);
     }
+
     /**
      * 查询流程部署情况
      * 通过mybatis 创建SQL语句直接从数据库表 act_re_deployment 中查询
@@ -155,10 +157,9 @@ public class ProcessController {
      */
     @GetMapping("processDefinitionList")
     public ResponseEntity<List<PowerProcessDefinition>> processDefinitionList() {
-        List<PowerProcessDefinition> list = powerProcessService.findProcdefList();
+        List<PowerProcessDefinition> list = powerProcessService.findProcessDefinitionList();
         return ResponseEntity.ok(list);
     }
-
 
     /**
      * 显示流程定义列表
@@ -167,7 +168,7 @@ public class ProcessController {
      */
     @GetMapping("processList")
     public String processList(Model model){
-        List<PowerProcessDefinition> list = powerProcessService.findProcdefList();
+        List<PowerProcessDefinition> list = powerProcessService.findProcessDefinitionList();
 
         if (list.size()==0){
             String msg  = "流程定义列表为空";
@@ -257,7 +258,6 @@ public class ProcessController {
         return ResponseEntity.ok("跳转成功");
     }
 
-
     /**
      * 普通节点之间跳转操作，flowable 6.4更新后提供的方法
      * @param procInstanceId       流程实例Id  act_ru_task 表中的 PROC_INST_ID_字段
@@ -320,62 +320,29 @@ public class ProcessController {
     /**
      * 增加节点
      * @param processDefinitionId 流程定义Id
-     * @return
+     * @return xx
      */
-    @GetMapping("addNode")
+    @GetMapping("addSingleNode")
     public ResponseEntity addNode(@RequestParam String processDefinitionId,
+                                  @RequestParam String sourceRef,
+                                  @RequestParam String targetRef,
                                   @RequestBody PowerTask powerTask){
+       /*{"id":"addNode","name":"添加节点","assignee":"ZhangSan"}*/
+        //根据流程定义Id获取流程对象
         Process process = managementService.executeCommand(new GetProcessCmd(processDefinitionId));
-
-        //创建任务节点
-        UserTask userTask = new UserTask();
-        userTask.setId(powerTask.getId());
-        userTask.setName(powerTask.getName());
-        userTask.setAssignee(powerTask.getAssignee());
-        userTask.setBehavior(createUserTaskBehavior(userTask));
-        /*
-        {
-        "id":"addNode",
-        "name":"添加节点",
-        "assignee":"ZhangSan"
-        }
-         */
-        //先将添加的节点写入process缓存中
-        process.addFlowElementToMap(userTask);
-
-        //设置写入流程sequenceFlow1 本次测试：从userTask1流向addNode
-        SequenceFlow sequenceFlow1 = new SequenceFlow();
-        String sourceRef1 = "userTask1";
-        String targetRef1 = powerTask.getId();
-        sequenceFlow1.setId(powerTask.getId()+"Flow_In");
-        sequenceFlow1.setSourceRef(sourceRef1);
-        sequenceFlow1.setSourceFlowElement(process.getFlowElement(sourceRef1));
-        sequenceFlow1.setTargetRef(targetRef1);
-        sequenceFlow1.setTargetFlowElement(process.getFlowElement(targetRef1));
-        userTask.setIncomingFlows(Collections.singletonList(sequenceFlow1));
-
-        //设置写出流程sequenceFlow2，本次测试：从addNode流向userTask2
-        SequenceFlow sequenceFlow2 = new SequenceFlow();
-        String sourceRef2 = powerTask.getId();
-        String targetRef2 = "userTask2";
-        sequenceFlow2.setId(powerTask.getId()+"Flow_Out");
-        sequenceFlow2.setSourceRef(sourceRef2);
-        sequenceFlow2.setSourceFlowElement(process.getFlowElement(sourceRef2));
-        sequenceFlow2.setTargetRef(targetRef2);
-        sequenceFlow2.setTargetFlowElement(process.getFlowElement(targetRef2));
-        //将流程顺序写入userTask中
-        userTask.setOutgoingFlows(Collections.singletonList(sequenceFlow2));
+        //创建用户任务节点
+        UserTask userTask = commonService.createUserTask(powerTask);
+        //创建流程输出信息
+        SequenceFlow sequenceFlow = commonService.createSequenceFlow(sourceRef, targetRef, processDefinitionId);
+        //将流程输出信息转化为List
+        List<SequenceFlow> sequenceFlows = Collections.singletonList(sequenceFlow);
+        //设置流程输出信息
+        userTask.setOutgoingFlows(sequenceFlows);
         //更新Process中的信息
         process.addFlowElement(userTask);
-        process.addFlowElement(sequenceFlow1);
-        process.addFlowElement(sequenceFlow2);
-
-        //获取ProcessCache缓存管理对象
-        ProcessDefinitionCacheEntry processCacheEntry = managementService
-                        .executeCommand(new GetProcessDefinitionCacheEntryCmd(processDefinitionId));
-
-        //设置缓存
-        processCacheEntry.setProcess(process);
+        process.addFlowElement(sequenceFlow);
+        //更新缓存中的流程对象信息
+        commonService.updateProcess(process,processDefinitionId);
 
         Collection<Artifact> artifacts = process.getArtifacts();
         System.out.println(artifacts);
@@ -419,18 +386,70 @@ public class ProcessController {
         return ResponseEntity.ok(process);
     }
 
+
     /**
-     * 创建任务节点行为类
-     * 可能会复用，单独抽出来
-     *
-     * @param userTask 用户任务节点
-     * @return 任务节点行为类
+     * 根据流程模型id部署流程
+     * @param modelId 流程模型ID
+     * @return status
+     * @throws UnsupportedEncodingException 异常
      */
-    private Object createUserTaskBehavior(UserTask userTask) {
-        //获取流程引擎配置类
-        ProcessEngineConfigurationImpl engineConfiguration = (ProcessEngineConfigurationImpl) processEngine.getProcessEngineConfiguration();
-        // 获取活动行为工厂
-        ActivityBehaviorFactory activityBehaviorFactory = engineConfiguration.getActivityBehaviorFactory();
-        return activityBehaviorFactory.createUserTaskActivityBehavior(userTask);
+    @GetMapping("deployModelById")
+    public ResponseEntity deployModelById(@RequestParam String modelId) throws UnsupportedEncodingException {
+        //获取模型
+        org.flowable.ui.modeler.domain.Model modelData =modelService.getModel(modelId);
+
+     byte[] bytes = modelService.getBpmnXML(modelData);
+
+     if (bytes == null) {
+         return ResponseEntity.ok("模型数据为空，请先设计流程并成功保存，再进行发布。");
+     }
+
+    BpmnModel model=modelService.getBpmnModel(modelData);
+    if(model.getProcesses().size()==0){
+        return ResponseEntity.ok("数据模型不符要求，请至少设计一条主线流程。");
+    }
+        byte[] bpmnBytes = new BpmnXMLConverter().convertToXML(model);
+        //发布流程
+        String processName = modelData.getName() + ".bpmn20.xml";
+        Deployment deploy=  repositoryService.createDeployment()
+                .name(modelData.getName())
+                .addString(processName, new String(bpmnBytes, "UTF-8"))
+                .deploy();
+        return (ResponseEntity.ok(deploy));
+    }
+
+
+    /**
+     * 根据流程模型Id删除流程模型
+     * @param modelId id
+     * @return mark
+     */
+    @GetMapping("deleteModelById")
+    public ResponseEntity deleteModelById(@RequestParam String modelId){
+        org.flowable.ui.modeler.domain.Model model = modelService.getModel(modelId);
+        if (model == null ){
+            return ResponseEntity.ok("没有对应的流程模板");
+
+        }        modelService.deleteModel(modelId);
+        return ResponseEntity.ok("成功删除");
+    }
+
+    /**
+     * 获取流程模型列表
+     * @param model model
+     * @return 流程模型页面
+     */
+    @GetMapping("modelList")
+    public String processModelList(Model model){
+        List<AbstractModel> abstractModels = powerProcessService.queryProcessModelList();
+
+        if (abstractModels.size()==0){
+            String msg  = "流程定义列表为空";
+            model.addAttribute("errorMsg",msg);
+            return "errorPage";
+        }
+        model.addAttribute("abstractModels",abstractModels);
+        return "modelList";
+
     }
 }

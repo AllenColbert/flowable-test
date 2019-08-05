@@ -6,7 +6,7 @@
 <!--[if IE 8]>
 <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!-->
-<html class="no-js"> <!--<![endif]-->
+<html class="no-js" xmlns:th="http://www.thymeleaf.org"> <!--<![endif]-->
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -43,7 +43,7 @@
 
 </head>
 <body ng-app="flowableModeler" ng-cloak>
-
+<div id="heard"  th:replace="header.html :: header"></div>
     <div class="navbar navbar-fixed-top navbar-inverse" role="navigation" id="main-header">
         <div class="fixed-container">
             <div class="navbar-header">

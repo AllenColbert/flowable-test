@@ -10,6 +10,8 @@ import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.repository.DeploymentBuilder;
 import org.flowable.engine.runtime.ProcessInstance;
+import org.flowable.ui.modeler.domain.AbstractModel;
+import org.flowable.ui.modeler.serviceapi.ModelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -24,7 +26,9 @@ import java.util.Map;
 @Service
 public class PowerProcessImpl implements PowerProcessService {
 
-    //默认将流程文件放在此目录下
+    /**
+     * 默认存放bpmn20.xml文件的位置
+     */
     private static final String BPMN_PREFIX = "upload/diagrams/";
 
     @Autowired
@@ -32,6 +36,9 @@ public class PowerProcessImpl implements PowerProcessService {
 
     @Autowired
     private RuntimeService runtimeService;
+
+    @Autowired
+    private ModelService modelService;
 
     @Autowired
     private ProcessMapper processMapper;
@@ -79,7 +86,7 @@ public class PowerProcessImpl implements PowerProcessService {
     }
 
     @Override
-    public List<PowerProcessDefinition> findProcdefList() {
+    public List<PowerProcessDefinition> findProcessDefinitionList() {
         return processMapper.findProcdefList();
     }
 
@@ -95,7 +102,6 @@ public class PowerProcessImpl implements PowerProcessService {
         return "流程实例Id：" + processInstance.getId();
     }
 
-    //TODO 通过流程定义Key启动流程实例 失败
     @Override
     public Object startProcessInstanceByKey(String processDefinitionKey, Map<String, Object> vars) {
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(processDefinitionKey, vars);
@@ -107,6 +113,11 @@ public class PowerProcessImpl implements PowerProcessService {
     public Object startProcessInstanceByKey(String processDefinitionKey) {
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(processDefinitionKey);
         return "流程实例Id：" + processInstance.getId();
+    }
+
+    @Override
+    public List<AbstractModel> queryProcessModelList() {
+        return modelService.getModelsByModelType(0);
     }
 
 

@@ -65,9 +65,10 @@ public class TaskController {
      * @param assignee  任务代理人
      * @return 任务列表
      */
+    @Deprecated
     @GetMapping("queryAllTask")
     public ResponseEntity queryAllTask(
-            @RequestParam(value = "assignee",required = false) String assignee) {
+            @RequestParam(value = "assignee",required = false,defaultValue = "admin") String assignee) {
         Object result = powerTaskService.queryAllTask(assignee);
         return ResponseEntity.ok(result);
     }
@@ -78,7 +79,6 @@ public class TaskController {
     @GetMapping("myTask")
     public String myTask(Model model) {
         User user = (User) session.getAttribute("user");
-        Map<String, Object> map = new HashMap<>();
 
         if(user == null){
             String msg = "任务代理人不能为空";
@@ -110,13 +110,12 @@ public class TaskController {
         Map<String, Object> vars = new HashMap<>(255);
         vars.put("userId", assignee);
         if (powerTaskService.checkTaskStatus(taskId)){
-            return ResponseEntity.status(403).body("任务已经被挂起");
+            return ResponseEntity.ok("任务已经被挂起");
         }
 
         Object result = powerTaskService.completeTask(taskId, vars);
         return ResponseEntity.ok(result);
     }
-
 
     /**
      * 根据实例查询，实例结束则查询绘制的流程图，并保存在本地
@@ -164,7 +163,6 @@ public class TaskController {
         in.close();
         return ResponseEntity.ok("标记");
     }
-
 
     /**
      * 直接在浏览器上显示当前任务图

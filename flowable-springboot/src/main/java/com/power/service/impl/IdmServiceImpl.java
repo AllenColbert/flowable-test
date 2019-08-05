@@ -55,7 +55,9 @@ public class IdmServiceImpl implements IdmService {
 
         Object queryResult = queryUserById(user.getId());
 
-        if (queryResult != null){ return "该用户Id已存在，请勿重复插入"; }
+        String wrongMsg =  "该用户Id已存在，请勿重复插入";
+
+        if (queryResult != null){ return wrongMsg; }
 
         //后台判断版本为0的时候才会执行新增用户请求,否则会报错
         if (user.getRevision() != 0){ user.setRevision(0); }
@@ -69,7 +71,10 @@ public class IdmServiceImpl implements IdmService {
     public Object saveGroup(GroupEntityImpl group) {
         Object queryResult = queryGroupById(group.getId());
 
-        if (queryResult!= null){ return "该组织ID已存在，请勿重复插入"; }
+        String wrongMsg = "该组织ID已存在，请勿重复插入";
+
+        if (queryResult!= null){ return wrongMsg; }
+
         //后台判断版本为0的时候才会执行新增请求,否则会报错
         if (group.getRevision() != 0){ group.setRevision(0); }
 

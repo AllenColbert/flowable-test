@@ -4,12 +4,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
- * 测试向Controller
+ * 页面跳转
  * @author xuyunfeng
  * @date 2019/7/31 19:07
  */
 @Controller
-public class Test {
+public class Index {
 
     @GetMapping("/")
     public String index(){
@@ -22,8 +22,4 @@ public class Test {
         return "login";
     }
 
-    @GetMapping("releaseProcess")
-    public String processList(){
-        return "releaseProcess";
-    }
 }
