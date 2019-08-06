@@ -7,7 +7,7 @@
 </head>
 <body>
 
-<style type="text/css">
+<!--<style type="text/css">
     table {
         border: 1px solid black;
         text-align: center;
@@ -19,79 +19,82 @@
     table tbody td {
         border: 1px solid black;
     }
-</style>
+</style>-->
 
 <div th:replace="header.html :: header"></div>
-
-<div id="mainBox" style="margin: 4px">
-        <table cellpadding="1" cellspacing="1" align="center" class="table">
-            <thead>
-            <th>流程定义Id</th>
-            <th>流程定义名称</th>
-            <th>流程定义类别</th>
-            <th>流程实例key</th>
-            <th>流程部署id</th>
-            <th>操作空间</th>
-            </thead>
-            <tbody>
-
-            <tr th:each="processDef:${processList}">
-
-                <td th:text="${processDef.id}" ></td>
-                <td th:text="${processDef.name}"></td>
-                <td th:text="${processDef.category}"></td>
-                <td th:text="${processDef.keyWord}"></td>
-                <td th:text="${processDef.deploymentId}"></td>
-                <td >
-                    <button  th:value="${processDef.id}"  onclick="runProcess(value)">启动流程</button>
-                    <button th:value="${processDef.deploymentId}" onclick="deleteProcess(value)">删除流程</button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+<link th:href="@{/css/table.css}" rel="stylesheet" type="text/css">
+<div id="mainBox" th:align="center">
+    <table th:class="gridtable">
+        <thead>
+        <th>流程定义Id</th>
+        <th>流程定义名称</th>
+        <th>流程定义类别</th>
+        <th>流程实例key</th>
+        <th>流程部署id</th>
+        <th>操作空间</th>
+        </thead>
+        <tbody>
+        <tr th:each="processDef:${processList}">
+            <td th:text="${processDef.id}"></td>
+            <td th:text="${processDef.name}"></td>
+            <td th:text="${processDef.category}"></td>
+            <td th:text="${processDef.keyWord}"></td>
+            <td th:text="${processDef.deploymentId}"></td>
+            <td>
+                <button th:value="${processDef.id}" th:class="button3" onclick="runProcess(value)">启动流程</button>
+                <button th:value="${processDef.deploymentId}" th:class="button3" style="background-color: red"
+                        onclick="deleteProcess(value)">删除流程
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </div>
 </body>
 <script>
+
     function runProcess(data) {
         console.log(data);
-    $.ajax({
-           url:"/process/runNormalById",
-           data:{"processDefinitionId":data},
-           /*contentType:'application/json',*/
-           type:"GET",
-           dataType:"text",
-           async:true,
-           success:function (data) {
-               alert("成功启动流程");
-               console.log(data)
+        $.ajax({
+            url: "/process/runNormalById",
+            data: {"processDefinitionId": data},
+            /*contentType:'application/json',*/
+            type: "GET",
+            dataType: "text",
+            async: true,
+            success: function (data) {
+                showMsg("成功启动流程");
+                console.log(data)
 
-              /*  window.location.href="/task/processDiagram/" */
-           },
-           error:function (data) {
-               alert("流程异常");
-               console.log(data)
-               /*window.location.reload();*/
+                /*  window.location.href="/task/processDiagram/" */
+            },
+            error: function (data) {
+                showMsg("流程异常");
+                console.log(data)
+                /*window.location.reload();*/
 
-           }
-       })
+            }
+        })
     }
+
     function deleteProcess(data) {
         $.ajax({
-            url:"/process/deleteProcessById",
-            data:{"deploymentId":data},
-            type:"DELETE",
-            dataType:"text",
-            async:true,
-            success:function (data) {
-                alert("成功删除流程,即将刷新页面");
+            url: "/process/deleteProcessById",
+            data: {"deploymentId": data},
+            type: "DELETE",
+            dataType: "text",
+            async: true,
+            success: function (data) {
                 console.log(data);
-                window.location.reload();
+                showMsg("成功删除流程,即将刷新页面");
+
 
                 /* window.location.href="/task/processDiagram/"*/
             },
-            error:function (data) {
-                alert(data);
-              console.log(data);
+            error: function (data) {
+                console.log(data);
+                showMsg(data);
+
             }
         })
     }

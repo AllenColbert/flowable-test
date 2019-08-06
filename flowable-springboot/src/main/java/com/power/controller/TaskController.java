@@ -167,24 +167,37 @@ public class TaskController {
     /**
      * 直接在浏览器上显示当前任务图
      * @param httpServletResponse Response
-     * @param processId processInstanceId流程Id
+     * @param processInstanceId processInstanceId流程Id
      * @throws Exception IOException
      */
     @GetMapping(value = "processDiagram")
-    public void genProcessDiagram(HttpServletResponse httpServletResponse, String processId) throws Exception {
-        ProcessInstance pi = runtimeService.createProcessInstanceQuery().processInstanceId(processId).singleResult();
+    public void genProcessDiagram(HttpServletResponse httpServletResponse, String processInstanceId) throws Exception {
+        ProcessInstance pi = runtimeService.createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
 
         //流程走完的不显示图
         if (pi == null) {
             return;
         }
-        Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+        //
+        List<Task> taskList = taskService.createTaskQuery().processInstanceId(pi.getId()).list();
+
+        List<String> instanceIds = new ArrayList<>();
+
         //使用流程实例ID，查询正在执行的执行对象表，返回流程实例对象
-        String instanceId = task.getProcessInstanceId();
-        List<Execution> executions = runtimeService
-                .createExecutionQuery()
-                .processInstanceId(instanceId)
-                .list();
+        for (Task task : taskList) {
+            String instanceId = task.getProcessInstanceId();
+            instanceIds.add(instanceId);
+        }
+
+        List<Execution> executions = new ArrayList<>();
+
+        //使用流程实例ID，查询正在执行的执行对象表，返回流程实例对象
+        for (String instanceId : instanceIds) {
+            List<Execution> executionList = runtimeService.createExecutionQuery().processInstanceId(instanceId).list();
+            executions.addAll(executionList);
+        }
+
+        System.out.println(executions);
 
         //得到正在执行的Activity的Id
         List<String> activityIds = new ArrayList<>();

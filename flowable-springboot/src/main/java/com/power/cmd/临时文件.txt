@@ -1,35 +1,53 @@
-public Void execute(CommandContext commandContext) {
-		ExecutionEntityManager executionEntityManager = org.flowable.engine.impl.util.CommandContextUtil.getExecutionEntityManager();
+    /**
+     * 直接在浏览器上显示当前任务图
+     * @param httpServletResponse Response
+     * @param processId processInstanceId流程Id
+     * @throws Exception IOException
+     */
+    @GetMapping(value = "processDiagram")
+    public void genProcessDiagram(HttpServletResponse httpServletResponse, String processId) throws Exception {
+        ProcessInstance pi = runtimeService.createProcessInstanceQuery().processInstanceId(processId).singleResult();
 
-		TaskEntityManager taskEntityManager = CommandContextUtil.getTaskEntityManager();
+        //流程走完的不显示图
+        if (pi == null) {
+            return;
+        }
+        //
+        Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+        //使用流程实例ID，查询正在执行的执行对象表，返回流程实例对象
+        String instanceId = task.getProcessInstanceId();
+        List<Execution> executions = runtimeService
+                .createExecutionQuery()
+                .processInstanceId(instanceId)
+                .list();
 
-		// 根据taskId获取执行实例信息
+        //得到正在执行的Activity的Id
+        List<String> activityIds = new ArrayList<>();
+        List<String> flows = new ArrayList<>();
+        for (Execution exe : executions) {
+            List<String> ids = runtimeService.getActiveActivityIds(exe.getId());
+            activityIds.addAll(ids);
+        }
 
-		TaskEntity taskEntity = taskEntityManager.findById(taskId);
-		// 获取执行实例ID
-		String executionId = taskEntity.getExecutionId();
-
-		//根据执行实例ID获取执行实例，再通过执行实例获取父级执行实例
-		ExecutionEntity executionEntity = executionEntityManager.findById(executionId);
-		ExecutionEntity rootExecutionEntity = executionEntity.getParent();
-		System.out.println(rootExecutionEntity);
-		Process process = ProcessDefinitionUtil.getProcess(executionEntity.getProcessDefinitionId());
-
-		//根据目标节点ID获取对应的流程元素
-		FlowElement targetFlowElement = process.getFlowElement(targetNodeId);
-		// 设置当前的执行实例ID对应的 CurrentFlowElement为目标节点，目标节点是一个参数，可以进行传递。
-		executionEntity.setCurrentFlowElement(targetFlowElement);
-		FlowableEngineAgenda flowableEngineAgenda = org.flowable.engine.impl.util.CommandContextUtil.getAgenda();
-		// 触发一下，让执行实例往下运行
-		flowableEngineAgenda.planContinueProcessInCompensation(executionEntity);
-		// 删除当前的任务，注意：不能完成任务 比如：taskService.complete(taskId);
-		taskEntityManager.delete(taskId);
-
-		org.flowable.engine.impl.util.CommandContextUtil.getHistoryManager().recordTaskEnd(taskEntity, executionEntity,
-				"shareniu-jump");
-
-		org.flowable.engine.impl.util.CommandContextUtil.getHistoryManager().recordActivityEnd(executionEntity,
-				"shareniu-jump");
-		// HistoricActivityInstanceEntityImpl
-		return null;
-	}
+        //获取流程图
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(pi.getProcessDefinitionId());
+        ProcessEngineConfiguration engconf = processEngine.getProcessEngineConfiguration();
+        ProcessDiagramGenerator diagramGenerator = engconf.getProcessDiagramGenerator();
+        InputStream in = diagramGenerator.generateDiagram(bpmnModel, "png", activityIds, flows,"宋体", "宋体", "宋体", null,1.0D,true);
+        OutputStream out = null;
+        byte[] buf = new byte[1024];
+        int length = 0;
+        try {
+            out = httpServletResponse.getOutputStream();
+            while ((length = in.read(buf)) != -1) {
+                out.write(buf, 0, length);
+            }
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+            if (out != null) {
+                out.close();
+            }
+        }
+    }

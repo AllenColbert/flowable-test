@@ -22,6 +22,7 @@ import org.flowable.engine.impl.persistence.deploy.ProcessDefinitionCacheEntry;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.runtime.Execution;
 import org.flowable.idm.api.User;
+import org.flowable.ui.common.service.exception.NotFoundException;
 import org.flowable.ui.modeler.domain.AbstractModel;
 import org.flowable.ui.modeler.serviceapi.ModelService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -395,14 +396,30 @@ public class ProcessController {
      */
     @GetMapping("deployModelById")
     public ResponseEntity deployModelById(@RequestParam String modelId) throws UnsupportedEncodingException {
-        //获取模型
-        org.flowable.ui.modeler.domain.Model modelData =modelService.getModel(modelId);
-
         Map<String, Object> map = new HashMap<>(255);
         //错误信息
-        String message ;
+        String message;
         //状态
         Integer status;
+        //获取模型
+        org.flowable.ui.modeler.domain.Model modelData;
+        try {
+            modelData = modelService.getModel(modelId);
+        } catch (NotFoundException e) {
+            message = "模型数据为空，请先设计流程并成功保存，再进行发布。";
+            status=404;
+            map.put("message",message);
+            map.put("status",status);
+            return ResponseEntity.ok(map);
+        }catch (Exception e){
+            message = "其他错误";
+            status=500;
+            map.put("message",message);
+            map.put("status",status);
+            return ResponseEntity.ok(map);
+        }
+
+
         byte[] bytes = modelService.getBpmnXML(modelData);
 
      if (bytes == null) {
@@ -437,11 +454,10 @@ public class ProcessController {
 
         message = "成功部署";
         status=200;
-        Object data = deploy;
 
         map.put("message",message);
         map.put("status",status);
-        map.put("data",data);
+        map.put("data",deploy);
         return (ResponseEntity.ok(map));
     }
 

@@ -24,14 +24,14 @@
 
 
 <div id="heard"  th:replace="header.html :: header"></div>
-<div style=" empty-cells: show;margin: auto ">
-    <div id="heardBox" style=" padding-left: 5% ; margin: 14px">
+<div >
+    <div id="heardBox" style=" padding-left: 5% ;margin: 0 0 10px 40px">
         <label for="assignee">在这里输入Assignee：</label>
         <input type="text" id="assignee" placeholder="设置任务代办人">
     </div>
 
-<div id="mainBox" style="margin: 4px">
-    <table style="text-align:center; empty-cells: show;margin: auto;border: 3px" >
+<div id="mainBox" th:align="center">
+    <table th:class="gridtable" >
         <thead>
         <th>任务Id</th>
         <th>任务名称</th>
@@ -61,15 +61,15 @@
             <!--<td th:text="${task.formKey}"></td>-->
             <td >
                 <!--<button  th:value="${task.id}"  onclick="completeTask(value)">完成任务</button>-->
-                <button  th:value="${task.id}"  onclick="completeTaskWithAssignee(value)">设置任务办理人并完成任务</button>
-                <button th:value="${task.processInstanceId}" onclick="showImage(value)">显示流程图</button>
+                <button  th:value="${task.id}" th:class="button3" onclick="completeTaskWithAssignee(value)">设置任务办理人并完成任务</button>
+                <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1b6d85" onclick="showImage(value)">显示流程图</button>
             </td>
         </tr>
         </tbody>
     </table>
 </div>
 
-    <div id="imgDiv"></div>
+    <div id="imgDiv" style="border-image-width: auto;text-align: center"></div>
 
 </div>
 </body>
@@ -86,7 +86,7 @@
             async:true,
             success:function (data) {
                 console.log(data);
-                alert("完成任务");
+                showMsg("完成任务");
                 window.location.reload();
 
                /* window.location.href="/task/processDiagram/"*/
@@ -99,10 +99,9 @@
         console.log(data)
     }
 
-    function showImage(data) {
-        console.log(data);
-        $("#imgDiv").empty().append("<img src='/task/processDiagram?processId="+data+"'>")
-       /* $("#imgDiv").append("<img src='/task/processDiagram?processId="+data+"'>");*/
+    function showImage(processInstanceId) {
+        console.log('processInstanceId:'+processInstanceId);
+        $("#imgDiv").empty().append("<img src='/task/processDiagram?processInstanceId="+processInstanceId+"'>")
     };
 
     function completeTaskWithAssignee(taskId) {
@@ -117,12 +116,12 @@
             async:true,
             success:function (data) {
                 console.log(data);
-                alert(data);
+                showMsg(data);
                 window.location.reload();
 
             },
             error:function (data) {
-                alert(data.get(responseText));
+                showMsg(data.get(responseText));
                 console.log(data);
             }
 
@@ -136,7 +135,7 @@
             url:"/idm/logout",
             success:function (data) {
                 console.log(data);
-                alert("成功退出");
+                showMsg("成功退出");
                 window.location.href="/";
 
             },

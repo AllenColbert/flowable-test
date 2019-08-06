@@ -4,26 +4,15 @@
     <meta charset="UTF-8">
     <title>流程模板列表</title>
     <script th:src="@{/js/jquery-3.3.1.js}"></script>
-
-    <style type="text/css">
-        table {
-            border: 1px solid black;
-            text-align: center;
-            border-collapse: collapse;
-        }
-        table thead th {
-            border: 1px solid black;
-        }
-        table tbody td {
-            border: 1px solid black;
-        }
-    </style>
 </head>
 <body>
 <div th:replace="header.html :: header"></div>
 
-<div id="mainBox" style="margin: 4px ; align-content: center">
-    <table  cellpadding="1" cellspacing="1" align="center">
+<!--错误信息-->
+<!--<p id="MsgBox" th:onshow="false" style="text-align: center;color: red;font-size: larger"></p>-->
+
+<div id="mainBox" th:align="center">
+    <table  th:class="gridtable" >
         <thead>
         <th>模型Id</th>
         <th>模型名称</th>
@@ -31,15 +20,14 @@
         <th>模型描叙</th>
         <th>创建时间</th>
         <th>最后更新时间</th>
-        <th>创建者</th>
-        <th>最后更新者</th>
+        <!--<th>创建者</th>-->
+        <!--<th>最后更新者</th>-->
         <th>版本</th>
         <!--<th>模型种类</th>-->
         <th>租户Id</th>
         <th>操作空间</th>
         </thead>
         <tbody>
-
         <tr th:each="model:${abstractModels}">
             <td th:text="${model.id}" ></td>
             <td th:text="${model.name}" ></td>
@@ -47,14 +35,14 @@
             <td th:text="${model.description}" ></td>
             <td th:text="${#dates.format(model.created, 'yyyy-MM-dd HH:mm:ss')}" ></td>
             <td th:text="${#dates.format(model.lastUpdated, 'yyyy-MM-dd HH:mm:ss')}" ></td>
-            <td th:text="${model.createdBy}" ></td>
-            <td th:text="${model.lastUpdatedBy}" ></td>
+            <!--<td th:text="${model.createdBy}"></td>-->
+            <!--<td th:text="${model.lastUpdatedBy}"></td>-->
             <td th:text="${model.version}" ></td>
             <!--<td th:text="${model.modelType}" ></td>-->
             <td th:text="${model.tenantId}" ></td>
             <td >
-                <button  th:value="${model.id}"  onclick="deploy(value)">部署流程模型</button>
-                <button th:value="${model.id}" onclick="deleteModel(value)">删除流程模型</button>
+                <button  th:value="${model.id}" th:class="button3" onclick="deploy(value)">部署</button>
+                <button th:value="${model.id}"  th:class="button3" style="background-color: red" onclick="deleteModel(value)">删除</button>
             </td>
         </tr>
         </tbody>
@@ -63,19 +51,39 @@
 
 </body>
 <script>
+
+    $(function () {
+
+    });
+
+
     function deploy(data) {
         $.get("/process/deployModelById",{"modelId":data},function (result) {
-
             console.log(result);
+            if (result.status !== '200'){
+                showMsg(result.message+'    2s后将自动刷新本页面');
+
+            }
+            if (result.status === 200){
+                showMsg(result.message+'    2s后将自动刷新本页面');
+
+            }
         })
     }
+
+/*    function reload() {
+        window.location.reload();
+    }*/
 
     function deleteModel(data) {
         console.log(data);
         $.get("/process/deleteModelById",{"modelId":data},function (result) {
             console.log(result);
+            showMsg(result)
         })
     }
+
+
 
 </script>
 </html>

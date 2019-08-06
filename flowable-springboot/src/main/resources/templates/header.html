@@ -4,18 +4,43 @@
     <meta charset="UTF-8">
     <title></title>
     <script th:src="@{/js/jquery-3.3.1.js}"></script>
+
+
 </head>
 
 <body>
 
-<div th:fragment="header" style="margin: 2%">
 
-    <span>当前登陆用户：<span id="userId" style="font-size: large ; color: red"></span></span>
-    <button style="float: right; size: 25px;background-color: #c02731;box-shadow:#76c199" onclick="logout()">登出</button>
-    <button style="float: right; size: 25px;background-color: #a0c01e;box-shadow:#76c199" onclick="showProcessList()">流程列表</button>
-    <button style="float: right; size: 25px;background-color: #72c0b6;box-shadow:#76c199" onclick="showMyTask()">我的任务</button>
-    <button style="float: right; size: 25px;background-color: #c00b9b;box-shadow:#c11932" onclick="createModel()">创建流程图</button>
-    <button style="float: right; size: 25px;background-color: #c0ba39;box-shadow:#c11932" onclick="modelList()">流程模板列表</button>
+
+<div th:fragment="header"  style="margin: 0 0 20px">
+<div style=" background-color: #1f3245; width: 100%;height: 100%;margin: 0 0 10px;min-height: 30px;text-align:center">
+    <link th:href="@{/css/buttons.css}" rel="stylesheet" type="text/css">
+    <link th:href="@{/css/table.css}" rel="stylesheet" type="text/css">
+    <link th:href="@{/styles/common/style.css}" rel="stylesheet" type="text/css">
+    <link th:href="@{/css/table.css}" rel="stylesheet" type="text/css">
+   <!-- <link th:href="@{/libs/bootstrap_3.1.1/css/bootstrap.min.css}" rel="stylesheet" type="text/css">-->
+
+    <a th:class="landing-logo">
+        <img ng-src="images/flowable-logo.png" ng-srcset="images/flowable-logo.png 1x, images/flowable-logo@2x.png 2x" th:src="@{/images/flowable-logo.png}" >
+    </a>
+    <span style="float: left;font-size: 20px;margin: 0 20px 0">
+        <span style="color:white ">当前用户：</span>
+        <span id="userId" style="color: #8bc220;border: 1px"></span>
+        <button id="loginButton"  th:class="login" style="visibility: hidden"  onclick="login()">登陆</button>
+    </span>
+
+    <button style="float: right" th:class="button2" onclick="logout()">登出</button>
+    <button  th:class="button2" onclick="showProcessList()">流程列表</button>
+    <button  th:class="button2" onclick="showMyTask()">我的任务</button>
+    <button  th:class="button2" onclick="modelList()">流程模板列表</button>
+    <button  th:class="button2" onclick="createModel()">创建流程图</button>
+</div>
+    <!--信息盒子-->
+    <div>
+    <p id="MsgBox"  style="text-align: center;color: red;font-size: larger"></p>
+    </div>
+
+
 
 
     <script>
@@ -26,9 +51,11 @@
                 console.log(data);
                 if (data.user == null){
                     $("#userId").html(data.msg);
+                    document.getElementById("loginButton").style.visibility = "visible"
                 }
                 if (data.user != null){
                     $("#userId").html(data.user.id);
+
                 }
             });
         });
@@ -38,13 +65,22 @@
                 url:"/idm/logout",
                 success:function (data) {
                     console.log(data);
-                    alert("成功退出");
                     window.location.href="/";
                 },
                 error:function (data) {
                     console.log(data);
                 }
             })
+        }
+
+
+        function showMsg(message) {
+            $("#MsgBox").text(message);
+            window.setTimeout(reload,2000)
+        }
+
+        function reload() {
+            window.location.reload();
         }
 
         function showProcessList() {
@@ -62,7 +98,14 @@
         function modelList() {
             window.location.href="/process/modelList";
         }
+
+        function login() {
+            window.location.href="/"
+        }
+
+
     </script>
+
 </div>
 
 </body>
