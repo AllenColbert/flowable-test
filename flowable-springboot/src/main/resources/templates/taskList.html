@@ -41,13 +41,13 @@
     <!--<th>任务定义Id</th>-->
         <th>代理人</th>
         <th>创建时间</th>
-        <th>任务是否挂起</th>
+        <th>任务状态</th>
         <th>租户Id</th>
     <!--<th>表单key</th>-->
         <th>操作空间</th>
         </thead>
         <tbody>
-        <tr th:each="task:${taskList}">
+        <tr th:each="task:${tasks}">
             <td th:text="${task.id}" ></td>
             <td th:text="${task.name}"></td>
             <!--<td th:text="${task.executionId}"></td>-->
@@ -110,52 +110,43 @@
 
         var assignee = $("#assignee").val();
 
-        $.ajax({
-            url:"/task/completeTask",
-            data:{"taskId":taskId,"assignee":assignee},
-            type:"GET",
-            /*dataType:"text",*/
-            async:true,
-            success:function (data) {
-                console.log(data);
-                showMsg(data);
-                window.location.reload();
-
-            },
-            error:function (data) {
-                showMsg(data.get(responseText));
-                console.log(data);
+        $.post("/task/completeTask",{"taskId":taskId,"assignee":assignee},function (result) {
+            if (result.code === 200){
+                reload();
             }
-
+            if (result.code !== 200){
+                showMsg(result.msg);
+            }
         })
-
-
     }
 
     function logout() {
-        $.ajax({
-            url:"/idm/logout",
-            success:function (data) {
-                console.log(data);
-                showMsg("成功退出");
-                window.location.href="/";
-
-            },
-            error:function (data) {
-                console.log(data);
-            }
-        })
+        $.get("/idm/logout",function () {
+            window.location.href="/";
+        });
     }
 
     function suspendProcessInstanceById(processInstanceId) {
-        $.get("/task/suspendProcessInstanceById",{"processInstanceId":processInstanceId},function () {
-            showMsg("成功挂起流程")
+        $.get("/task/suspendProcessInstanceById",{"processInstanceId":processInstanceId},function (result) {
+
+            if (result.code === 200){
+                reload();
+            }
+            if (result.code !== 200){
+                showMsg(result.msg);
+            }
+
         })
     }
 
     function activateProcessInstanceById(processInstanceId) {
-        $.get("/task/activateProcessInstanceById",{"processInstanceId":processInstanceId},function () {
-            showMsg("成功激活流程")
+        $.get("/task/activateProcessInstanceById",{"processInstanceId":processInstanceId},function (result) {
+            if (result.code === 200){
+                reload();
+            }
+            if (result.code !== 200){
+                showMsg(result.msg);
+            }
         })
     }
 

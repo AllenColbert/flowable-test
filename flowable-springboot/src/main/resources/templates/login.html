@@ -28,17 +28,9 @@
 <script>
     function ajax_ajax() {
         var userId =$("#userId").val();
-        console.log(userId);
+
         var password = $("#password").val();
-        console.log(password);
-        //实现ajax方式ajax
-        // url  请求路径
-        // data 请求提交参数
-        // type 请求方式
-        // dataType 响应数据类型
-        // async异步
-        //success 请求成功 回调函数
-        // error：请求失败 回调函数
+
         $.ajax({
             url:"/idm/login",
             data:{"userId":userId,"password":password},
@@ -47,13 +39,9 @@
             async:false,
             success:function (data) {
                 //返回数据
-                alert(data);
-                window.location.href="/task/myTask";
-              //  window.location.href="/idm/logout";
-
+                window.location.href="/";
             },
             error:function (data) {
-
                 alert(data)
             }
         });

@@ -14,7 +14,7 @@ import java.util.List;
 
 public enum ResultCode {
 	 /* 成功状态码 */
-    SUCCESS(1, "成功"),
+    SUCCESS(200, "成功"),
 
     /* 参数错误：10001-19999 */
     PARAM_IS_INVALID(10001, "参数无效"),
@@ -31,18 +31,21 @@ public enum ResultCode {
 
     /* 业务错误：30001-39999 */
     SPECIFIED_QUESTIONED_USER_NOT_EXIST(30001, "某业务出现问题"),
+    PROCESS_IS_SUSPENDED(30002,"流程已经被挂起"),
+    PROCESS_IS_ACTIVATED(30003,"流程已经被激活"),
 
     /* 系统错误：40001-49999 */
     SYSTEM_INNER_ERROR(40001, "系统繁忙，请稍后重试"),
 
     /* 数据错误：50001-599999 */
-    RESULE_DATA_NONE(50001, "数据未找到"),
+    RESULT_DATA_NONE(50001, "数据未找到"),
     DATA_IS_WRONG(50002, "数据有误"),
     DATA_ALREADY_EXISTED(50003, "数据已存在"),
+    TASKS_IS_NULL(50004,"当前用户没有任务存在"),
 
     /* 接口错误：60001-69999 */
     INTERFACE_INNER_INVOKE_ERROR(60001, "内部系统接口调用异常"),
-    INTERFACE_OUTTER_INVOKE_ERROR(60002, "外部系统接口调用异常"),
+    INTERFACE_OUTER_INVOKE_ERROR(60002, "外部系统接口调用异常"),
     INTERFACE_FORBID_VISIT(60003, "该接口禁止访问"),
     INTERFACE_ADDRESS_INVALID(60004, "接口地址无效"),
     INTERFACE_REQUEST_TIMEOUT(60005, "接口请求超时"),

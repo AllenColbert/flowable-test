@@ -1,9 +1,9 @@
 package com.power.service;
 
-import com.power.entity.PowerTask;
-import org.flowable.task.api.Task;
 
-import java.util.List;
+import com.power.util.Result;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -12,39 +12,42 @@ import java.util.Map;
  * @date :   2019/7/17 16:37
  */
 public interface PowerTaskService {
+
+
     /**
-     * 根据用户id查询任务列表
+     * 根据流程实例ID挂起流程实例
+     * @param processInstanceId 流程实例Id
+     * @return Result
+     */
+    Result suspendProcessInstanceById(String processInstanceId);
+
+    /**
+     * 根据流程实例ID激活流程实例
+     * @param processInstanceId 流程实例Id
+     * @return Result
+     */
+    Result activateProcessInstanceById(String processInstanceId);
+
+    /**
+     * 获取流程图
+     * @param httpServletResponse response响应
+     * @param processInstanceId  流程实例Id
+     * @throws IOException IO流异常
+     */
+    void getProcessDiagram(HttpServletResponse httpServletResponse, String processInstanceId) throws IOException;
+
+    /**
+     * 查询session中当前用户任务列表
+     * @return Result
+     */
+    Result queryCurrentUserTasks();
+
+    /**
+     * 完成任务
+     * @param taskId 任务Id
      * @param assignee 用户id
-     * @return TaskList 任务列表
+     * @param vars 参数map
+     * @return Result
      */
-    List<PowerTask> queryUserTask(String assignee);
-
-    /**
-     * 根据任务Id完成任务，并传递参数
-     * @param taskId 任务Id
-     * @param vars 参数
-     * @return xx
-     */
-    Object completeTask(String taskId, Map<String, Object> vars);
-
-    /**
-     * 根据流程实例Id查询任务信息
-     * @param processInstanceId 任务流程实例Id
-     * @return 任务信息
-     */
-    Task queryTaskByProcessInstanceId(String processInstanceId);
-
-    /**
-     * 根据用户Id查询任务信息，废弃
-     * @param assignee 用户Id
-     * @return xx
-     */
-    Object queryAllTask(String assignee);
-
-    /**
-     * 根据任务Id查询任务状态
-     * @param taskId 任务Id
-     * @return xx
-     */
-    Boolean checkTaskStatus(String taskId);
+    Result completeTask(String taskId, String assignee, Map<String, Object> vars);
 }

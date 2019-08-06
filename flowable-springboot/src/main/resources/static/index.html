@@ -47,7 +47,8 @@
     <div class="navbar navbar-fixed-top navbar-inverse" role="navigation" id="main-header">
         <div class="fixed-container">
             <div class="navbar-header">
-                <a ng-click="backToLanding()" class="landing-logo" ng-if="account != null && account != undefined" title="{{'GENERAL.MAIN-TITLE' | translate}}">
+                <!--ng-click="backToLanding()"-->
+                <a  onclick="backIndex()" class="landing-logo" ng-if="account != null && account != undefined" title="{{'GENERAL.MAIN-TITLE' | translate}}">
                     <img ng-src="{{appResourceRoot}}images/flowable-logo.png" ng-srcset="{{appResourceRoot}}images/flowable-logo.png 1x, {{appResourceRoot}}images/flowable-logo@2x.png 2x">
                 </a>
                 <ul class="nav navbar-nav" id="main-nav" ng-show="authenticated">
@@ -75,6 +76,12 @@
             </div>
         </div>
     </div>
+<script>
+    function backIndex() {
+        window.location.href="/";
+    }
+</script>
+
 
     <!--[if lt IE 9]>
     <div class="unsupported-browser">

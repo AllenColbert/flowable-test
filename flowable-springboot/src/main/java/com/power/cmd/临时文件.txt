@@ -51,3 +51,52 @@
             }
         }
     }
+#####################################################################################################################
+
+    /**
+     * 根据实例查询，实例结束则查询绘制的流程图，并保存在本地
+     * 执行没问题，老是在结束的时候报错是什么鬼？
+     * 跟拦截器有关--测一下
+     *
+     * @param processInstanceId 流程实例Id
+     * @throws IOException Io流报错
+     */
+    @GetMapping("showImage")
+    public ResponseEntity showActivityImageDetailPage(@RequestParam String processInstanceId) throws IOException {
+        //通过流程实例Id查询当前执行中的任务对象，如果没有的话就去历史记录中查询，再通过返回结果查询流程定义Id
+        //通过流程定义Id获取BpmnModel对象
+        String processDefinitionId = "";
+        List<String> highLightedActivities = new ArrayList<String>();
+        List<String> highLightedFlows = new ArrayList<String>();
+
+        Task task = powerTaskService.queryTaskByProcessInstanceId(processInstanceId);
+        if (task == null) {
+            HistoricProcessInstance hp = historyService.createHistoricProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
+            processDefinitionId = hp.getProcessDefinitionId();
+        } else {
+            processDefinitionId = task.getProcessDefinitionId();
+            highLightedActivities.add(task.getTaskDefinitionKey());
+        }
+
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
+
+        DefaultProcessDiagramGenerator defaultProcessDiagramGenerator =
+                new DefaultProcessDiagramGenerator();
+
+        InputStream in = defaultProcessDiagramGenerator
+                .generateDiagram(bpmnModel, "PNG",highLightedActivities,highLightedFlows, "宋体", "宋体", "宋体", null, 1.0D, true);
+
+        System.out.println(in);
+        File file = new File("C:\\FFOutput\\test1.png");
+        FileOutputStream out = new FileOutputStream(file);
+        byte [] b = new byte[1024];
+        while (in.read(b) != -1) {
+            out.write(b);
+        }
+        out.close();
+        in.close();
+        return ResponseEntity.ok("标记");
+    }
+
+
+#####################################################################################################################
