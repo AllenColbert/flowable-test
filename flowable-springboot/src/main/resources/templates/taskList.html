@@ -63,6 +63,8 @@
                 <!--<button  th:value="${task.id}"  onclick="completeTask(value)">完成任务</button>-->
                 <button  th:value="${task.id}" th:class="button3" onclick="completeTaskWithAssignee(value)">设置任务办理人并完成任务</button>
                 <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1b6d85" onclick="showImage(value)">显示流程图</button>
+                <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1b6d85" onclick="suspendProcessInstanceById(value)">挂起</button>
+                <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1b6d85" onclick="activateProcessInstanceById(value)">激活</button>
             </td>
         </tr>
         </tbody>
@@ -144,5 +146,18 @@
             }
         })
     }
+
+    function suspendProcessInstanceById(processInstanceId) {
+        $.get("/task/suspendProcessInstanceById",{"processInstanceId":processInstanceId},function () {
+            showMsg("成功挂起流程")
+        })
+    }
+
+    function activateProcessInstanceById(processInstanceId) {
+        $.get("/task/activateProcessInstanceById",{"processInstanceId":processInstanceId},function () {
+            showMsg("成功激活流程")
+        })
+    }
+
 </script>
 </html>

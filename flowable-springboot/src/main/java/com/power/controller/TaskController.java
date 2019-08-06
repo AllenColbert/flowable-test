@@ -230,4 +230,14 @@ public class TaskController {
         }
     }
 
+
+    @GetMapping("suspendProcessInstanceById")
+    public void suspendProcessInstanceById(@RequestParam String processInstanceId){
+        runtimeService.suspendProcessInstanceById(processInstanceId);
+    }
+
+    @GetMapping("activateProcessInstanceById")
+    public void activateProcessInstanceById(@RequestParam String processInstanceId){
+        runtimeService.activateProcessInstanceById(processInstanceId);
+    }
 }
