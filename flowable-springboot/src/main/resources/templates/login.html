@@ -22,6 +22,8 @@
         <input type="password" id="password"  class="form-control" placeholder="密码" required>
         <button class="btn btn-lg btn-primary btn-block" type="button" onclick="ajax_ajax()">登录</button>
     </form>
+
+    <p id="errorMsg" style="min-height: 30px;min-width: 50px ;min-font-size: 25px;color: #ff2c52"> </p>
 </div>
 
 </body>
@@ -31,20 +33,15 @@
 
         var password = $("#password").val();
 
-        $.ajax({
-            url:"/idm/login",
-            data:{"userId":userId,"password":password},
-            type:"POST",
-            dataType:"text",
-            async:false,
-            success:function (data) {
-                //返回数据
-                window.location.href="/";
-            },
-            error:function (data) {
-                alert(data)
+        $.post("/idm/login",{"userId":userId,"password":password},function (result) {
+            if (result.code === 200){
+                window.location.href = "/";
+            }
+            if (result.code !== 200){
+                $("#errorMsg").text(result.msg);
             }
         });
+
     }
 </script>
 </html>

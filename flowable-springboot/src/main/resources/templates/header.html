@@ -47,15 +47,14 @@
 
         $(function () {
             /*加载页面的时候自动查询用户登陆信息*/
-            $.get("/idm/checkSession",function (data) {
-                console.log(data);
-                if (data.user == null){
-                    $("#userId").html(data.msg);
+            $.get("/idm/checkCurrentUser",function (result) {
+                console.log(result);
+                if (result.code !== 200){
+                    $("#userId").text(result.msg);
                     document.getElementById("loginButton").style.visibility = "visible"
                 }
-                if (data.user != null){
-                    $("#userId").html(data.user.id);
-
+                if (result.code === 200){
+                    $("#userId").text(result.data);
                 }
             });
         });

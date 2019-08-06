@@ -1,6 +1,7 @@
 package com.power.controller;
 
-import com.power.service.IdmService;
+import com.power.service.PowerIdmService;
+import com.power.util.Result;
 import org.flowable.idm.engine.impl.persistence.entity.GroupEntityImpl;
 import org.flowable.idm.engine.impl.persistence.entity.UserEntityImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class IdmController {
 
 
 	@Autowired
-	private IdmService idmService;
+	private PowerIdmService powerIdmService;
 
 	@Autowired
 	private HttpSession session;
@@ -48,7 +49,7 @@ public class IdmController {
 	 */
 	 @PostMapping("userRegister")
 	public ResponseEntity userRegister(@RequestBody UserEntityImpl user){
-	 	Object result = idmService.saveUser(user);
+	 	Object result = powerIdmService.saveUser(user);
 		 return ResponseEntity.ok(result);
 	 }
 
@@ -66,7 +67,7 @@ public class IdmController {
 	 */
 	 @PostMapping("groupRegister")
 	public ResponseEntity groupRegister(@RequestBody GroupEntityImpl group){
-	 	Object result = idmService.saveGroup(group);
+	 	Object result = powerIdmService.saveGroup(group);
 	 	return ResponseEntity.ok(result);
 	 }
 
@@ -79,20 +80,20 @@ public class IdmController {
 	 @PostMapping("createMembership")
 	public ResponseEntity createMembership(@RequestParam("userId")String userId,
 								   @RequestParam("groupId")String groupId){
-	 Object result = idmService.createMembership(userId,groupId);
+	 Object result = powerIdmService.createMembership(userId,groupId);
 
 	 return ResponseEntity.ok(result);
 	 }
 
 	 @DeleteMapping("deleteUser")
 	public ResponseEntity deleteUserById(@RequestParam("userId")String userId){
-		 Object result = idmService.deleteUserById(userId);
+		 Object result = powerIdmService.deleteUserById(userId);
 		 return ResponseEntity.ok(result);
 	 }
 
 	 @DeleteMapping("deleteGroup")
 	public ResponseEntity deleteGroupById(@RequestParam("groupId")String groupId){
-		 Object result = idmService.deleteGroupById(groupId);
+		 Object result = powerIdmService.deleteGroupById(groupId);
 		 return ResponseEntity.ok(result);
 	 }
 
@@ -105,12 +106,12 @@ public class IdmController {
 	  localhost:9100/idm/login?userId=zhangsan&password=1234
 	 */
 	 @PostMapping("login")
-	public ResponseEntity login(@RequestParam("userId") String userId,
-								@RequestParam("password") String password,
-								HttpServletRequest request,
-								HttpServletResponse response){
-	 	Object result = idmService.login(userId,password,request,response);
-	 	return ResponseEntity.ok(result);
+	 @ResponseBody
+	public Result login(@RequestParam("userId") String userId,
+						@RequestParam("password") String password,
+						HttpServletRequest request,
+						HttpServletResponse response){
+		 return  powerIdmService.login(userId,password,request,response);
 	 }
 
 	/**
@@ -119,25 +120,17 @@ public class IdmController {
 	 */
 	@GetMapping("logout")
 	public ResponseEntity logout(){
-	 	Object result = idmService.logout();
+	 	Object result = powerIdmService.logout();
 	 	return ResponseEntity.ok(result);
 	 }
 
 	/**
-	 * 测试用
-	 * @return session.id
+	 * 查询当前登录状态
+	 * @return result
 	 */
-	@GetMapping("checkSession")
-	public ResponseEntity checkSession(){
-		Object user = session.getAttribute("user");
-        Map<String, Object> map = new HashMap<>(255);
-        if (user==null){
-            map.put("user",null);
-            map.put("msg","当前没有用户登陆");
-		}else{
-            map.put("user", user);
-        }
-
-		return ResponseEntity.ok(map);
+	@GetMapping("checkCurrentUser")
+	@ResponseBody
+	public Result checkCurrentUser(){
+		return powerIdmService.checkCurrentUser();
 	 }
 }

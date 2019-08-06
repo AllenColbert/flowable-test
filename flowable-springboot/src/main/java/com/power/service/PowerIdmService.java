@@ -1,6 +1,7 @@
 package com.power.service;
 
 
+import com.power.util.Result;
 import org.flowable.idm.engine.impl.persistence.entity.GroupEntityImpl;
 import org.flowable.idm.engine.impl.persistence.entity.UserEntityImpl;
 
@@ -12,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author : xuyunfeng
  * @date :   2019/7/19 10:00
  */
-public interface IdmService {
+public interface PowerIdmService {
 
     /**
      * 新增用户信息
@@ -71,11 +72,18 @@ public interface IdmService {
      * @param response HttpResponse
      * @return xx
      */
-    Object login(String userId, String password, HttpServletRequest request, HttpServletResponse response);
+    Result login(String userId, String password, HttpServletRequest request, HttpServletResponse response);
 
     /**
      * 登出
      * @return xx
      */
     Object logout();
+
+    /**
+     * 查询当前session中的user
+     * @return
+     */
+    Result checkCurrentUser();
+
 }

@@ -1,6 +1,8 @@
 package com.power.service.impl;
 
-import com.power.service.IdmService;
+import com.power.service.PowerIdmService;
+import com.power.util.Result;
+import com.power.util.ResultCode;
 import org.flowable.idm.api.IdmIdentityService;
 import org.flowable.idm.api.User;
 import org.flowable.idm.engine.impl.persistence.entity.GroupEntityImpl;
@@ -17,7 +19,7 @@ import javax.servlet.http.HttpSession;
  * @date :   2019/7/19 10:00
  */
 @Service
-public class IdmServiceImpl implements IdmService {
+public class PowerIdmServiceImpl implements PowerIdmService {
 
     @Autowired
     private IdmIdentityService idmIdentityService;
@@ -25,22 +27,23 @@ public class IdmServiceImpl implements IdmService {
     @Autowired
     private HttpSession session;
 
-/*    public IdmServiceImpl(IdmIdentityService idmIdentityService) {
+/*    public PowerIdmServiceImpl(IdmIdentityService idmIdentityService) {
         this.idmIdentityService = idmIdentityService;
     }*/
 
 
     @Override
-    public Object login(String userId, String password, HttpServletRequest request, HttpServletResponse response) {
-
-        if (idmIdentityService.checkPassword(userId, password)){
-            User user = (User) queryUserById(userId);
-            request.getSession().setAttribute("user",user);
-            return "登陆成功";
-        }else if (queryUserById(userId) == null){
-            return "用户不存在";
+    public Result login(String userId, String password, HttpServletRequest request, HttpServletResponse response) {
+        User user = idmIdentityService.createUserQuery().userId(userId).singleResult();
+        if (user == null ){
+            return Result.failure(ResultCode.USER_LOGIN_ERROR);
         }
-        return "密码错误";
+        if(idmIdentityService.checkPassword(userId, password)){
+            session.setAttribute("user",user);
+            return Result.success();
+        }else{
+            return Result.failure(ResultCode.USER_LOGIN_ERROR);
+        }
     }
 
     @Override
@@ -49,6 +52,16 @@ public class IdmServiceImpl implements IdmService {
         return "用户退出";
     }
 
+    @Override
+    public Result checkCurrentUser() {
+        User user = (User) session.getAttribute("user");
+
+        if (user == null || user.getId() == null) {
+            return Result.failure(ResultCode.USER_NOT_LOGGED_IN);
+        }
+
+        return Result.success(user.getId());
+    }
 
     @Override
     public Object saveUser(UserEntityImpl user) {
