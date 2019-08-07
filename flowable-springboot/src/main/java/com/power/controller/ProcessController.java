@@ -349,6 +349,10 @@ public class ProcessController extends BaseController {
         Process process = managementService.executeCommand(new GetProcessCmd(processDefinitionId));
         //创建用户任务节点
         UserTask userTask = commonService.createUserTask(powerTask);
+
+        //添加图形信息
+        GraphicInfo graphicInfo = commonService.createGraphicInfo();
+
         //创建流程输出信息
         SequenceFlow sequenceFlow = commonService.createSequenceFlow(sourceRef, targetRef, processDefinitionId);
         //将流程输出信息转化为List
@@ -357,6 +361,7 @@ public class ProcessController extends BaseController {
         userTask.setOutgoingFlows(sequenceFlows);
         //更新Process中的信息
         process.addFlowElement(userTask);
+
         process.addFlowElement(sequenceFlow);
         //更新缓存中的流程对象信息
         commonService.updateProcess(process,processDefinitionId);

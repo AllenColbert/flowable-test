@@ -4,6 +4,7 @@ import com.power.cmd.GetProcessCmd;
 import com.power.cmd.GetProcessDefinitionCacheEntryCmd;
 import com.power.entity.PowerTask;
 import com.power.service.CommonService;
+import org.flowable.bpmn.model.GraphicInfo;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.SequenceFlow;
 import org.flowable.bpmn.model.UserTask;
@@ -39,6 +40,17 @@ public class CommonServiceImpl implements CommonService {
         userTask.setAssignee(taskInfo.getAssignee());
         userTask.setBehavior(createUserTaskBehavior(userTask));
         return  userTask;
+    }
+
+    @Override
+    public GraphicInfo createGraphicInfo() {
+        GraphicInfo graphicInfo = new GraphicInfo();
+        graphicInfo.setX(130);
+        graphicInfo.setY(140);
+        graphicInfo.setHeight(13.55);
+        graphicInfo.setWidth(10.23);
+        graphicInfo.setExpanded(true);
+        return graphicInfo;
     }
 
     @Override

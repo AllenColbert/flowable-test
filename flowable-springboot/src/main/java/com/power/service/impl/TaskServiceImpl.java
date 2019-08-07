@@ -154,9 +154,10 @@ public class TaskServiceImpl implements PowerTaskService {
 
         //获取流程图
         BpmnModel bpmnModel = repositoryService.getBpmnModel(pi.getProcessDefinitionId());
-        ProcessEngineConfiguration engconf = processEngine.getProcessEngineConfiguration();
-        ProcessDiagramGenerator diagramGenerator = engconf.getProcessDiagramGenerator();
+        ProcessDiagramGenerator diagramGenerator = processEngine.getProcessEngineConfiguration().getProcessDiagramGenerator();
+
         InputStream in = diagramGenerator.generateDiagram(bpmnModel, "png", activityIds, flows, "宋体", "宋体", "宋体", null, 1.0D, true);
+
         OutputStream out = null;
         byte[] buf = new byte[1024];
         int length = 0;

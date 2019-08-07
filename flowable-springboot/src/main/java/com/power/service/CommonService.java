@@ -1,6 +1,7 @@
 package com.power.service;
 
 import com.power.entity.PowerTask;
+import org.flowable.bpmn.model.GraphicInfo;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.SequenceFlow;
 import org.flowable.bpmn.model.UserTask;
@@ -18,6 +19,13 @@ public interface CommonService {
      * @return UserTask
      */
    UserTask createUserTask(PowerTask taskInfo);
+
+
+    /**
+     * 增加图形信息
+     * @return
+     */
+    GraphicInfo createGraphicInfo();
 
     /**
      * 根据流程定义Id查询流程对象
