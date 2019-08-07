@@ -6,10 +6,10 @@ import com.power.cmd.GetProcessDefinitionCacheEntryCmd;
 import com.power.cmd.PowerJumpCmd;
 import com.power.entity.PowerDeployEntity;
 import com.power.entity.PowerDeployment;
-import com.power.entity.PowerProcessDefinition;
 import com.power.entity.PowerTask;
 import com.power.service.CommonService;
 import com.power.service.PowerProcessService;
+import com.power.util.Result;
 import org.flowable.bpmn.converter.BpmnXMLConverter;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
@@ -23,7 +23,6 @@ import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.runtime.Execution;
 import org.flowable.idm.api.User;
 import org.flowable.ui.common.service.exception.NotFoundException;
-import org.flowable.ui.modeler.domain.AbstractModel;
 import org.flowable.ui.modeler.serviceapi.ModelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +41,7 @@ import java.util.*;
 
 @Controller
 @RequestMapping("process")
-public class ProcessController {
+public class ProcessController extends BaseController {
 
     @Autowired
     private RepositoryService repositoryService;
@@ -66,27 +65,39 @@ public class ProcessController {
     private ModelService modelService;
 
     /**
-     * 根据本地文件名部署流程（文件全名，默认匹配路径：resources/upload/diagrams/**）
-     *
-     * @param fileName    流程文件全名 如 test.bpmn20.xml 或者 test.bpmn
-     * @param powerDeploy 流程部署信息，name，key。。。 等属性
-    JSON示例：
-    {
-    "name":"XXX测试",
-    "category":"测试类",
-    "key":"XXX",
-    "tenantId":"1",
-    "outerForm":false,
-    "formResource":["XXX","XXX","XXX"]
-    }
-     * @return 流程部署对象 deploy属性  or 其他提示信息;
+     * 获取流程模型列表
+     * @param model model
+     * @return 流程模型页面
      */
-    @GetMapping("deploy")
-    public ResponseEntity<Object> deploy(@RequestParam String fileName,
-                                         @RequestBody(required = false)PowerDeployEntity powerDeploy) {
-        Object result = powerProcessService.deployProcess(fileName, powerDeploy);
+    @GetMapping("modelList")
+    public String processModelList(Model model){
 
-        return ResponseEntity.ok(result);
+        Result result =  powerProcessService.queryProcessModelList();
+
+        if (!result.getCode().equals(SUCCESS_CODE)){
+            model.addAttribute("errorMsg",result.getMsg());
+            return "errorPage";
+        }
+        model.addAttribute("models",result.getData());
+        return  "modelList";
+    }
+
+    /**
+     * 显示流程定义列表
+     * @param model model对象
+     * @return html文件名
+     */
+    @GetMapping("processList")
+    public String processList(Model model){
+        Result result =  powerProcessService.queryProcessDefinitionList();
+
+        if (!result.getCode().equals(SUCCESS_CODE)){
+            model.addAttribute("errorMsg",result.getMsg());
+            return "errorPage";
+        }
+
+        model.addAttribute("processDefinitionList",result.getData());
+        return "processList";
     }
 
     /**
@@ -96,25 +107,67 @@ public class ProcessController {
      * @param processDefinitionId 流程定义ID：processDefinitionId；
      * @return 流程执行ID
      */
-    @GetMapping("runNormalById")
-    public ResponseEntity runProcessById(@RequestParam String processDefinitionId) {
-        Map<String, Object> vars = new HashMap<>(255);
+    @PostMapping("startProcessById")
+    @ResponseBody
+    public Result startProcessById(@RequestParam String processDefinitionId) {
 
+        //TODO 目前还不会做前端form传值，先写死，后面再改
+        System.out.println("传到Controller层的processDefinitionId:"+processDefinitionId);
+
+        Map<String, Object> vars = new HashMap<>(255);
         String userId = "admin";
         User user = (User) session.getAttribute("user");
         if (user != null) {
             userId = user.getId();
         }
         vars.put("userId", userId);
-        /*前端直接传流程定义Id时，会将 ':'编码为'%3A',这里加个判断将其恢复*/
-        String specialCharacters  = "%3A";
-        String newChar =":";
-        if (processDefinitionId .contains(specialCharacters)){
-            processDefinitionId  = processDefinitionId.replaceAll(specialCharacters, newChar);
-        }
 
-        Object result = powerProcessService.startProcessInstanceById(processDefinitionId, vars);
-        return ResponseEntity.ok(result);
+       return powerProcessService.startProcessInstanceById(processDefinitionId,vars);
+
+    }
+
+    /**
+     * 根据流程部署Id删除流程，默认开启级联删除
+     * 此处使用流程部署Id deploymentId；
+     * @param deploymentId  流程部署Id
+     * @param concatenation 是否开启级联删除，默认开启
+     * @return result
+     */
+    @DeleteMapping("deleteProcessById")
+    @ResponseBody
+    public Result deleteProcessById(@RequestParam String deploymentId,
+                                    @RequestParam(required = false,defaultValue = "true") Boolean concatenation) {
+      return powerProcessService.deleteProcessByDeploymentId(deploymentId,concatenation);
+    }
+
+    /**
+     * 通过流程定义Id挂起整个流程
+     * @param processDefinitionId 流程定义Id
+     * @param suspendProcessInstances 是否挂起所有的流程实例,默认开启
+     * @param suspensionDate 流程定义将被暂停的日期，为null时，会立即激活
+     * @return result
+     */
+    @GetMapping("suspendProcessByProcessDefinitionId")
+    @ResponseBody
+    public Result suspendProcessByProcessDefinitionId(@RequestParam String processDefinitionId,
+                                                      @RequestParam(defaultValue = "true", required = false) Boolean suspendProcessInstances,
+                                                      @RequestParam(required = false)Date suspensionDate){
+        return powerProcessService.suspendProcessByProcessDefinitionId(processDefinitionId,suspendProcessInstances,suspensionDate);
+    }
+
+    /**
+     *通过流程定义Id激活整个流程
+     * @param processDefinitionId 流程定义Id
+     * @param suspendProcessInstances 是否激活所有的流程实例，默认开启
+     * @param suspensionDate 流程定义将被暂停的日期，为null时，会立即激活
+     * @return Result
+     */
+    @GetMapping("activateProcessByProcessDefinitionId")
+    @ResponseBody
+    public Result activateProcessByProcessDefinitionId(@RequestParam String processDefinitionId,
+                                                       @RequestParam(defaultValue = "true", required = false) Boolean suspendProcessInstances,
+                                                       @RequestParam(required = false)Date suspensionDate){
+        return powerProcessService.activateProcessByProcessDefinitionId(processDefinitionId,suspendProcessInstances,suspensionDate);
     }
 
     /**
@@ -151,48 +204,8 @@ public class ProcessController {
         return ResponseEntity.ok(list);
     }
 
-    /**
-     * 自定义mybatis --mapper 查询流程定义列表    数据在表 act_re_procdef
-     *
-     * @return 流程定义列表 processDefinitionList
-     */
-    @GetMapping("processDefinitionList")
-    public ResponseEntity<List<PowerProcessDefinition>> processDefinitionList() {
-        List<PowerProcessDefinition> list = powerProcessService.findProcessDefinitionList();
-        return ResponseEntity.ok(list);
-    }
+//#########################################未整理代码##############################################
 
-    /**
-     * 显示流程定义列表
-     * @param model model对象
-     * @return html文件名
-     */
-    @GetMapping("processList")
-    public String processList(Model model){
-        List<PowerProcessDefinition> list = powerProcessService.findProcessDefinitionList();
-
-        if (list.size()==0){
-            String msg  = "流程定义列表为空";
-            model.addAttribute("errorMsg",msg);
-            return "errorPage";
-        }
-        model.addAttribute("processList",list);
-        return "processList";
-    }
-
-    /**
-     * 此处使用流程部署Id deploymentId；
-     * 根据流程部署Id删除流程，级联删除
-     * @param deploymentId  流程部署Id
-     * @param concatenation 是否开启级联删除，默认开启
-     * @return 删除提示
-     */
-    @DeleteMapping("deleteProcessById")
-    public ResponseEntity<String> deleteProcessById(@RequestParam String deploymentId,
-                                                    @RequestParam(defaultValue = "true") Boolean concatenation) {
-        repositoryService.deleteDeployment(deploymentId, concatenation);
-        return ResponseEntity.ok("删除流程成功，Id：" + deploymentId);
-    }
 
     /**
      * 测试包含多实例节点流程启动
@@ -319,9 +332,12 @@ public class ProcessController {
 
 
     /**
-     * 增加节点
+     * 增加单个普通节点
      * @param processDefinitionId 流程定义Id
-     * @return xx
+     * @param sourceRef 源节点 一般来说都是新增的节点id
+     * @param targetRef 目标节点
+     * @param powerTask 新增的节点
+     * @return
      */
     @GetMapping("addSingleNode")
     public ResponseEntity addNode(@RequestParam String processDefinitionId,
@@ -478,21 +494,28 @@ public class ProcessController {
     }
 
     /**
-     * 获取流程模型列表
-     * @param model model
-     * @return 流程模型页面
-     */
-    @GetMapping("modelList")
-    public String processModelList(Model model){
-        List<AbstractModel> abstractModels = powerProcessService.queryProcessModelList();
-
-        if (abstractModels.size()==0){
-            String msg  = "流程定义列表为空";
-            model.addAttribute("errorMsg",msg);
-            return "errorPage";
-        }
-        model.addAttribute("abstractModels",abstractModels);
-        return "modelList";
-
+     * 根据本地文件名部署流程（文件全名，默认匹配路径：resources/upload/diagrams/**）
+     *
+     * @param fileName    流程文件全名 如 test.bpmn20.xml 或者 test.bpmn
+     * @param powerDeploy 流程部署信息，name，key。。。 等属性
+    JSON示例：
+    {
+    "name":"XXX测试",
+    "category":"测试类",
+    "key":"XXX",
+    "tenantId":"1",
+    "outerForm":false,
+    "formResource":["XXX","XXX","XXX"]
     }
+     * @return 流程部署对象 deploy属性  or 其他提示信息;
+     */
+    @GetMapping("deploy")
+    public ResponseEntity<Object> deploy(@RequestParam String fileName,
+                                         @RequestBody(required = false)PowerDeployEntity powerDeploy) {
+        Object result = powerProcessService.deployProcess(fileName, powerDeploy);
+
+        return ResponseEntity.ok(result);
+    }
+
+
 }

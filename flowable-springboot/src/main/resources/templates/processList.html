@@ -27,23 +27,27 @@
     <table th:class="gridtable">
         <thead>
         <th>流程定义Id</th>
-        <th>流程定义名称</th>
-        <th>流程定义类别</th>
+        <th>流程定义名</th>
+        <!--<th>流程类别</th>-->
         <th>流程实例key</th>
-        <th>流程部署id</th>
+        <th>部署id</th>
+        <th>状态</th>
         <th>操作空间</th>
         </thead>
         <tbody>
-        <tr th:each="processDef:${processList}">
+        <tr th:each="processDef:${processDefinitionList}">
             <td th:text="${processDef.id}"></td>
             <td th:text="${processDef.name}"></td>
-            <td th:text="${processDef.category}"></td>
+            <!--<td th:text="${processDef.category}"></td>-->
             <td th:text="${processDef.keyWord}"></td>
             <td th:text="${processDef.deploymentId}"></td>
+            <td th:text="${processDef.suspensionState} eq 1? '运行中':'已挂起'"></td>
             <td>
-                <button th:value="${processDef.id}" th:class="button3" onclick="runProcess(value)">启动流程</button>
+                <button th:value="${processDef.id}" th:class="button3" onclick="runProcess(value)">启动</button>
+                <button th:value="${processDef.id}" th:class="button3" style="background-color: #1754c2" onclick="suspend(value)">挂起</button>
+                <button th:value="${processDef.id}" th:class="button3" style="background-color: #c28c63" onclick="activate(value)">激活</button>
                 <button th:value="${processDef.deploymentId}" th:class="button3" style="background-color: red"
-                        onclick="deleteProcess(value)">删除流程
+                        onclick="deleteProcess(value)">删除
                 </button>
             </td>
         </tr>
@@ -53,50 +57,40 @@
 </body>
 <script>
 
-    function runProcess(data) {
-        console.log(data);
-        $.ajax({
-            url: "/process/runNormalById",
-            data: {"processDefinitionId": data},
-            /*contentType:'application/json',*/
-            type: "GET",
-            dataType: "text",
-            async: true,
-            success: function (data) {
-                showMsg("成功启动流程");
-                console.log(data)
+    function runProcess(processDefinitionId) {
+        $.post("/process/startProcessById",{"processDefinitionId": processDefinitionId},function (result) {
+            showMsg(result.msg);
+        });
+    }
 
-                /*  window.location.href="/task/processDiagram/" */
+    function deleteProcess(deploymentId) {
+        $.ajax({
+            url: "/process/deleteProcessById",
+            data: {"deploymentId": deploymentId},
+            type: "DELETE",
+            /*dataType: "JSON/a",*/
+            async: true,
+            success: function (result) {
+                console.log(result);
+                showMsg(result.msg);
             },
             error: function (data) {
-                showMsg("流程异常");
-                console.log(data)
-                /*window.location.reload();*/
-
+                console.log(data);
             }
         })
     }
 
-    function deleteProcess(data) {
-        $.ajax({
-            url: "/process/deleteProcessById",
-            data: {"deploymentId": data},
-            type: "DELETE",
-            dataType: "text",
-            async: true,
-            success: function (data) {
-                console.log(data);
-                showMsg("成功删除流程,即将刷新页面");
+    function suspend(processDefinitionId) {
+        $.get("/process/suspendProcessByProcessDefinitionId",{"processDefinitionId":processDefinitionId},function (result) {
+            showMsg(result.msg);
+        });
+    }
 
-
-                /* window.location.href="/task/processDiagram/"*/
-            },
-            error: function (data) {
-                console.log(data);
-                showMsg(data);
-
-            }
+    function activate(processDefinitionId) {
+        $.get("/process/activateProcessByProcessDefinitionId",{"processDefinitionId":processDefinitionId},function (result) {
+            showMsg(result.msg);
         })
+
     }
 </script>
 </html>

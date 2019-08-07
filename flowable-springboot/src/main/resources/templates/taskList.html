@@ -61,10 +61,10 @@
             <!--<td th:text="${task.formKey}"></td>-->
             <td >
                 <!--<button  th:value="${task.id}"  onclick="completeTask(value)">完成任务</button>-->
-                <button  th:value="${task.id}" th:class="button3" onclick="completeTaskWithAssignee(value)">设置任务办理人并完成任务</button>
+                <button  th:value="${task.id}" th:class="button3" onclick="completeTaskWithAssignee(value)">完成任务</button>
                 <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1b6d85" onclick="showImage(value)">显示流程图</button>
-                <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1b6d85" onclick="suspendProcessInstanceById(value)">挂起</button>
-                <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1b6d85" onclick="activateProcessInstanceById(value)">激活</button>
+                <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1754c2" onclick="suspendTask(value)">挂起</button>
+                <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #c28c63" onclick="activateTask(value)">激活</button>
             </td>
         </tr>
         </tbody>
@@ -126,7 +126,7 @@
         });
     }
 
-    function suspendProcessInstanceById(processInstanceId) {
+    function suspendTask(processInstanceId) {
         $.get("/task/suspendProcessInstanceById",{"processInstanceId":processInstanceId},function (result) {
 
             if (result.code === 200){
@@ -139,7 +139,7 @@
         })
     }
 
-    function activateProcessInstanceById(processInstanceId) {
+    function activateTask(processInstanceId) {
         $.get("/task/activateProcessInstanceById",{"processInstanceId":processInstanceId},function (result) {
             if (result.code === 200){
                 reload();

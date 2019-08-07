@@ -19,9 +19,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("task")
-public class TaskController {
-
-    private final static Integer SUCCESS_CODE = 200;
+public class TaskController extends BaseController{
 
     @Autowired
     private PowerTaskService powerTaskService;
@@ -32,14 +30,13 @@ public class TaskController {
      * @return 任务列表页面 or 错误信息页面
      */
     @GetMapping("userTask")
-    public String userTask(Model model) {
+    public String userTask(Model model,HttpServletResponse response) {
 
-        Result result = powerTaskService.queryCurrentUserTasks();
+        Result result = powerTaskService.queryCurrentUserTasks(model,response);
         if (!result.getCode().equals(SUCCESS_CODE)) {
             model.addAttribute("errorMsg", result.getMsg());
             return "errorPage";
         }
-        model.addAttribute("tasks", result.getData());
         return "taskList";
     }
 
@@ -61,7 +58,6 @@ public class TaskController {
         return powerTaskService.completeTask(taskId,assignee,vars);
     }
 
-
     /**
      * 直接在浏览器上显示当前任务图
      *
@@ -76,7 +72,7 @@ public class TaskController {
 
 
     /**
-     * 挂起流程操作·
+     * 挂起流程实例操作·
      *
      * @param processInstanceId 流程实例Id
      * @return Result

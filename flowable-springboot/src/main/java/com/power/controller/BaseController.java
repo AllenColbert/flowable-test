@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
  * @date 2019/7/31 19:07
  */
 @Controller
-public class Index {
+public class BaseController {
+
+    public final static Integer SUCCESS_CODE = 200;
 
     @GetMapping("/")
     public String index(){
@@ -20,6 +22,11 @@ public class Index {
     @GetMapping("login")
     public String login(){
         return "login";
+    }
+
+    @GetMapping("webTest")
+    public String webTest(){
+        return "web-test";
     }
 
 }

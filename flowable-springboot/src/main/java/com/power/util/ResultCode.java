@@ -15,6 +15,7 @@ import java.util.List;
 public enum ResultCode {
 	 /* 成功状态码 */
     SUCCESS(200, "成功"),
+    TASK_TYPE_MULTIPLE_INSTANCES(2001,"该任务是多实例任务"),
 
     /* 参数错误：10001-19999 */
     PARAM_IS_INVALID(10001, "参数无效"),
@@ -33,7 +34,7 @@ public enum ResultCode {
     SPECIFIED_QUESTIONED_USER_NOT_EXIST(30001, "某业务出现问题"),
     PROCESS_IS_SUSPENDED(30002,"流程已经被挂起"),
     PROCESS_IS_ACTIVATED(30003,"流程已经被激活"),
-
+    PROCESS_STATUS_EXCEPTION(30004,"流程状态异常"),
     /* 系统错误：40001-49999 */
     SYSTEM_INNER_ERROR(40001, "系统繁忙，请稍后重试"),
 

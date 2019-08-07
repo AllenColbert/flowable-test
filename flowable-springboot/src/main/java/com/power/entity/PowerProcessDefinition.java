@@ -23,4 +23,6 @@ public class PowerProcessDefinition {
     private String deploymentId;
     private String bpmnResource;
     private String pngResource;
+    private Integer suspensionState;
+
 }

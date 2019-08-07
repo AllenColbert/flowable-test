@@ -16,7 +16,7 @@
     -->
 
     <!--<resultMap id="PowerProcess" type=""-->
-    <select id="findProcessList" resultType="com.power.entity.PowerDeployment">
+    <select id="queryProcessDeploymentList" resultType="com.power.entity.PowerDeployment">
         SELECT
             ard.ID_ AS id,
             ard.NAME_ AS name,
@@ -31,7 +31,7 @@
     </select>
 
 
-    <select id="findProcdefList" resultType="com.power.entity.PowerProcessDefinition">
+    <select id="queryProcessDefinitionList" resultType="com.power.entity.PowerProcessDefinition">
         SELECT
             arp.ID_ AS id,
             arp.REV_ AS rev,
@@ -41,7 +41,8 @@
             arp.VERSION_ AS version,
             arp.DEPLOYMENT_ID_ AS deploymentId,
             arp.RESOURCE_NAME_ AS bpmnResource,
-            arp.DGRM_RESOURCE_NAME_ AS	pngResource
+            arp.DGRM_RESOURCE_NAME_ AS	pngResource,
+            arp.SUSPENSION_STATE_ AS  suspensionState
         FROM
             act_re_procdef arp
     </select>

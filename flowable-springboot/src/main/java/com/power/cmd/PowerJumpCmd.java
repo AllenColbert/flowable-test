@@ -31,11 +31,11 @@ public class PowerJumpCmd implements Command<Void> {
         //获取执行实例管理类
         ExecutionEntityManager executionEntityManager = CommandContextUtil.getExecutionEntityManager();
         //获取任务实体管理类
-        TaskEntityManager taskEntityManager = org.flowable.task.service.impl.util.CommandContextUtil
-                .getTaskEntityManager();
-
+        TaskEntityManager taskEntityManager = org.flowable.task.service.impl.util.CommandContextUtil.getTaskEntityManager();
         //获取任务执行Id
         TaskEntity taskEntity = taskEntityManager.findById(taskId);
+        //获取流程实例Id
+        String processInstanceId = taskEntity.getProcessInstanceId();
         //获取执行实例Id
         String executionId = taskEntity.getExecutionId();
         //根据执行实例ID获取到执行实例

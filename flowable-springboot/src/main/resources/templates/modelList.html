@@ -17,7 +17,7 @@
         <th>模型Id</th>
         <th>模型名称</th>
         <th>模型关键词</th>
-        <th>模型描叙</th>
+        <!--<th>模型描叙</th>-->
         <th>创建时间</th>
         <th>最后更新时间</th>
         <!--<th>创建者</th>-->
@@ -28,11 +28,11 @@
         <th>操作空间</th>
         </thead>
         <tbody>
-        <tr th:each="model:${abstractModels}">
+        <tr th:each="model:${models}">
             <td th:text="${model.id}" ></td>
             <td th:text="${model.name}" ></td>
             <td th:text="${model.key}" ></td>
-            <td th:text="${model.description}" ></td>
+            <!--<td th:text="${model.description}" ></td>-->
             <td th:text="${#dates.format(model.created, 'yyyy-MM-dd HH:mm:ss')}" ></td>
             <td th:text="${#dates.format(model.lastUpdated, 'yyyy-MM-dd HH:mm:ss')}" ></td>
             <!--<td th:text="${model.createdBy}"></td>-->
@@ -42,6 +42,7 @@
             <td th:text="${model.tenantId}" ></td>
             <td >
                 <button  th:value="${model.id}" th:class="button3" onclick="deploy(value)">部署</button>
+                <button  th:value="${model.id}" th:class="button3" onclick="editor(value)">编辑</button>
                 <button th:value="${model.id}"  th:class="button3" style="background-color: red" onclick="deleteModel(value)">删除</button>
             </td>
         </tr>
@@ -83,6 +84,11 @@
         })
     }
 
+    function editor(modelId) {
+
+        window.location.href= "/index.html#/editor/"+modelId;
+
+    }
 
 
 </script>

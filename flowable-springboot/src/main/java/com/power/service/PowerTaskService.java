@@ -2,6 +2,8 @@ package com.power.service;
 
 
 import com.power.util.Result;
+import org.springframework.ui.Model;
+
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
@@ -38,9 +40,11 @@ public interface PowerTaskService {
 
     /**
      * 查询session中当前用户任务列表
+     * @param model 模型
+     * @param response 响应体
      * @return Result
      */
-    Result queryCurrentUserTasks();
+    Result queryCurrentUserTasks(Model model,HttpServletResponse response);
 
     /**
      * 完成任务

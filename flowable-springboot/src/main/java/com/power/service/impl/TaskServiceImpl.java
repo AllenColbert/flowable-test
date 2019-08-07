@@ -5,9 +5,10 @@ import com.power.mapper.TaskMapper;
 import com.power.service.PowerTaskService;
 import com.power.util.Result;
 import com.power.util.ResultCode;
-import org.checkerframework.checker.units.qual.A;
+import org.flowable.bpmn.constants.BpmnXMLConstants;
 import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.engine.*;
+import org.flowable.engine.runtime.ActivityInstance;
 import org.flowable.engine.runtime.Execution;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.idm.api.User;
@@ -45,6 +46,9 @@ public class TaskServiceImpl implements PowerTaskService {
     @Autowired
     private RepositoryService repositoryService;
 
+    @Autowired
+    private HistoryService historyService;
+
     @Qualifier("processEngine")
     @Autowired
     private ProcessEngine processEngine;
@@ -58,32 +62,51 @@ public class TaskServiceImpl implements PowerTaskService {
 
     @Override
     public Result suspendProcessInstanceById(String processInstanceId) {
-
         Result result = checkProcessStatusByProcessInstanceId(processInstanceId);
-        if (!result.getCode().equals(SUCCESS_CODE)) {
-            return result;
+        //先判断查询到的任务的状态码
+        //如果状态码不是200
+        if (!result.getCode().equals(SUCCESS_CODE)){
+            //返回数据为空的结果
+            if (result.getCode().equals(ResultCode.RESULT_DATA_NONE.code())){
+                return result;
+            }
+            //当查询的任务为多实例时
+            if (result.getCode().equals(ResultCode.TASK_TYPE_MULTIPLE_INSTANCES.code())){
+               result.setMsg("该任务为多实例任务，无法进行挂起操作");
+                return result;
+            }
         }
+        //当查询到该任务已经被挂起时
+        if (result.getData().equals(true)) {
+            return Result.failure(ResultCode.PROCESS_IS_SUSPENDED);
+        }
+        runtimeService.suspendProcessInstanceById(processInstanceId);
+        return Result.success();
 
-        if (result.getData().equals(false)) {
-            runtimeService.suspendProcessInstanceById(processInstanceId);
-            return Result.success();
-        }
-        return Result.failure(ResultCode.PROCESS_IS_SUSPENDED);
     }
 
     @Override
     public Result activateProcessInstanceById(String processInstanceId) {
         Result result = checkProcessStatusByProcessInstanceId(processInstanceId);
-
-        if (!result.getCode().equals(SUCCESS_CODE)) {
-            return result;
+        //首先判断查询到的任务的状态码
+        //如果状态码不是200
+        if (!result.getCode().equals(SUCCESS_CODE)){
+            //返回数据为空的结果
+            if (result.getCode().equals(ResultCode.RESULT_DATA_NONE.code())){
+                return result;
+            }
+            //当查询的任务为多实例时
+            if (result.getCode().equals(ResultCode.TASK_TYPE_MULTIPLE_INSTANCES.code())){
+                result.setMsg("该任务为多实例任务，无法进行激活操作");
+                return result;
+            }
         }
-
-        if (result.getData().equals(true)) {
-            runtimeService.activateProcessInstanceById(processInstanceId);
-            return Result.success();
+        //当查询到该任务已经被激活时
+        if (result.getData().equals(false)) {
+            return Result.failure(ResultCode.PROCESS_IS_ACTIVATED);
         }
-        return Result.failure(ResultCode.PROCESS_IS_ACTIVATED);
+        runtimeService.activateProcessInstanceById(processInstanceId);
+        return Result.success();
     }
 
     @Override
@@ -113,14 +136,20 @@ public class TaskServiceImpl implements PowerTaskService {
             executions.addAll(executionList);
         }
 
-        System.out.println(executions);
-
         //得到正在执行的Activity的Id
         List<String> activityIds = new ArrayList<>();
         List<String> flows = new ArrayList<>();
         for (Execution exe : executions) {
             List<String> ids = runtimeService.getActiveActivityIds(exe.getId());
             activityIds.addAll(ids);
+        }
+
+        List<ActivityInstance> flows2 = runtimeService.createActivityInstanceQuery()
+                .activityType(BpmnXMLConstants.ELEMENT_SEQUENCE_FLOW).processInstanceId(processInstanceId).list();
+
+        for (ActivityInstance activityInstance : flows2) {
+            String activityId = activityInstance.getActivityId();
+            flows.add(activityId);
         }
 
         //获取流程图
@@ -147,11 +176,12 @@ public class TaskServiceImpl implements PowerTaskService {
     }
 
     @Override
-    public Result queryCurrentUserTasks() {
+    public Result queryCurrentUserTasks(Model model,HttpServletResponse response) {
 
         User user = (User) session.getAttribute("user");
 
         if (user == null || user.getId() == null) {
+
             return Result.failure(ResultCode.USER_NOT_EXIST);
         }
         String userId = user.getId();
@@ -161,6 +191,8 @@ public class TaskServiceImpl implements PowerTaskService {
         if (tasks == null || tasks.size() == 0) {
             return Result.failure(ResultCode.TASKS_IS_NULL);
         }
+
+       model.addAttribute("tasks",tasks);
 
         return Result.success(tasks);
     }
@@ -181,11 +213,17 @@ public class TaskServiceImpl implements PowerTaskService {
      * @return Result
      */
     private Result checkProcessStatusByProcessInstanceId(String processInstanceId) {
-        Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).singleResult();
-        if (task == null) {
+        List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
+        //首先判断任务是否存在
+        if (tasks == null || tasks.size()==0) {
             return Result.failure(ResultCode.RESULT_DATA_NONE);
         }
-        return Result.success(task.isSuspended());
+        //再判断是不是多实例任务，如果是将全部的执行实例返回给上一层
+        if (tasks.size() > 1){
+            return Result.failure(ResultCode.TASK_TYPE_MULTIPLE_INSTANCES);
+        }
+        return   Result.success(tasks.get(0).isSuspended());
+
     }
 
     /**

@@ -1,6 +1,5 @@
 package com.power.filter;
 
-import org.flowable.idm.api.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -35,7 +34,6 @@ public class RequestHandlerInterceptor implements HandlerInterceptor {
         user = session.getAttribute("user");
 
         if (user != null) {
-            System.out.println("当前登陆用户Id："+((User) user).getId());
             return true;
         }
         System.out.println("拦截到请求："+servletPath);
