@@ -6,21 +6,6 @@
     <script th:src="@{/js/jquery-3.3.1.js}"></script>
 </head>
 <body>
-
-<!--<style type="text/css">
-    table {
-        border: 1px solid black;
-        text-align: center;
-        border-collapse: collapse;
-    }
-    table thead th {
-        border: 1px solid black;
-    }
-    table tbody td {
-        border: 1px solid black;
-    }
-</style>-->
-
 <div th:replace="header.html :: header"></div>
 <link th:href="@{/css/table.css}" rel="stylesheet" type="text/css">
 <div id="mainBox" th:align="center">
@@ -59,6 +44,7 @@
 
     function runProcess(processDefinitionId) {
         $.post("/process/startProcessById",{"processDefinitionId": processDefinitionId},function (result) {
+            console.log(result);
             showMsg(result.msg);
         });
     }

@@ -1,5 +1,6 @@
 package com.power.service.impl;
 
+import com.power.cmd.NodeJumpCmd;
 import com.power.entity.PowerTask;
 import com.power.mapper.TaskMapper;
 import com.power.service.PowerTaskService;
@@ -33,31 +34,25 @@ import java.util.Map;
  * @date :   2019/7/19 16:05
  */
 @Service
-public class TaskServiceImpl implements PowerTaskService {
+public class PowerTaskServiceImpl implements PowerTaskService {
 
-    private final static Integer SUCCESS_CODE = 200;
 
     @Autowired
     private TaskService taskService;
-
     @Autowired
     private RuntimeService runtimeService;
-
     @Autowired
     private RepositoryService repositoryService;
-
-    @Autowired
-    private HistoryService historyService;
-
     @Qualifier("processEngine")
     @Autowired
     private ProcessEngine processEngine;
-
     @Autowired
     private HttpSession session;
-
+    @Autowired
+    private ManagementService managementService;
     @Autowired
     private TaskMapper taskMapper;
+
 
 
     @Override
@@ -65,7 +60,7 @@ public class TaskServiceImpl implements PowerTaskService {
         Result result = checkProcessStatusByProcessInstanceId(processInstanceId);
         //先判断查询到的任务的状态码
         //如果状态码不是200
-        if (!result.getCode().equals(SUCCESS_CODE)){
+        if (!result.getCode().equals(ResultCode.SUCCESS.code())){
             //返回数据为空的结果
             if (result.getCode().equals(ResultCode.RESULT_DATA_NONE.code())){
                 return result;
@@ -90,7 +85,7 @@ public class TaskServiceImpl implements PowerTaskService {
         Result result = checkProcessStatusByProcessInstanceId(processInstanceId);
         //首先判断查询到的任务的状态码
         //如果状态码不是200
-        if (!result.getCode().equals(SUCCESS_CODE)){
+        if (!result.getCode().equals(ResultCode.SUCCESS.code())){
             //返回数据为空的结果
             if (result.getCode().equals(ResultCode.RESULT_DATA_NONE.code())){
                 return result;
@@ -201,7 +196,7 @@ public class TaskServiceImpl implements PowerTaskService {
     @Override
     public Result completeTask(String taskId, String assignee, Map<String, Object> vars) {
         Result taskStatus = checkTaskStatus(taskId);
-        if (!taskStatus.getCode().equals(SUCCESS_CODE)) {
+        if (!taskStatus.getCode().equals(ResultCode.SUCCESS.code())) {
             return taskStatus;
         }
         taskService.complete(taskId, vars);
@@ -244,4 +239,13 @@ public class TaskServiceImpl implements PowerTaskService {
 
     }
 
+    @Override
+    public Result nodeJumpCmd(String taskId, String targetNodeId) {
+        try {
+            managementService.executeCommand(new NodeJumpCmd(taskId, targetNodeId));
+        } catch (Exception e) {
+            return Result.failure(ResultCode.CMD_ERROR_MESSAGE);
+        }
+        return Result.success();
+    }
 }

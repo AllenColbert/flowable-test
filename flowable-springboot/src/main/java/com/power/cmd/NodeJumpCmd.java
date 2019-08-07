@@ -17,11 +17,11 @@ import org.flowable.task.service.impl.persistence.entity.TaskEntityManager;
  * @author : xuyunfeng
  * @date :   2019/7/23 11:29
  */
-public class PowerJumpCmd implements Command<Void> {
+public class NodeJumpCmd implements Command<Void> {
     private String taskId;
     private String targetNodeId;
 
-    public PowerJumpCmd(String taskId, String targetNodeId) {
+    public NodeJumpCmd(String taskId, String targetNodeId) {
         this.taskId = taskId;
         this.targetNodeId = targetNodeId;
     }

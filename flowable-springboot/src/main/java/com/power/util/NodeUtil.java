@@ -7,6 +7,7 @@ import org.flowable.engine.impl.bpmn.parser.factory.ActivityBehaviorFactory;
 import org.flowable.engine.impl.cfg.ProcessEngineConfigurationImpl;
 
 /**
+ * 工具类生成节点信息，---废弃?
  * @author : xuyunfeng
  * @date :   2019/7/25 14:58
  */

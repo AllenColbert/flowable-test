@@ -32,10 +32,9 @@ public interface PowerProcessService {
     /**
      * 根据流程定义Id启动流程
      * @param processDefinitionId 流程定义Id
-     * @param vars 参数
      * @return xx
      */
-    Result startProcessInstanceById(String processDefinitionId, Map<String,Object> vars);
+    Result startProcessInstanceById(String processDefinitionId);
 
     /**
      * 根据部署id（默认级联）删除已部署的流程实例
@@ -45,8 +44,41 @@ public interface PowerProcessService {
      */
     Result deleteProcessByDeploymentId(String deploymentId, Boolean concatenation);
 
+    /**
+     * 通过流程定义Id挂起整个流程
+     * @param processDefinitionId 流程定义Id
+     * @param suspendProcessInstances 是否挂起所有的流程实例,默认开启
+     * @param suspensionDate 流程定义将被暂停的日期，为null时，会立即激活
+     * @return Result
+     */
+    Result suspendProcessByProcessDefinitionId(String processDefinitionId, Boolean suspendProcessInstances, Date suspensionDate);
+
+    /**
+     *通过流程定义Id激活整个流程
+     * @param processDefinitionId 流程定义Id
+     * @param suspendProcessInstances 是否激活所有的流程实例，默认开启
+     * @param suspensionDate 流程定义将被暂停的日期，为null时，会立即激活
+     * @return Result
+     */
+    Result activateProcessByProcessDefinitionId(String processDefinitionId, Boolean suspendProcessInstances, Date suspensionDate);
+
+    /**
+     * 根据流程模型Id启动流程
+     * @param modelId 流程模型Id act_de_model表中
+     * @return Result
+     */
+    Result deployModelByModelId(String modelId);
+
+    /**
+     * 根据流程模型id删除流程模型
+     * @param modelId 模型Id
+     * @return Result
+     *
+     */
+    Result deleteModelById(String modelId);
 
 
+//################################未重构部分################################
 
     /**
      * 根据流程文件名和部署信息部署流程文件
@@ -68,22 +100,4 @@ public interface PowerProcessService {
      * @return xx
      */
     Object startProcessInstanceByKey(String processDefinitionKey);
-
-    /**
-     * 通过流程定义Id挂起整个流程
-     * @param processDefinitionId 流程定义Id
-     * @param suspendProcessInstances 是否挂起所有的流程实例,默认开启
-     * @param suspensionDate 流程定义将被暂停的日期，为null时，会立即激活
-     * @return Result
-     */
-    Result suspendProcessByProcessDefinitionId(String processDefinitionId, Boolean suspendProcessInstances, Date suspensionDate);
-
-    /**
-     *通过流程定义Id激活整个流程
-     * @param processDefinitionId 流程定义Id
-     * @param suspendProcessInstances 是否激活所有的流程实例，默认开启
-     * @param suspensionDate 流程定义将被暂停的日期，为null时，会立即激活
-     * @return Result
-     */
-    Result activateProcessByProcessDefinitionId(String processDefinitionId, Boolean suspendProcessInstances, Date suspensionDate);
 }

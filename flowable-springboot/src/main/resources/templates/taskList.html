@@ -4,40 +4,37 @@
     <meta charset="UTF-8">
     <title>任务列表</title>
     <script th:src="@{/js/jquery-3.3.1.js}"></script>
-
-    <style type="text/css">
-        table {
-            border: 1px solid black;
-            text-align: center;
-            border-collapse: collapse;
-        }
-        table thead th {
-            border: 1px solid #7b2380;
-        }
-        table tbody td {
-            border: 1px solid black;
-        }
-    </style>
 </head>
 <body>
-<h2></h2>
-
-
 <div id="heard"  th:replace="header.html :: header"></div>
-<div >
-    <div id="heardBox" style=" padding-left: 5% ;margin: 0 0 10px 40px">
+
+<div id="bodyBox">
+    <div id="inputBox" style=" padding-left: 8% ;margin: 0 0 10px 40px">
         <label for="assignee">在这里输入Assignee：</label>
         <input type="text" id="assignee" placeholder="设置任务代办人">
+
+        <!--表单提交的错误示范，明日去百度正确的表单提交方法-->
+        <div id="node_jump_box">
+            <form id="node_jump_form" onsubmit="sendData()" action="#">
+                <label>
+                    <input type="text" name="taskId" placeholder="任务Id">
+                </label>
+                <label>
+                    <input type="text" name="targetNodeId" placeholder="目标节点">
+                </label>
+                <input type="submit">
+            </form>
+        </div>
     </div>
 
-<div id="mainBox" th:align="center">
+    <div id="mainBox" th:align="center">
     <table th:class="gridtable" >
         <thead>
         <th>任务Id</th>
         <th>任务名称</th>
     <!--<th>任务执行Id</th>-->
-        <!--<th>流程实例Id</th>-->
-        <!--<th>流程定义Id</th>-->
+    <!--<th>流程实例Id</th>-->
+    <!--<th>流程定义Id</th>-->
     <!--<th>任务定义Id</th>-->
         <th>代理人</th>
         <th>创建时间</th>
@@ -66,45 +63,23 @@
                 <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1754c2" onclick="suspendTask(value)">挂起</button>
                 <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #c28c63" onclick="activateTask(value)">激活</button>
             </td>
-        </tr>
-        </tbody>
-    </table>
-</div>
+            </tr>
+           </tbody>
+      </table>
+    </div>
 
     <div id="imgDiv" style="border-image-width: auto;text-align: center"></div>
 
 </div>
+
 </body>
 
 <script>
 
-
-    function completeTask(data) {
-        $.ajax({
-            url:"/task/completeTask",
-            data:{"taskId":data},
-            type:"GET",
-            dataType:"text",
-            async:true,
-            success:function (data) {
-                console.log(data);
-                showMsg("完成任务");
-                window.location.reload();
-
-               /* window.location.href="/task/processDiagram/"*/
-            },
-            error:function (data) {
-                console.log(data);
-            }
-
-        });
-        console.log(data)
-    }
-
     function showImage(processInstanceId) {
         console.log('processInstanceId:'+processInstanceId);
         $("#imgDiv").empty().append("<img src='/task/processDiagram?processInstanceId="+processInstanceId+"'>")
-    };
+    }
 
     function completeTaskWithAssignee(taskId) {
 
@@ -150,5 +125,10 @@
         })
     }
 
+    function sendData(data) {
+        $.post("/data",{"data":data},function (result) {
+            console.log(result.data)
+        });
+    }
 </script>
 </html>

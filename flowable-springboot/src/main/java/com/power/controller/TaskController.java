@@ -70,7 +70,6 @@ public class TaskController extends BaseController{
         powerTaskService.getProcessDiagram(httpServletResponse, processInstanceId);
     }
 
-
     /**
      * 挂起流程实例操作·
      *
@@ -93,5 +92,21 @@ public class TaskController extends BaseController{
     @ResponseBody
     public Result activateProcessInstanceById(@RequestParam String processInstanceId) {
         return powerTaskService.activateProcessInstanceById(processInstanceId);
+    }
+
+    /**
+     * 任意节点跳转操作 Flowable 6.3--- Cmd模式
+     * 这里只是在普通节点之间跳转；多实例节点跳转到普通节点会出问题
+     * (又测了几次，好像多实例节点也能跑的通ε=ε=ε=(~￣▽￣)~)
+     *
+     * @param taskId        当前任务节点ID    表act_ru_task中的ID；
+     * @param targetNodeId  目标节点id   已部署的流程文件中的 <userTask id="shareniu-b"/> 标签中的Id；
+     * @return Result
+     */
+    @GetMapping("jump")
+    public Result jumpNode(@RequestParam String taskId,
+                           @RequestParam String targetNodeId) {
+        return powerTaskService.nodeJumpCmd(taskId, targetNodeId);
+
     }
 }

@@ -58,23 +58,11 @@
     });
 
 
-    function deploy(data) {
-        $.get("/process/deployModelById",{"modelId":data},function (result) {
-            console.log(result);
-            if (result.status !== '200'){
-                showMsg(result.message+' 即将自动刷新本页面');
-
-            }
-            if (result.status === 200){
-                showMsg(result.message+' 即将自动刷新本页面');
-
-            }
+    function deploy(modelId) {
+        $.get("/process/deployModelById",{"modelId":modelId},function (result) {
+            showMsg(result.msg);
         })
     }
-
-/*    function reload() {
-        window.location.reload();
-    }*/
 
     function deleteModel(data) {
         console.log(data);

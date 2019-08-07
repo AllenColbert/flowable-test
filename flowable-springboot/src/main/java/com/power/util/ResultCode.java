@@ -35,6 +35,7 @@ public enum ResultCode {
     PROCESS_IS_SUSPENDED(30002,"流程已经被挂起"),
     PROCESS_IS_ACTIVATED(30003,"流程已经被激活"),
     PROCESS_STATUS_EXCEPTION(30004,"流程状态异常"),
+
     /* 系统错误：40001-49999 */
     SYSTEM_INNER_ERROR(40001, "系统繁忙，请稍后重试"),
 
@@ -43,6 +44,9 @@ public enum ResultCode {
     DATA_IS_WRONG(50002, "数据有误"),
     DATA_ALREADY_EXISTED(50003, "数据已存在"),
     TASKS_IS_NULL(50004,"当前用户没有任务存在"),
+    MODEL_IS_EMPTY(50005,"模型为空，请重新布置后再执行"),
+    MODEL_DATA_WRONG_WARNING(50005,"数据模型不符要求，请至少设计一条主线流程。"),
+    ENCODING_NOT_SUPPORT(50005,"不支持的编码格式"),
 
     /* 接口错误：60001-69999 */
     INTERFACE_INNER_INVOKE_ERROR(60001, "内部系统接口调用异常"),
@@ -53,7 +57,13 @@ public enum ResultCode {
     INTERFACE_EXCEED_LOAD(60006, "接口负载过高"),
 
     /* 权限错误：70001-79999 */
-    PERMISSION_NO_ACCESS(70001, "无访问权限");
+    PERMISSION_NO_ACCESS(70001, "无访问权限"),
+
+    /*未定义错误类型，记录下错误位置*/
+    CMD_ERROR_MESSAGE(80001,"CMD错误"),
+
+
+    LASE_CODE(9999999,"最底部状态码");
 
     private Integer code;
 

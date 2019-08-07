@@ -1,6 +1,7 @@
 package com.power.service.impl;
 
 
+import com.power.cmd.NodeJumpCmd;
 import com.power.entity.PowerDeployEntity;
 import com.power.entity.PowerDeployment;
 import com.power.entity.PowerProcessDefinition;
@@ -8,6 +9,8 @@ import com.power.mapper.ProcessMapper;
 import com.power.service.PowerProcessService;
 import com.power.util.Result;
 import com.power.util.ResultCode;
+import org.flowable.bpmn.converter.BpmnXMLConverter;
+import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.engine.ManagementService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
@@ -15,13 +18,19 @@ import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.repository.DeploymentBuilder;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.runtime.ProcessInstance;
+import org.flowable.idm.api.User;
+import org.flowable.ui.common.service.exception.NotFoundException;
 import org.flowable.ui.modeler.domain.AbstractModel;
 import org.flowable.ui.modeler.serviceapi.ModelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.flowable.ui.modeler.domain.Model;
 
+import javax.servlet.http.HttpSession;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +62,9 @@ public class PowerProcessImpl implements PowerProcessService {
     private ProcessMapper processMapper;
 
     @Autowired
+    private HttpSession session;
+
+    @Autowired
     private ManagementService managementService;
 
     @Override
@@ -77,21 +89,25 @@ public class PowerProcessImpl implements PowerProcessService {
     }
 
     @Override
-    public Result startProcessInstanceById(String processDefinitionId, Map<String, Object> vars) {
+    public Result startProcessInstanceById(String processDefinitionId) {
         //这里需要先对流程状态进行判断，1.判断流程是否存在，2.流程是否挂起；
         Result result = checkStatusByProcessDefinitionId(processDefinitionId);
         if (!result.getCode().equals(SUCCESS_CODE)){
             return result;
         }
-        //前端GET请求 直接传流程定义Id时，会将 ':'编码为'%3A',这里加个判断自动适应GET请求或POST请求
+        //前端有些时候是GET请求 直接传流程定义Id时，会将 ':'编码为'%3A',这里加个判断自动适应GET请求或POST请求
         String specialCharacters  = "%3A";
         String replacementCharacter =":";
         if (processDefinitionId .contains(specialCharacters)){
             processDefinitionId  = processDefinitionId.replaceAll(specialCharacters, replacementCharacter);
         }
+        //为了方便测试，这里将"userId"设置为当前登录的用户Id
+        Map<String, Object> map = new HashMap<>(255);
+        User user = (User)session.getAttribute("user");
+        map.put("userId",user.getId());
 
-        ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId, vars);
-        return Result.success(processInstance.getId());
+        ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId,map);
+        return Result.success(processInstance.getActivityId()+processInstance.getProcessDefinitionId()+"/"+processInstance.getRootProcessInstanceId());
     }
 
     @Override
@@ -106,9 +122,7 @@ public class PowerProcessImpl implements PowerProcessService {
     }
 
     @Override
-    public Result suspendProcessByProcessDefinitionId(String processDefinitionId,
-                                                      Boolean suspendProcessInstances,
-                                                      Date suspensionDate){
+    public Result suspendProcessByProcessDefinitionId(String processDefinitionId, Boolean suspendProcessInstances, Date suspensionDate) {
         Result result = checkStatusByProcessDefinitionId(processDefinitionId);
         if (!result.getCode().equals(SUCCESS_CODE)){
             return result;
@@ -118,9 +132,7 @@ public class PowerProcessImpl implements PowerProcessService {
     }
 
     @Override
-    public  Result activateProcessByProcessDefinitionId(String processDefinitionId,
-                                                        Boolean suspendProcessInstances,
-                                                        Date suspensionDate){
+    public  Result activateProcessByProcessDefinitionId(String processDefinitionId,Boolean suspendProcessInstances, Date suspensionDate){
         Result result = checkStatusByProcessDefinitionId(processDefinitionId);
 
         //只有流程被挂起时才能进行激活操作
@@ -133,6 +145,54 @@ public class PowerProcessImpl implements PowerProcessService {
 
     }
 
+    @Override
+    public Result deployModelByModelId(String modelId) {
+        //获取模型
+        Model modelData;
+        try {
+            modelData = modelService.getModel(modelId);
+        } catch (NotFoundException e) {
+            return Result.failure(ResultCode.RESULT_DATA_NONE);
+        }catch (Exception e){
+            return Result.failure(ResultCode.DATA_IS_WRONG);
+        }
+        byte[] bytes = modelService.getBpmnXML(modelData);
+        if (bytes == null) {
+            return Result.failure(ResultCode.MODEL_IS_EMPTY);
+        }
+
+        BpmnModel model=modelService.getBpmnModel(modelData);
+        if(model.getProcesses().size()==0){
+            return Result.failure(ResultCode.MODEL_DATA_WRONG_WARNING);
+        }
+        byte[] bpmnBytes = new BpmnXMLConverter().convertToXML(model);
+        //发布流程
+        String processName = modelData.getName() + ".bpmn20.xml";
+
+        Deployment deploy = repositoryService.createDeployment()
+                .name(modelData.getName())
+                .addString(processName, new String(bpmnBytes, StandardCharsets.UTF_8))
+                .deploy();
+
+        return Result.success(deploy);
+    }
+
+    @Override
+    public Result deleteModelById(String modelId){
+        try {
+             modelService.getModel(modelId);
+        } catch (NotFoundException e) {
+            return Result.failure(ResultCode.RESULT_DATA_NONE);
+        }catch (Exception e){
+            return Result.failure(ResultCode.DATA_IS_WRONG);
+        }
+        modelService.deleteModel(modelId);
+        return Result.success();
+    }
+
+
+
+    //##################未重构部分代码#######################
     @Override
     public Object deployProcess(String fileName, PowerDeployEntity powerDeploy) {
         String fileType1 = "bpmn";
@@ -180,6 +240,8 @@ public class PowerProcessImpl implements PowerProcessService {
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(processDefinitionKey);
         return "流程实例Id：" + processInstance.getId();
     }
+
+
 
 
     //方法区

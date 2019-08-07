@@ -3,14 +3,11 @@ package com.power.controller;
 
 import com.power.cmd.GetProcessCmd;
 import com.power.cmd.GetProcessDefinitionCacheEntryCmd;
-import com.power.cmd.PowerJumpCmd;
 import com.power.entity.PowerDeployEntity;
-import com.power.entity.PowerDeployment;
 import com.power.entity.PowerTask;
 import com.power.service.CommonService;
 import com.power.service.PowerProcessService;
 import com.power.util.Result;
-import org.flowable.bpmn.converter.BpmnXMLConverter;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
 import org.flowable.engine.ManagementService;
@@ -19,10 +16,8 @@ import org.flowable.engine.RuntimeService;
 import org.flowable.engine.impl.bpmn.behavior.MultiInstanceActivityBehavior;
 import org.flowable.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
 import org.flowable.engine.impl.persistence.deploy.ProcessDefinitionCacheEntry;
-import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.runtime.Execution;
 import org.flowable.idm.api.User;
-import org.flowable.ui.common.service.exception.NotFoundException;
 import org.flowable.ui.modeler.serviceapi.ModelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +26,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -44,25 +38,15 @@ import java.util.*;
 public class ProcessController extends BaseController {
 
     @Autowired
-    private RepositoryService repositoryService;
-
-    @Autowired
     private RuntimeService runtimeService;
-
     @Autowired
     private PowerProcessService powerProcessService;
-
     @Autowired
     private ManagementService managementService;
-
     @Autowired
     private CommonService commonService;
-
     @Autowired
     private HttpSession session;
-
-    @Autowired
-    private ModelService modelService;
 
     /**
      * 获取流程模型列表
@@ -78,7 +62,9 @@ public class ProcessController extends BaseController {
             model.addAttribute("errorMsg",result.getMsg());
             return "errorPage";
         }
+
         model.addAttribute("models",result.getData());
+
         return  "modelList";
     }
 
@@ -97,6 +83,7 @@ public class ProcessController extends BaseController {
         }
 
         model.addAttribute("processDefinitionList",result.getData());
+
         return "processList";
     }
 
@@ -110,20 +97,7 @@ public class ProcessController extends BaseController {
     @PostMapping("startProcessById")
     @ResponseBody
     public Result startProcessById(@RequestParam String processDefinitionId) {
-
-        //TODO 目前还不会做前端form传值，先写死，后面再改
-        System.out.println("传到Controller层的processDefinitionId:"+processDefinitionId);
-
-        Map<String, Object> vars = new HashMap<>(255);
-        String userId = "admin";
-        User user = (User) session.getAttribute("user");
-        if (user != null) {
-            userId = user.getId();
-        }
-        vars.put("userId", userId);
-
-       return powerProcessService.startProcessInstanceById(processDefinitionId,vars);
-
+       return powerProcessService.startProcessInstanceById(processDefinitionId);
     }
 
     /**
@@ -171,60 +145,28 @@ public class ProcessController extends BaseController {
     }
 
     /**
-     * 根据流程定义key启动流程 失败 --tmd 为什么？
-     * 参数问题： --目前来看跟参数没关系
-     * @param processDefinitionKey 流程定义key
-     * @return 标记
+     * 根据流程模型id部署流程
+     * @param modelId 流程模型id
+     * @return Result
      */
-    @GetMapping("runNormalByKey")
-    public ResponseEntity runNormalByKey(@RequestParam String processDefinitionKey){
-        Map<String, Object> vars = new HashMap<>(255);
-
-        User user = (User) session.getAttribute("user");
-        vars.put("userId", user.getId());
-        System.out.println(vars);
-
-
-        Object result = powerProcessService.startProcessInstanceByKey(processDefinitionKey);
-
-        return ResponseEntity.ok(result);
+    @GetMapping("deployModelById")
+    @ResponseBody
+    public Result deployModelByModelId(@RequestParam String modelId){
+       return powerProcessService.deployModelByModelId(modelId);
     }
 
     /**
-     * 查询流程部署情况
-     * 通过mybatis 创建SQL语句直接从数据库表 act_re_deployment 中查询
-     * 将结果封装到自定义实体类  PowerDeployment
-     * TODO Pageable分页
-     *
-     * @return 流程部署列表 processDeploymentList
+     * 根据流程模型Id删除流程模型
+     * @param modelId 模型Id
+     * @return Result
      */
-    @GetMapping("deploymentList")
-    public ResponseEntity<List<PowerDeployment>> processList() {
-        List<PowerDeployment> list = powerProcessService.findProcessList();
-        return ResponseEntity.ok(list);
+    @GetMapping("deleteModelById")
+    @ResponseBody
+    public Result deleteModelById(@RequestParam String modelId){
+        return powerProcessService.deleteModelById(modelId);
     }
 
-//#########################################未整理代码##############################################
-
-
-    /**
-     * 测试包含多实例节点流程启动
-     * 注意  此处任务执行人列表硬编码 只是为了测试方法
-     *
-     * @param processDefinition 流程定义Id
-     * @return 标记
-     */
-    @GetMapping("runMultiInstance/{processDefinition}")
-    public ResponseEntity runMultiInstance(@PathVariable String processDefinition) {
-        String[] strings = {"ZhangSan", "LiSi", "WangWu"};
-        List<String> list = Arrays.asList(strings);
-        Map<String, Object> vars = new HashMap<>(255);
-
-        vars.put("assigneeList", list);
-        Object result = powerProcessService.startProcessInstanceById(processDefinition, vars);
-
-        return ResponseEntity.ok(result);
-    }
+//#########################################未重构代码##############################################
 
     /**
      * 多实例节点加签操作
@@ -256,21 +198,7 @@ public class ProcessController extends BaseController {
         return ResponseEntity.ok("完成多实例节点减签操作");
     }
 
-    /**
-     * 任意节点跳转操作 Flowable 6.3--- Cmd模式
-     * 这里只是在普通节点之间跳转；多实例节点跳转到普通节点会出问题
-     * (又测了几次，好像多实例节点也能跑的通ε=ε=ε=(~￣▽￣)~)
-     *
-     * @param taskId        当前任务节点ID    表act_ru_task中的ID；
-     * @param targetNodeId  目标节点id   已部署的流程文件中的 <userTask id="shareniu-b"/> 标签中的Id；
-     * @return 标记
-     */
-    @GetMapping("jump")
-    public ResponseEntity jumpNode(@RequestParam String taskId,
-                                   @RequestParam String targetNodeId) {
-        managementService.executeCommand(new PowerJumpCmd(taskId, targetNodeId));
-        return ResponseEntity.ok("跳转成功");
-    }
+
 
     /**
      * 普通节点之间跳转操作，flowable 6.4更新后提供的方法
@@ -395,108 +323,7 @@ public class ProcessController extends BaseController {
         return ResponseEntity.ok(process);
     }
 
-    /**
-     * 检查Process缓存
-     * @param processDefinitionId 流程定义Id
-     * @return process
-     */
-    @GetMapping("checkProcess")
-    public ResponseEntity checkProcess(@RequestParam String processDefinitionId){
-        ProcessDefinitionCacheEntry processCacheEntry = managementService
-                .executeCommand(new GetProcessDefinitionCacheEntryCmd(processDefinitionId));
-        Process process = processCacheEntry.getProcess();
-        return ResponseEntity.ok(process);
-    }
 
-
-    /**
-     * 根据流程模型id部署流程
-     * @param modelId 流程模型ID
-     * @return status
-     * @throws UnsupportedEncodingException 异常
-     */
-    @GetMapping("deployModelById")
-    public ResponseEntity deployModelById(@RequestParam String modelId) throws UnsupportedEncodingException {
-        Map<String, Object> map = new HashMap<>(255);
-        //错误信息
-        String message;
-        //状态
-        Integer status;
-        //获取模型
-        org.flowable.ui.modeler.domain.Model modelData;
-        try {
-            modelData = modelService.getModel(modelId);
-        } catch (NotFoundException e) {
-            message = "模型数据为空，请先设计流程并成功保存，再进行发布。";
-            status=404;
-            map.put("message",message);
-            map.put("status",status);
-            return ResponseEntity.ok(map);
-        }catch (Exception e){
-            message = "其他错误";
-            status=500;
-            map.put("message",message);
-            map.put("status",status);
-            return ResponseEntity.ok(map);
-        }
-
-
-        byte[] bytes = modelService.getBpmnXML(modelData);
-
-     if (bytes == null) {
-
-         message = "模型数据为空，请先设计流程并成功保存，再进行发布。";
-         status=404;
-
-         map.put("message",message);
-
-         map.put("status",status);
-
-         return ResponseEntity.ok(map);
-     }
-
-    BpmnModel model=modelService.getBpmnModel(modelData);
-    if(model.getProcesses().size()==0){
-        message="数据模型不符要求，请至少设计一条主线流程。";
-        status=500;
-
-        map.put("message",message);
-        map.put("status",status);
-
-        return ResponseEntity.ok(map);
-    }
-        byte[] bpmnBytes = new BpmnXMLConverter().convertToXML(model);
-        //发布流程
-        String processName = modelData.getName() + ".bpmn20.xml";
-        Deployment deploy=  repositoryService.createDeployment()
-                .name(modelData.getName())
-                .addString(processName, new String(bpmnBytes, "UTF-8"))
-                .deploy();
-
-        message = "成功部署";
-        status=200;
-
-        map.put("message",message);
-        map.put("status",status);
-        map.put("data",deploy);
-        return (ResponseEntity.ok(map));
-    }
-
-
-    /**
-     * 根据流程模型Id删除流程模型
-     * @param modelId id
-     * @return mark
-     */
-    @GetMapping("deleteModelById")
-    public ResponseEntity deleteModelById(@RequestParam String modelId){
-        org.flowable.ui.modeler.domain.Model model = modelService.getModel(modelId);
-        if (model == null ){
-            return ResponseEntity.ok("没有对应的流程模板");
-
-        }        modelService.deleteModel(modelId);
-        return ResponseEntity.ok("成功删除");
-    }
 
     /**
      * 根据本地文件名部署流程（文件全名，默认匹配路径：resources/upload/diagrams/**）
@@ -518,6 +345,27 @@ public class ProcessController extends BaseController {
     public ResponseEntity<Object> deploy(@RequestParam String fileName,
                                          @RequestBody(required = false)PowerDeployEntity powerDeploy) {
         Object result = powerProcessService.deployProcess(fileName, powerDeploy);
+
+        return ResponseEntity.ok(result);
+    }
+
+
+    /**
+     * 根据流程定义key启动流程 失败 --tmd 为什么？
+     * 参数问题： --目前来看跟参数没关系
+     * @param processDefinitionKey 流程定义key
+     * @return 标记
+     */
+    @GetMapping("runNormalByKey")
+    public ResponseEntity runNormalByKey(@RequestParam String processDefinitionKey){
+        Map<String, Object> vars = new HashMap<>(255);
+
+        User user = (User) session.getAttribute("user");
+        vars.put("userId", user.getId());
+        System.out.println(vars);
+
+
+        Object result = powerProcessService.startProcessInstanceByKey(processDefinitionKey);
 
         return ResponseEntity.ok(result);
     }

@@ -15,7 +15,6 @@ import java.util.Map;
  */
 public interface PowerTaskService {
 
-
     /**
      * 根据流程实例ID挂起流程实例
      * @param processInstanceId 流程实例Id
@@ -54,4 +53,12 @@ public interface PowerTaskService {
      * @return Result
      */
     Result completeTask(String taskId, String assignee, Map<String, Object> vars);
+
+    /**
+     * 重写CMD完成任意任务节点跳转操作
+     * @param taskId 当前任务id
+     * @param targetNodeId 目标节点
+     * @return Result
+     */
+    Result nodeJumpCmd(String taskId, String targetNodeId);
 }
