@@ -19,7 +19,7 @@
 }
 
 .remove {
-    display: none; /* 修改这里可以让删除框消失*/
+    display: none; /* 默认不显示弹出层*/
     width: 400px;
     height: 190px;
     position: absolute;

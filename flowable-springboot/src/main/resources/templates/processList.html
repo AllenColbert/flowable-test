@@ -15,7 +15,7 @@
         <th>流程定义名</th>
         <!--<th>流程类别</th>-->
         <th>流程实例key</th>
-        <th>部署id</th>
+        <!--<th>部署id</th>-->
         <th>状态</th>
         <th>操作空间</th>
         </thead>
@@ -25,10 +25,11 @@
             <td th:text="${processDef.name}"></td>
             <!--<td th:text="${processDef.category}"></td>-->
             <td th:text="${processDef.keyWord}"></td>
-            <td th:text="${processDef.deploymentId}"></td>
+            <!--<td th:text="${processDef.deploymentId}"></td>-->
             <td th:text="${processDef.suspensionState} eq 1? '运行中':'已挂起'"></td>
             <td>
                 <button th:value="${processDef.id}" th:class="button3" onclick="runProcess(value)">启动</button>
+                <button th:value="${processDef.id}" th:class="button3" onclick="getProcess(value)">查询process</button>
                 <button th:value="${processDef.id}" th:class="button3" style="background-color: #1754c2" onclick="suspend(value)">挂起</button>
                 <button th:value="${processDef.id}" th:class="button3" style="background-color: #c28c63" onclick="activate(value)">激活</button>
                 <button th:value="${processDef.deploymentId}" th:class="button3" style="background-color: red"
@@ -47,6 +48,14 @@
             console.log(result);
             showMsg(result.msg);
         });
+    }
+
+    function getProcess(processDefinitionId) {
+        window.open('/process/showProcess?processDefinitionId='+processDefinitionId,false);
+        //window.location.href="/process/showProcess?processDefinitionId="+processDefinitionId;
+/*        $.get("/process/showProcess",{"processDefinitionId":processDefinitionId},function (result) {
+
+        })*/
     }
 
     function deleteProcess(deploymentId) {

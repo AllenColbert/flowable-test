@@ -7,7 +7,6 @@ import com.power.util.Result;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -77,6 +76,19 @@ public interface PowerProcessService {
      */
     Result deleteModelById(String modelId);
 
+    /**
+     * 根据processDefinitionId查询process对象
+     * @param processDefinitionId 流程定义Id
+     * @return Result
+     */
+    Result showProcess(String processDefinitionId);
+
+    /**
+     * 查询model对象
+     * @param modelId 模型Id
+     * @return Result
+     */
+    Result showModel(String modelId);
 
 //################################未重构部分################################
 
@@ -100,4 +112,6 @@ public interface PowerProcessService {
      * @return xx
      */
     Object startProcessInstanceByKey(String processDefinitionKey);
+
+
 }

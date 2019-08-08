@@ -4,27 +4,58 @@
     <meta charset="UTF-8">
     <title>任务列表</title>
     <script th:src="@{/js/jquery-3.3.1.js}"></script>
+    <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
 </head>
 <body>
 <div id="heard"  th:replace="header.html :: header"></div>
+
+<div id="buttons-hbox">
+    <button id="tanchu" onclick="show()">填写任务数据</button>
+</div>
+
+<!--遮罩层div-->
+<div class="zhezhao"></div>
+
+<!--弹出层div-->
+<div class="remove" title="完成任务" >
+    <button id="guanbi" onclick="hide()">关闭</button>
+    <form id="form1" action="#" method="post" name="form1">
+        <table id="table1">
+            <tr>
+                <td>参数1:</td>
+                <td>
+                    <label>
+                    <input type="text" placeholder="参数1" name="taskId" >
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td>参数2:</td>
+                <td>
+                    <label>
+                        <input type="text" placeholder="参数2"  name="targetNode" >
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td>参数3:</td>
+                <td>
+                    <label>
+                        <input type="text" placeholder="参数3" name="assignee">
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td><input type="button" id="form1_submit" value="提交参数"></td>
+            </tr>
+        </table>
+    </form>
+</div>
 
 <div id="bodyBox">
     <div id="inputBox" style=" padding-left: 8% ;margin: 0 0 10px 40px">
         <label for="assignee">在这里输入Assignee：</label>
         <input type="text" id="assignee" placeholder="设置任务代办人">
-
-        <!--表单提交的错误示范，明日去百度正确的表单提交方法-->
-        <div id="node_jump_box">
-            <form id="node_jump_form" onsubmit="sendData()" action="#">
-                <label>
-                    <input type="text" name="taskId" placeholder="任务Id">
-                </label>
-                <label>
-                    <input type="text" name="targetNodeId" placeholder="目标节点">
-                </label>
-                <input type="submit">
-            </form>
-        </div>
     </div>
 
     <div id="mainBox" th:align="center">
@@ -75,6 +106,82 @@
 </body>
 
 <script>
+
+/*    $.fn.serializeObject = function() {
+        var o = {};
+        var a = this.serializeArray();
+        $.each(a, function() {
+            if (o[this.name]) {
+                if (!o[this.name].push) {
+                    o[this.name] = [ o[this.name] ];
+                }
+                o[this.name].push(this.value || '');
+            } else {
+                o[this.name] = this.value || '';
+            }
+        });
+        return o;
+    };*/
+
+    $(function () {
+
+        $("#form1_submit").click(function () {
+            var formData = $("#form1").serializeArray();
+            console.log('原始数据'+formData);
+            var newVar = formData[0];
+            console.log('newVar:'+newVar);
+            //var parse = JSON.parse(formData);
+            //console.log('解析数据1'+parse);
+            var jsonData = JSON.stringify(formData);
+            console.log('jsonDate'+jsonData);
+            var resultJson = $.parseJSON(jsonData);
+
+            console.log(resultJson);
+            $.post("/data",{"formData":jsonData},function (result) {
+                console.log(result);
+            });
+        })
+    });
+
+/*    function data_view() {
+        var data = $('form[id="form1"]').serialize();
+        var data2 = $('form[id="form1"]').serializeObject();
+        //var data3 = $('form[id="form1"]').serializeArray();
+        console.log(data);
+        console.log(data2);
+       // console.log(data3);
+        window.alert(data);
+    }*/
+
+
+
+    function show() {
+        show_zhe_zhao();
+        show_tan_chuang();
+    }
+
+    function hide() {
+        hide_zhe_zhao();
+        hide_tan_chuang();
+    }
+
+     function show_zhe_zhao(){
+         $('.zhezhao').css('display', 'block');
+     }
+
+     function hide_zhe_zhao() {
+         $('.zhezhao').css('display', 'none');
+     }
+
+     function show_tan_chuang() {
+         $('.remove').css('display','block')
+     }
+
+     function hide_tan_chuang() {
+        $('.remove').css('display','none')
+     }
+
+
 
     function showImage(processInstanceId) {
         console.log('processInstanceId:'+processInstanceId);

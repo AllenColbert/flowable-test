@@ -1,7 +1,7 @@
 package com.power.service.impl;
 
 
-import com.power.cmd.NodeJumpCmd;
+import com.power.cmd.GetProcessCmd;
 import com.power.entity.PowerDeployEntity;
 import com.power.entity.PowerDeployment;
 import com.power.entity.PowerProcessDefinition;
@@ -11,6 +11,7 @@ import com.power.util.Result;
 import com.power.util.ResultCode;
 import org.flowable.bpmn.converter.BpmnXMLConverter;
 import org.flowable.bpmn.model.BpmnModel;
+import org.flowable.bpmn.model.Process;
 import org.flowable.engine.ManagementService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
@@ -21,11 +22,11 @@ import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.idm.api.User;
 import org.flowable.ui.common.service.exception.NotFoundException;
 import org.flowable.ui.modeler.domain.AbstractModel;
+import org.flowable.ui.modeler.domain.Model;
 import org.flowable.ui.modeler.serviceapi.ModelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-import org.flowable.ui.modeler.domain.Model;
 
 import javax.servlet.http.HttpSession;
 import java.nio.charset.StandardCharsets;
@@ -190,9 +191,27 @@ public class PowerProcessImpl implements PowerProcessService {
         return Result.success();
     }
 
+    @Override
+    public Result showProcess(String processDefinitionId){
+        Process process = managementService.executeCommand(new GetProcessCmd(processDefinitionId));
+        if (process == null){
+            return Result.failure(ResultCode.RESULT_DATA_NONE);
+        }
+        return Result.success(process);
+    }
 
+    @Override
+    public  Result showModel(String modelId){
+        Model model = modelService.getModel(modelId);
+        if (model == null) {
+            return Result.failure(ResultCode.RESULT_DATA_NONE);
+        }
+        return Result.success(model);
+    }
 
-    //##################未重构部分代码#######################
+    /*############################################################################*/
+
+    /*##################未重构部分代码#######################*/
     @Override
     public Object deployProcess(String fileName, PowerDeployEntity powerDeploy) {
         String fileType1 = "bpmn";

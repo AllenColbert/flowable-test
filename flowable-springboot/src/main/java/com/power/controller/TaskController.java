@@ -42,8 +42,6 @@ public class TaskController extends BaseController{
 
     /**
      * 完成当前任务
-     * 完成任务前需要检测一下任务是否被挂起
-     *
      * @param taskId   任务Id
      * @param assignee 任务代理人
      * @return 完成标记
@@ -55,6 +53,10 @@ public class TaskController extends BaseController{
         Map<String, Object> vars = new HashMap<>(255);
         //这里还有完成任务，添加评论，表单填写等功能，还没想好怎么写，暂时先放着
         vars.put("userId", assignee);
+        vars.put("money",1800);
+        vars.put("send_apply",true);
+        vars.put("assignee","ZhangSan");
+        vars.put("approve",true);
         return powerTaskService.completeTask(taskId,assignee,vars);
     }
 
@@ -107,6 +109,7 @@ public class TaskController extends BaseController{
     public Result jumpNode(@RequestParam String taskId,
                            @RequestParam String targetNodeId) {
         return powerTaskService.nodeJumpCmd(taskId, targetNodeId);
-
     }
+
+
 }

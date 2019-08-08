@@ -11,14 +11,12 @@ import com.power.util.Result;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
 import org.flowable.engine.ManagementService;
-import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.impl.bpmn.behavior.MultiInstanceActivityBehavior;
 import org.flowable.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
 import org.flowable.engine.impl.persistence.deploy.ProcessDefinitionCacheEntry;
 import org.flowable.engine.runtime.Execution;
 import org.flowable.idm.api.User;
-import org.flowable.ui.modeler.serviceapi.ModelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -166,6 +164,18 @@ public class ProcessController extends BaseController {
         return powerProcessService.deleteModelById(modelId);
     }
 
+    @GetMapping("showProcess")
+    @ResponseBody
+    public Result showProcess(@RequestParam String processDefinitionId){
+        return powerProcessService.showProcess(processDefinitionId);
+    }
+
+    @GetMapping("showModel")
+    @ResponseBody
+    public Result showModel(@RequestParam String modelId){
+        return powerProcessService.showModel(modelId);
+    }
+
 //#########################################未重构代码##############################################
 
     /**
@@ -265,7 +275,7 @@ public class ProcessController extends BaseController {
      * @param sourceRef 源节点 一般来说都是新增的节点id
      * @param targetRef 目标节点
      * @param powerTask 新增的节点
-     * @return
+     * @return xx
      */
     @GetMapping("addSingleNode")
     public ResponseEntity addNode(@RequestParam String processDefinitionId,
@@ -304,7 +314,7 @@ public class ProcessController extends BaseController {
      * 风险太大，不能用，需要将其改成正在执行中的执行实例模板
      * @param processDefinitionId 流程定义Id
      * @param targetNodeId 目标节点Id
-     * @return
+     * @return xx
      */
     @GetMapping("deleteNode")
     public ResponseEntity deleteNode(@RequestParam String processDefinitionId,
