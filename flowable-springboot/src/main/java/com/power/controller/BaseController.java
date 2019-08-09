@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,7 +18,7 @@ import java.util.Map;
 @Controller
 public class BaseController {
 
-    public final static Integer SUCCESS_CODE = 200;
+
 
     @GetMapping("/")
     public String index(){
@@ -40,20 +38,22 @@ public class BaseController {
 
     @PostMapping("data")
     @ResponseBody
-    public Result receiveData(@RequestParam String formData){
+    public Result receiveData(@RequestParam String formData,
+                              @RequestParam Map<String,String> result){
 
-        List<Map> parse = JSON.parseArray(formData, Map.class);
-        System.out.println(parse);
+        System.out.println("转译后传递的JSON字符串"+formData);
+        //将字符串解析成map对象
+        Map map  = (Map) JSON.parse(formData);
+        //直接传递的map对象
+        System.out.println("直接传递的map对象："+result);
 
-        Map<String, String> hashMap = new HashMap<>();
-
-        for (Map map : parse) {
-            System.out.println(map);
+        for (String s : result.keySet()) {
+            System.out.println("直接从result中取值："+result.get(s));
         }
 
-        System.out.println(hashMap);
-
-        /*Map map  = (Map) JSON.parse(formData);*/
-        return Result.success(hashMap);
+        for (Object o : map.keySet()) {
+            System.out.println("从解析后的Map中取值："+map.get(o));
+        }
+        return Result.success(formData);
     }
 }

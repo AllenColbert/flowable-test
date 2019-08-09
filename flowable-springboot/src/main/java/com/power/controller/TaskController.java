@@ -1,12 +1,15 @@
 package com.power.controller;
 
 
+import com.alibaba.fastjson.JSON;
 import com.power.service.PowerTaskService;
 import com.power.util.Result;
+import com.power.util.ResultCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +36,7 @@ public class TaskController extends BaseController{
     public String userTask(Model model,HttpServletResponse response) {
 
         Result result = powerTaskService.queryCurrentUserTasks(model,response);
-        if (!result.getCode().equals(SUCCESS_CODE)) {
+        if (!result.getCode().equals(ResultCode.SUCCESS.code())) {
             model.addAttribute("errorMsg", result.getMsg());
             return "errorPage";
         }
@@ -109,6 +112,22 @@ public class TaskController extends BaseController{
     public Result jumpNode(@RequestParam String taskId,
                            @RequestParam String targetNodeId) {
         return powerTaskService.nodeJumpCmd(taskId, targetNodeId);
+    }
+
+
+    /**
+     * 完成任务的时候提交数据
+     * @param taskId 任务Id
+     * @param formData 表单数据
+     * @return Result
+     */
+    @GetMapping("completeTaskWithData")
+    @ResponseBody
+    public Result completeTaskWithData (@RequestParam String taskId,
+                                        @RequestParam String formData){
+        Map vars = (Map) JSON.parse(formData);
+
+       return powerTaskService.completeTask(taskId,vars);
     }
 
 

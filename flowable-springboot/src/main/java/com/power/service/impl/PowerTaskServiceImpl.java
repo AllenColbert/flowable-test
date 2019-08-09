@@ -203,6 +203,17 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         return Result.success();
     }
 
+    @Override
+    public Result completeTask(String taskId, Map<String, Object> vars) {
+        Result taskStatus = checkTaskStatus(taskId);
+        if (!taskStatus.getCode().equals(ResultCode.SUCCESS.code())) {
+            return taskStatus;
+        }
+        taskService.complete(taskId, vars);
+        return Result.success();
+    }
+
+
     /**
      * 根据流程实例Id判断流程是否存在和挂起状态，返回自定义Result
      * @param processInstanceId 流程实例Id

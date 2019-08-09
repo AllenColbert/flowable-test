@@ -47,12 +47,21 @@ public interface PowerTaskService {
 
     /**
      * 完成任务
+     * --待删除
      * @param taskId 任务Id
      * @param assignee 用户id
      * @param vars 参数map
      * @return Result
      */
     Result completeTask(String taskId, String assignee, Map<String, Object> vars);
+
+    /**
+     * 完成任务
+     * @param taskId 任务Id
+     * @param vars 参数map
+     * @return Result
+     */
+    Result completeTask(String taskId, Map<String ,Object> vars);
 
     /**
      * 重写CMD完成任意任务节点跳转操作

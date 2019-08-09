@@ -8,6 +8,7 @@ import com.power.entity.PowerTask;
 import com.power.service.CommonService;
 import com.power.service.PowerProcessService;
 import com.power.util.Result;
+import com.power.util.ResultCode;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
 import org.flowable.engine.ManagementService;
@@ -56,7 +57,7 @@ public class ProcessController extends BaseController {
 
         Result result =  powerProcessService.queryProcessModelList();
 
-        if (!result.getCode().equals(SUCCESS_CODE)){
+        if (!result.getCode().equals(ResultCode.SUCCESS.code())){
             model.addAttribute("errorMsg",result.getMsg());
             return "errorPage";
         }
@@ -75,7 +76,7 @@ public class ProcessController extends BaseController {
     public String processList(Model model){
         Result result =  powerProcessService.queryProcessDefinitionList();
 
-        if (!result.getCode().equals(SUCCESS_CODE)){
+        if (!result.getCode().equals(ResultCode.SUCCESS.code())){
             model.addAttribute("errorMsg",result.getMsg());
             return "errorPage";
         }
