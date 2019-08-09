@@ -15,6 +15,9 @@
         parameterType：传递的参数类型，可以省略
     -->
 
+
+    <!--这里查的是单表act_ru_task表中的数据，扩展后应该有任务发起人，评论（上一步的），任务描述（这个好像有了，在流程编辑的时候写的）-->
+
     <select id="queryUserTask" resultType="com.power.entity.PowerTask" parameterType="String">
         SELECT
             art.ID_ AS id,

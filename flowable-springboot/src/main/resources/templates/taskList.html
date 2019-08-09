@@ -71,7 +71,7 @@
 </div>
 
 <div id="bodyBox">
-    <div id="inputBox" style=" padding-left: 8% ;margin: 0 0 10px 40px">
+    <div id="inputBox" style=" padding-left: 8% ;margin: 0 0 10px 40px;display: none ">
         <label for="assignee">在这里输入Assignee：</label>
         <input type="text" id="assignee" placeholder="设置任务代办人">
     </div>
@@ -119,14 +119,11 @@
 
     <div id="imgDiv" style="border-image-width: auto;text-align: center"></div>
 
-
 </div>
 
 </body>
 
 <script>
-
-
 
     $(function () {
 
@@ -161,42 +158,50 @@
             $.get("/task/completeTaskWithData",{"taskId":taskId,"formData":resultData},function (result) {
                 showMsg(result.msg);
             });
-                hide()
+            hide()
         }
         )
     }
 
     function show() {
-        show_zhe_zhao();
-        show_tan_chuang();
+        $('.zhezhao').css('display', 'block');
+        $('.remove').css('display','block')
     }
 
     function hide() {
-        hide_zhe_zhao();
-        hide_tan_chuang();
+        $('.remove').css('display','none');
+        $('.zhezhao').css('display', 'none');
     }
-
-     function show_zhe_zhao(){
-         $('.zhezhao').css('display', 'block');
-     }
-
-     function hide_zhe_zhao() {
-         $('.zhezhao').css('display', 'none');
-     }
-
-     function show_tan_chuang() {
-         $('.remove').css('display','block')
-     }
-
-     function hide_tan_chuang() {
-        $('.remove').css('display','none')
-     }
-
 
 
     function showImage(processInstanceId) {
         console.log('processInstanceId:'+processInstanceId);
         $("#imgDiv").empty().append("<img src='/task/processDiagram?processInstanceId="+processInstanceId+"'>")
+    }
+
+    function suspendTask(processInstanceId) {
+        $.get("/task/suspendProcessInstanceById",{"processInstanceId":processInstanceId},function (result) {
+
+            if (result.code === 200){
+                reload();
+            }
+            if (result.code !== 200){
+                showMsg(result.msg);
+            }
+
+        })
+    }
+
+
+    function activateTask(processInstanceId) {
+        $.get("/task/activateProcessInstanceById",{"processInstanceId":processInstanceId},function (result) {
+            if (result.code === 200){
+                reload();
+            }
+            if (result.code !== 200){
+                showMsg(result.msg);
+            }
+        })
     }
 
     function completeTaskWithAssignee(taskId) {
@@ -213,40 +218,5 @@
         })
     }
 
-    function logout() {
-        $.get("/idm/logout",function () {
-            window.location.href="/";
-        });
-    }
-
-    function suspendTask(processInstanceId) {
-        $.get("/task/suspendProcessInstanceById",{"processInstanceId":processInstanceId},function (result) {
-
-            if (result.code === 200){
-                reload();
-            }
-            if (result.code !== 200){
-                showMsg(result.msg);
-            }
-
-        })
-    }
-
-    function activateTask(processInstanceId) {
-        $.get("/task/activateProcessInstanceById",{"processInstanceId":processInstanceId},function (result) {
-            if (result.code === 200){
-                reload();
-            }
-            if (result.code !== 200){
-                showMsg(result.msg);
-            }
-        })
-    }
-
-    function sendData(data) {
-        $.post("/data",{"data":data},function (result) {
-            console.log(result.data)
-        });
-    }
 </script>
 </html>
