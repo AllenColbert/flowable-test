@@ -36,6 +36,12 @@ public class BaseController {
         return "web-test";
     }
 
+    /**
+     * 测试传递表单数据
+     * @param formData 前端传过来的表单数据 String类型的
+     * @param result Map类型的数据
+     * @return  Result
+     */
     @PostMapping("data")
     @ResponseBody
     public Result receiveData(@RequestParam String formData,

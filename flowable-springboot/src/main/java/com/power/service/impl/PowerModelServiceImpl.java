@@ -1,6 +1,7 @@
 package com.power.service.impl;
 
 import com.power.cmd.GetProcessDefinitionCacheEntryCmd;
+import com.power.entity.PowerUserTaskEntity;
 import com.power.service.PowerModelService;
 import com.power.util.Result;
 import com.power.util.ResultCode;
@@ -14,10 +15,12 @@ import org.flowable.engine.RepositoryService;
 import org.flowable.engine.impl.bpmn.parser.factory.ActivityBehaviorFactory;
 import org.flowable.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.flowable.engine.impl.persistence.deploy.ProcessDefinitionCacheEntry;
+import org.flowable.idm.api.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,27 +46,31 @@ public class PowerModelServiceImpl implements PowerModelService {
 
 
     @Override
-    public Result addSingleNode(String processDefinitionId, UserTask userTask) {
+    public Result addSingleNode(String processDefinitionId, PowerUserTaskEntity userTaskEntity) {
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
         Process process = bpmnModel.getProcesses().get(0);
 
+        UserTask userTask = new UserTask();
+        userTask.setId(userTaskEntity.getId());
+        userTask.setName(userTaskEntity.getName());
+        userTask.setAssignee(userTaskEntity.getAssignee());
         userTask.setBehavior(createUserTaskBehavior(userTask));
 
+        //只要一条流出线路就够了
+        SequenceFlow sequenceFlow = new SequenceFlow();
+        sequenceFlow.setId(userTaskEntity.getSequenceFlowId());
+        sequenceFlow.setSourceRef(userTaskEntity.getId());
+        sequenceFlow.setTargetRef(userTaskEntity.getTargetRef());
+        FlowElement targetFlowElement = process.getFlowElement(userTaskEntity.getTargetRef());
+        FlowElement sourceFlowElement = process.getFlowElement(userTaskEntity.getId());
+
+        sequenceFlow.setTargetFlowElement(targetFlowElement);
+        sequenceFlow.setSourceFlowElement(sourceFlowElement);
+
+        userTask.setOutgoingFlows(Collections.singletonList(sequenceFlow));
+
         process.addFlowElement(userTask);
-
-        List<SequenceFlow> incomingFlows = userTask.getIncomingFlows();
-        for (SequenceFlow incomingFlow : incomingFlows) {
-            process.addFlowElement(incomingFlow);
-            process.addFlowElementToMap(incomingFlow);
-        }
-
-        List<SequenceFlow> outgoingFlows = userTask.getOutgoingFlows();
-        for (SequenceFlow outgoingFlow : outgoingFlows) {
-            process.addFlowElement(outgoingFlow);
-            process.addFlowElementToMap(outgoingFlow);
-        }
-
-        new BpmnAutoLayout(bpmnModel).execute();
+        process.addFlowElement(sequenceFlow);
 
         //获取ProcessCache缓存管理对象
         ProcessDefinitionCacheEntry processCacheEntry = managementService
@@ -71,6 +78,9 @@ public class PowerModelServiceImpl implements PowerModelService {
 
         //设置缓存
         processCacheEntry.setProcess(process);
+
+        new BpmnAutoLayout(bpmnModel).execute();
+
         return Result.success();
     }
 

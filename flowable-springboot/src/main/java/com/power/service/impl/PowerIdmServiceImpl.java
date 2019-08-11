@@ -54,7 +54,12 @@ public class PowerIdmServiceImpl implements PowerIdmService {
 
     @Override
     public Result checkCurrentUser() {
-        User user = (User) session.getAttribute("user");
+        User user = null;
+        try {
+            user = (User) session.getAttribute("user");
+        } catch (Exception e) {
+            return Result.failure(ResultCode.RESULT_DATA_NONE);
+        }
 
         if (user == null || user.getId() == null) {
             return Result.failure(ResultCode.USER_NOT_LOGGED_IN);

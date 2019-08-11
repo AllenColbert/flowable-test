@@ -109,6 +109,7 @@ public class TaskController extends BaseController{
      * @return Result
      */
     @GetMapping("jump")
+    @ResponseBody
     public Result jumpNode(@RequestParam String taskId,
                            @RequestParam String targetNodeId) {
         return powerTaskService.nodeJumpCmd(taskId, targetNodeId);

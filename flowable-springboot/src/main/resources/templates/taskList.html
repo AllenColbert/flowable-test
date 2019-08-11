@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<!--suppress ThymeleafVariablesResolveInspection 压制表达式报错-->
+
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
@@ -7,11 +9,8 @@
     <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
 </head>
 <body>
+<!--引入头列表-->
 <div id="heard"  th:replace="header.html :: header"></div>
-
-<!--<div id="buttons-hbox">-->
-<!--    <button id="tanchu" onclick="show()">填写任务数据</button>-->
-<!--</div>-->
 
 <!--遮罩层div-->
 <div class="zhezhao"></div>
@@ -19,8 +18,9 @@
 <!--弹出层div-->
 <div class="remove" title="完成任务" >
     <button id="guanbi" onclick="hide()">关闭</button>
-    <form id="form1" action="#" method="get" name="form1">
-        <table id="table1">
+
+    <form id="form1" action="#" method="get" name="form1" >
+        <table id="table1" style="display: none">
             <tr>
                 <td>用户id:</td>
                 <td>
@@ -67,46 +67,51 @@
                 <td><input type="button" id="form1_submit" value="提交参数"></td>
             </tr>
         </table>
+
+        <table id="table2" >
+            <tbody>
+            <tr>
+                <td>用户&nbsp;ID：</td>
+                <td><input type="text" placeholder="userId" name="userId"></td>
+            </tr>
+            <tr>
+                <td><input type="button" id="table2_submit" value="提交参数"></td>
+            </tr>
+            </tbody>
+        </table>
+
     </form>
+
+
 </div>
 
+<!--taskList-div-->
 <div id="bodyBox">
     <div id="inputBox" style=" padding-left: 8% ;margin: 0 0 10px 40px;display: none ">
         <label for="assignee">在这里输入Assignee：</label>
         <input type="text" id="assignee" placeholder="设置任务代办人">
     </div>
-
+    <!--任务列表div-->
     <div id="mainBox" th:align="center">
     <table th:class="gridtable" >
         <thead>
         <th>任务Id</th>
         <th>任务名称</th>
-    <!--<th>任务执行Id</th>-->
-    <!--<th>流程实例Id</th>-->
-    <!--<th>流程定义Id</th>-->
-    <!--<th>任务定义Id</th>-->
         <th>代理人</th>
         <th>创建时间</th>
         <th>任务状态</th>
         <th>租户Id</th>
-    <!--<th>表单key</th>-->
         <th>操作空间</th>
         </thead>
         <tbody>
         <tr th:each="task:${tasks}">
             <td th:text="${task.id}" ></td>
             <td th:text="${task.name}"></td>
-            <!--<td th:text="${task.executionId}"></td>-->
-            <!--<td th:text="${task.processInstanceId}"></td>-->
-            <!--<td th:text="${task.processDefinitionId}"></td>-->
-            <!--<td th:text="${task.taskDefinitionKey}"></td>-->
             <td th:text="${task.assignee}"></td>
             <td th:text="${#dates.format(task.createTime, 'yyyy-MM-dd HH:mm:ss')}" ></td>
             <td th:text="${task.suspensionState} eq 1? '运行中':'已挂起'"></td>
             <td th:text="${task.tenantId}"></td>
-            <!--<td th:text="${task.formKey}"></td>-->
             <td >
-                <!--<button  th:value="${task.id}"  onclick="completeTask(value)">完成任务</button>-->
                 <button  th:value="${task.id}" th:class="button3" onclick="completeMyTask(value)">完成任务</button>
                 <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1b6d85" onclick="showImage(value)">显示流程图</button>
                 <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1754c2" onclick="suspendTask(value)">挂起</button>
@@ -116,7 +121,7 @@
            </tbody>
       </table>
     </div>
-
+    <!--流程图div-->
     <div id="imgDiv" style="border-image-width: auto;text-align: center"></div>
 
 </div>
@@ -126,7 +131,6 @@
 <script>
 
     $(function () {
-
         $("#form1_submit").click(function () {
             //调用SerializeArray()方法返回的是数组对象
             // [{"name":"key1","value":"value1"},{"name":"key2","value":"value2"},...]
@@ -141,14 +145,12 @@
                 console.log('返回结果:'+result);
             });
             hide()
-
         })
-
     });
 
     function completeMyTask(taskId) {
         show();
-        $("#form1_submit").click(function () {
+       /* $("#form1_submit").click(function () {
             var formData = $("#form1").serializeArray();
             //通过自定义JS方法将数组对象转化为map格式{"key1","value1",...}
             var result = jsonArrayToMap(formData);
@@ -159,8 +161,19 @@
                 showMsg(result.msg);
             });
             hide()
-        }
-        )
+        }*/
+       $("#table2_submit").click(function (){
+           var formData = $("#form1").serializeArray();
+           //通过自定义JS方法将数组对象转化为map格式{"key1","value1",...}
+           var result = jsonArrayToMap(formData);
+           //console.log(result);
+           //再将Map对象转为字符串
+           var resultData =JSON.stringify(result);
+           $.get("/task/completeTaskWithData",{"taskId":taskId,"formData":resultData},function (result) {
+               showMsg(result.msg);
+           });
+           hide();
+       } );
     }
 
     function show() {

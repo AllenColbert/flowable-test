@@ -1,5 +1,6 @@
 package com.power.controller;
 
+import com.power.entity.PowerUserTaskEntity;
 import com.power.service.PowerModelService;
 import com.power.util.Result;
 import org.flowable.bpmn.model.UserTask;
@@ -22,8 +23,8 @@ public class ModelController {
     @GetMapping("addSingleNode")
     @ResponseBody
     public Result addSingleNode(@RequestParam String processDefinitionId,
-                                @RequestBody UserTask userTask){
-        return powerModelService.addSingleNode(processDefinitionId,userTask);
+                                @RequestBody PowerUserTaskEntity userTaskEntity){
+        return powerModelService.addSingleNode(processDefinitionId,userTaskEntity);
     }
 
     @GetMapping("userTaskView")

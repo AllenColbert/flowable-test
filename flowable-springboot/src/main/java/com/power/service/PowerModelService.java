@@ -1,5 +1,6 @@
 package com.power.service;
 
+import com.power.entity.PowerUserTaskEntity;
 import com.power.util.Result;
 import org.flowable.bpmn.model.UserTask;
 
@@ -13,10 +14,10 @@ public interface PowerModelService {
     /**
      * 添加单个用户任务节点到流程中
      * @param processDefinitionId 流程定义Id
-     * @param userTask 用户任务节点
+     * @param userTaskEntity 自定义用户任务节点
      * @return Result
      */
-    Result addSingleNode(String processDefinitionId, UserTask userTask);
+    Result addSingleNode(String processDefinitionId, PowerUserTaskEntity userTaskEntity);
 
     /**
      * 测试用，查看单个用户节点的传递数据格式
