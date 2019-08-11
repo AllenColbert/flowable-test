@@ -4,19 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <title>发布流程页面</title>
-    <script th:src="@{/js/jquery-3.3.1.js}"></script>
 </head>
+
 <body>
 <div th:replace="header.html :: header"></div>
-<link th:href="@{/css/table.css}" rel="stylesheet" type="text/css">
+
+
 <div id="mainBox" th:align="center">
     <table th:class="gridtable">
         <thead>
         <th>流程定义Id</th>
         <th>流程定义名</th>
-        <!--<th>流程类别</th>-->
         <th>流程实例key</th>
-        <!--<th>部署id</th>-->
         <th>状态</th>
         <th>操作空间</th>
         </thead>
@@ -24,12 +23,11 @@
         <tr th:each="processDef:${processDefinitionList}">
             <td th:text="${processDef.id}"></td>
             <td th:text="${processDef.name}"></td>
-            <!--<td th:text="${processDef.category}"></td>-->
             <td th:text="${processDef.keyWord}"></td>
-            <!--<td th:text="${processDef.deploymentId}"></td>-->
             <td th:text="${processDef.suspensionState} eq 1? '运行中':'已挂起'"></td>
             <td>
                 <button th:value="${processDef.id}" th:class="button3" onclick="runProcess(value)">启动</button>
+                <button th:value="${processDef.id}" th:class="button3" style="background-color: #5e53e4" onclick="addSingleNode(value)">增加单节点</button>
                 <button th:value="${processDef.id}" th:class="button3" onclick="getProcess(value)">查询process</button>
                 <button th:value="${processDef.id}" th:class="button3" style="background-color: #1754c2" onclick="suspend(value)">挂起</button>
                 <button th:value="${processDef.id}" th:class="button3" style="background-color: #c28c63" onclick="activate(value)">激活</button>
@@ -41,8 +39,82 @@
         </tbody>
     </table>
 </div>
+
+<div class="zhezhao"></div>
+
+<div class="remove" >
+    <button id="guanbi" onclick="hide()">关闭</button>
+
+    <form id="add_single_node_form" action="#">
+        <table>
+            <tbody>
+            <tr>
+                <td><span>节点ID：</span></td>
+                <td><input type="text" placeholder="增加节点的Id" name="id"></td>
+            </tr>
+            <tr>
+                <td><span>节点名称：</span></td>
+                <td><input type="text" placeholder="增加节点的名称" name="name"></td>
+            </tr>
+            <tr>
+                <td><span>节点任务代办人：</span></td>
+                <td><input type="text" placeholder="任务节点的代办人" name="assignee"></td>
+            </tr>
+            <tr>
+                <td><span>源节点Id：</span></td>
+                <td><input type="text" placeholder="源节点的Id" name="sourceRef"></td>
+            </tr>
+            <tr>
+                <td><span>目标节点Id：</span></td>
+                <td><input type="text" placeholder="目标节点的Id" name="targetRef"></td>
+            </tr>
+            <tr>
+                <td><span>流程线的Id：</span></td>
+                <td><input type="text" placeholder="流程线的Id" name="sequenceFlowId"></td>
+            </tr>
+            <tr>
+                <td><input type="button" id="send_node_info" value="提交参数"></td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+
+</div>
+
 </body>
 <script>
+
+    $(function () {
+
+    });
+
+    /*#########################遮罩层和弹出层控制####################################*/
+
+    function show() {
+        $('.zhezhao').css('display', 'block');
+        $('.remove').css('display','block')
+    }
+
+    function hide() {
+        $('.remove').css('display','none');
+        $('.zhezhao').css('display', 'none');
+    }
+
+    /*###########################按钮方法区########################################*/
+    function addSingleNode(processDefinitionId) {
+        show();
+        $("#send_node_info").click(function () {
+            var formData = $("#add_single_node_form").serializeArray();
+            var result = jsonArrayToMap(formData);
+            var userTaskData =JSON.stringify(result);
+
+            $.get("/model/addSingleNode",{"processDefinitionId":processDefinitionId,"userTaskData":userTaskData},function (result) {
+                showMsg(result.msg);
+                hide();
+            })
+        })
+
+    }
 
     function runProcess(processDefinitionId) {
         $.post("/process/startProcessById",{"processDefinitionId": processDefinitionId},function (result) {
@@ -88,5 +160,6 @@
         })
 
     }
+
 </script>
 </html>

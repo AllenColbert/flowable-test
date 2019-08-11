@@ -5,8 +5,6 @@
 <head>
     <meta charset="UTF-8">
     <title>任务列表</title>
-    <script th:src="@{/js/jquery-3.3.1.js}"></script>
-    <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
 </head>
 <body>
 <!--引入头列表-->
@@ -16,7 +14,7 @@
 <div class="zhezhao"></div>
 
 <!--弹出层div-->
-<div class="remove" title="完成任务" >
+<div class="remove"  >
     <button id="guanbi" onclick="hide()">关闭</button>
 
     <form id="form1" action="#" method="get" name="form1" >
@@ -82,15 +80,27 @@
 
     </form>
 
+</div>
 
+<div class="singleNodeJump" >
+    <button onclick="hide()">关闭</button>
+    <form action="#" id="node_jump_form">
+        <table id="node_jump_table" >
+            <tbody>
+            <tr>
+                <td>目标节点ID：</td>
+                <td><input  id="targetNodeId" type="text" placeholder="要跳转的节点Id" name="targetNodeId"></td>
+            </tr>
+            <tr>
+                <td><input type="button" id="node_jump_submit" value="执行跳转"></td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
 </div>
 
 <!--taskList-div-->
 <div id="bodyBox">
-    <div id="inputBox" style=" padding-left: 8% ;margin: 0 0 10px 40px;display: none ">
-        <label for="assignee">在这里输入Assignee：</label>
-        <input type="text" id="assignee" placeholder="设置任务代办人">
-    </div>
     <!--任务列表div-->
     <div id="mainBox" th:align="center">
     <table th:class="gridtable" >
@@ -113,6 +123,7 @@
             <td th:text="${task.tenantId}"></td>
             <td >
                 <button  th:value="${task.id}" th:class="button3" onclick="completeMyTask(value)">完成任务</button>
+                <button  th:value="${task.id}" th:class="button3" onclick="nodeJump(value)">跳转节点</button>
                 <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1b6d85" onclick="showImage(value)">显示流程图</button>
                 <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1754c2" onclick="suspendTask(value)">挂起</button>
                 <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #c28c63" onclick="activateTask(value)">激活</button>
@@ -148,9 +159,37 @@
         })
     });
 
+    function show() {
+        $('.zhezhao').css('display', 'block');
+        $('.remove').css('display','block')
+    }
+
+    function hide() {
+        $('.remove').css('display','none');
+        $('.zhezhao').css('display', 'none');
+        $('.singleNodeJump').css('display','none');
+    }
+
+    function nodeJump(taskId) {
+        $('.zhezhao').css('display', 'block');
+        $('.singleNodeJump').css('display', 'block');
+
+        $("#node_jump_submit").click(function () {
+            var formData = $("#node_jump_form").serializeArray();
+            var result = jsonArrayToMap(formData);
+            var targetNodeId =result.targetNodeId;
+
+            console.log(targetNodeId);
+            $.get("/task/jump",{"taskId":taskId,"targetNodeId":targetNodeId},function (result) {
+                showMsg(result.msg);
+            });
+            hide();
+        })
+    }
+
     function completeMyTask(taskId) {
         show();
-       /* $("#form1_submit").click(function () {
+        $("#table2_submit").click(function (){
             var formData = $("#form1").serializeArray();
             //通过自定义JS方法将数组对象转化为map格式{"key1","value1",...}
             var result = jsonArrayToMap(formData);
@@ -160,32 +199,9 @@
             $.get("/task/completeTaskWithData",{"taskId":taskId,"formData":resultData},function (result) {
                 showMsg(result.msg);
             });
-            hide()
-        }*/
-       $("#table2_submit").click(function (){
-           var formData = $("#form1").serializeArray();
-           //通过自定义JS方法将数组对象转化为map格式{"key1","value1",...}
-           var result = jsonArrayToMap(formData);
-           //console.log(result);
-           //再将Map对象转为字符串
-           var resultData =JSON.stringify(result);
-           $.get("/task/completeTaskWithData",{"taskId":taskId,"formData":resultData},function (result) {
-               showMsg(result.msg);
-           });
-           hide();
-       } );
+            hide();
+        } );
     }
-
-    function show() {
-        $('.zhezhao').css('display', 'block');
-        $('.remove').css('display','block')
-    }
-
-    function hide() {
-        $('.remove').css('display','none');
-        $('.zhezhao').css('display', 'none');
-    }
-
 
     function showImage(processInstanceId) {
         console.log('processInstanceId:'+processInstanceId);
@@ -204,7 +220,6 @@
 
         })
     }
-
 
     function activateTask(processInstanceId) {
         $.get("/task/activateProcessInstanceById",{"processInstanceId":processInstanceId},function (result) {

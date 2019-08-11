@@ -1,8 +1,10 @@
 package com.power.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.power.entity.PowerUserTaskEntity;
 import com.power.service.PowerModelService;
 import com.power.util.Result;
+import com.power.util.ResultCode;
 import org.flowable.bpmn.model.UserTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,7 +25,14 @@ public class ModelController {
     @GetMapping("addSingleNode")
     @ResponseBody
     public Result addSingleNode(@RequestParam String processDefinitionId,
-                                @RequestBody PowerUserTaskEntity userTaskEntity){
+                                @RequestParam String userTaskData){
+        PowerUserTaskEntity userTaskEntity = null;
+        try {
+            userTaskEntity = JSON.parseObject(userTaskData, PowerUserTaskEntity.class);
+        } catch (Exception e) {
+            return Result.failure(ResultCode.MODEL_DATA_WRONG_WARNING);
+        }
+
         return powerModelService.addSingleNode(processDefinitionId,userTaskEntity);
     }
 

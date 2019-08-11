@@ -47,6 +47,16 @@ public class PowerModelServiceImpl implements PowerModelService {
 
     @Override
     public Result addSingleNode(String processDefinitionId, PowerUserTaskEntity userTaskEntity) {
+
+        //TODO 写一个判断程序，判断以下几点
+        // 1.userTaskEntity不为空
+        // 2.processDefinitionId能有对应的流程对象
+        // 3.待添加的节点Id不重复
+
+        if (userTaskEntity == null){
+            return Result.failure(ResultCode.DATA_IS_WRONG);
+        }
+
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
         Process process = bpmnModel.getProcesses().get(0);
 
@@ -80,6 +90,8 @@ public class PowerModelServiceImpl implements PowerModelService {
         processCacheEntry.setProcess(process);
 
         new BpmnAutoLayout(bpmnModel).execute();
+
+        //这里也许需要做一个增加节点后自动跳转的功能 ---评估中
 
         return Result.success();
     }
