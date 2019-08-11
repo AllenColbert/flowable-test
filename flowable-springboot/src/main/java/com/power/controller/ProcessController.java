@@ -271,7 +271,7 @@ public class ProcessController extends BaseController {
 
 
     /**
-     * 增加单个普通节点
+     * 增加单个普通节点 - ----待删除
      * @param processDefinitionId 流程定义Id
      * @param sourceRef 源节点 一般来说都是新增的节点id
      * @param targetRef 目标节点
