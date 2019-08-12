@@ -5,9 +5,6 @@ import com.power.util.Result;
 import org.flowable.idm.engine.impl.persistence.entity.GroupEntityImpl;
 import org.flowable.idm.engine.impl.persistence.entity.UserEntityImpl;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 
 /**
  * @author : xuyunfeng
@@ -15,6 +12,27 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface PowerIdmService {
 
+    /**
+     * 登陆
+     * @param userId 用户名
+     * @param password 密码
+     * @return resukt
+     */
+    Result login(String userId, String password);
+
+    /**
+     * 登出
+     * @return result
+     */
+    Result logout();
+
+    /**
+     * 查询当前session中的user
+     * @return result
+     */
+    Result checkCurrentUser();
+
+/*#######################################################################################*/
     /**
      * 新增用户信息
      * @param user 用户实例
@@ -64,26 +82,6 @@ public interface PowerIdmService {
      */
     Object deleteGroupById(String groupId);
 
-    /**
-     * 登陆
-     * @param userId 用户名
-     * @param password 密码
-     * @param request HttpRequest
-     * @param response HttpResponse
-     * @return xx
-     */
-    Result login(String userId, String password, HttpServletRequest request, HttpServletResponse response);
 
-    /**
-     * 登出
-     * @return xx
-     */
-    Object logout();
-
-    /**
-     * 查询当前session中的user
-     * @return
-     */
-    Result checkCurrentUser();
 
 }

@@ -2,12 +2,16 @@ package com.power.service.impl;
 
 import com.power.cmd.NodeJumpCmd;
 import com.power.entity.PowerTask;
+import com.power.entity.RejectInfo;
 import com.power.mapper.TaskMapper;
 import com.power.service.PowerTaskService;
 import com.power.util.Result;
 import com.power.util.ResultCode;
 import org.flowable.bpmn.constants.BpmnXMLConstants;
 import org.flowable.bpmn.model.BpmnModel;
+import org.flowable.bpmn.model.Process;
+import org.flowable.bpmn.model.SequenceFlow;
+import org.flowable.bpmn.model.UserTask;
 import org.flowable.engine.*;
 import org.flowable.engine.runtime.ActivityInstance;
 import org.flowable.engine.runtime.Execution;
@@ -36,7 +40,6 @@ import java.util.Map;
 @Service
 public class PowerTaskServiceImpl implements PowerTaskService {
 
-
     @Autowired
     private TaskService taskService;
     @Autowired
@@ -52,7 +55,6 @@ public class PowerTaskServiceImpl implements PowerTaskService {
     private ManagementService managementService;
     @Autowired
     private TaskMapper taskMapper;
-
 
 
     @Override
@@ -213,7 +215,6 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         return Result.success();
     }
 
-
     /**
      * 根据流程实例Id判断流程是否存在和挂起状态，返回自定义Result
      * @param processInstanceId 流程实例Id
@@ -258,5 +259,62 @@ public class PowerTaskServiceImpl implements PowerTaskService {
             return Result.failure(ResultCode.CMD_ERROR_MESSAGE);
         }
         return Result.success();
+    }
+
+    @Override
+    public void rejectTask(String processInstanceId,Model model) {
+
+        List<Execution> executions = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).list();
+
+        if (executions == null || executions.size() == 0 ){ return; }
+
+        //获取当前活动节点
+        List<String> activityIds = new ArrayList<>();
+        for (Execution execution : executions) {
+            activityIds.add(execution.getActivityId());
+            //移除掉开始节点
+            activityIds.remove(null);
+        }
+        //获取流程定义Id
+        String processDefinitionId = null;
+        List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
+        if (tasks == null || tasks.size()==0){return ;}
+        for (Task task : tasks) {
+             processDefinitionId = task.getProcessDefinitionId();
+        }
+
+        if (processDefinitionId == null | "".equals(processDefinitionId)){ return;}
+
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
+        Process process = bpmnModel.getMainProcess();
+        //获取 List<UserTask> ，多实例任务不止一个userTask
+        List<UserTask> userTasks = new ArrayList<>();
+
+        for (String activityId : activityIds) {
+            UserTask userTask =(UserTask) process.getFlowElement(activityId);
+            userTasks.add(userTask);
+        }
+
+        List<RejectInfo> rejectInfos = new ArrayList<>();
+
+        for (UserTask userTask : userTasks) {
+            List<SequenceFlow> incomingFlows = userTask.getIncomingFlows();
+            for (SequenceFlow incomingFlow : incomingFlows) {
+                RejectInfo rejectInfo = new RejectInfo();
+                String sourceRefId = incomingFlow.getSourceRef();
+                String sourceRefName = process.getFlowElement(sourceRefId).getName();
+                rejectInfo.setSourceRefName(sourceRefName);
+                rejectInfo.setSourceRefId(sourceRefId);
+
+                rejectInfos.add(rejectInfo);
+            }
+        }
+/*        runtimeService.createChangeActivityStateBuilder()
+                .processInstanceId(processInstanceId)
+                .moveActivityIdsToSingleActivityId(activityIds, targetTaskKey)
+                .changeState();*/
+        model.addAttribute("rejectInfos",rejectInfos);
+        //model.addAttribute("activityIds",activityIds);
+        return;
     }
 }

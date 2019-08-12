@@ -16,5 +16,6 @@ public class PowerUserTaskEntity {
     private String sourceRef;
     private String targetRef;
     private String sequenceFlowId;
+    private String conditionExpression;
 
 }

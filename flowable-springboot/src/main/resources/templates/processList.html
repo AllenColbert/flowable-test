@@ -43,40 +43,64 @@
 <div class="zhezhao"></div>
 
 <div class="remove" >
-    <button id="guanbi" onclick="hide()">关闭</button>
+
 
     <form id="add_single_node_form" action="#">
-        <table>
+        <table style="margin:auto">
+            <thead>
+            <tr>
+                <td>
+
+                </td>
+                <td>
+                    <input type="button" id="guanbi" th:class="button-royal" style="float: right" onclick="hide()" value="关闭">
+                </td>
+
+            </tr>
+            </thead>
             <tbody>
             <tr>
                 <td><span>节点ID：</span></td>
-                <td><input type="text" placeholder="增加节点的Id" name="id"></td>
+                <td><label>
+                    <input type="text" placeholder="增加节点的Id" name="id">
+                </label></td>
             </tr>
             <tr>
                 <td><span>节点名称：</span></td>
-                <td><input type="text" placeholder="增加节点的名称" name="name"></td>
+                <td><label>
+                    <input type="text" placeholder="增加节点的名称" name="name">
+                </label></td>
             </tr>
             <tr>
-                <td><span>节点任务代办人：</span></td>
-                <td><input type="text" placeholder="任务节点的代办人" name="assignee"></td>
-            </tr>
-            <tr>
-                <td><span>源节点Id：</span></td>
-                <td><input type="text" placeholder="源节点的Id" name="sourceRef"></td>
+                <td><span>任务办理人：</span></td>
+                <td><label>
+                    <input type="text" placeholder="任务节点的代办人" name="assignee">
+                </label></td>
             </tr>
             <tr>
                 <td><span>目标节点Id：</span></td>
-                <td><input type="text" placeholder="目标节点的Id" name="targetRef"></td>
+                <td><label>
+                    <input type="text" placeholder="目标节点的Id" name="targetRef">
+                </label></td>
             </tr>
             <tr>
                 <td><span>流程线的Id：</span></td>
-                <td><input type="text" placeholder="流程线的Id" name="sequenceFlowId"></td>
+                <td><label>
+                    <input type="text" placeholder="流程线的Id" name="sequenceFlowId">
+                </label></td>
             </tr>
             <tr>
-                <td><input type="button" id="send_node_info" value="提交参数"></td>
+                <td><span>流通过条件：</span></td>
+                <td><label>
+                    <input type="text" placeholder="这里写流通过的条件，默认为空" name="conditionExpression">
+                </label></td>
+            </tr>
+            <tr>
+                <td style="align-content: center"><input type="button" th:class="button-primary"   id="send_node_info" value="提交参数"></td>
             </tr>
             </tbody>
         </table>
+
     </form>
 
 </div>

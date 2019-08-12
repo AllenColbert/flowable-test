@@ -70,4 +70,12 @@ public interface PowerTaskService {
      * @return Result
      */
     Result nodeJumpCmd(String taskId, String targetNodeId);
+
+    /**
+     * 驳回任务到上一步
+     * @param processInstanceId 执行实例Id
+     * @param model model;
+     * @return Result
+     */
+    void rejectTask(String processInstanceId,Model model);
 }

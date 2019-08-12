@@ -10,8 +10,6 @@ import org.flowable.idm.engine.impl.persistence.entity.UserEntityImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -33,7 +31,7 @@ public class PowerIdmServiceImpl implements PowerIdmService {
 
 
     @Override
-    public Result login(String userId, String password, HttpServletRequest request, HttpServletResponse response) {
+    public Result login(String userId, String password) {
         User user = idmIdentityService.createUserQuery().userId(userId).singleResult();
         if (user == null ){
             return Result.failure(ResultCode.USER_LOGIN_ERROR);
@@ -47,21 +45,24 @@ public class PowerIdmServiceImpl implements PowerIdmService {
     }
 
     @Override
-    public Object logout() {
+    public Result logout() {
+        Result result = checkCurrentUser();
+
+        if (!result.getCode().equals(ResultCode.SUCCESS.code())){
+            return result;
+        }
+
         session.removeAttribute("user");
-        return "用户退出";
+
+        return Result.success();
     }
 
     @Override
     public Result checkCurrentUser() {
-        User user = null;
-        try {
-            user = (User) session.getAttribute("user");
-        } catch (Exception e) {
-            return Result.failure(ResultCode.RESULT_DATA_NONE);
-        }
 
-        if (user == null || user.getId() == null) {
+        User  user = (User) session.getAttribute("user");
+
+        if (user == null ||  "".equals(user.getId())) {
             return Result.failure(ResultCode.USER_NOT_LOGGED_IN);
         }
 

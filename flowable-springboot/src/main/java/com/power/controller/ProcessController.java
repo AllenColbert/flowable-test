@@ -4,13 +4,11 @@ package com.power.controller;
 import com.power.cmd.GetProcessCmd;
 import com.power.cmd.GetProcessDefinitionCacheEntryCmd;
 import com.power.entity.PowerDeployEntity;
-import com.power.entity.PowerTask;
-import com.power.service.CommonService;
 import com.power.service.PowerProcessService;
 import com.power.util.Result;
 import com.power.util.ResultCode;
 import org.flowable.bpmn.model.Process;
-import org.flowable.bpmn.model.*;
+import org.flowable.bpmn.model.UserTask;
 import org.flowable.engine.ManagementService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.impl.bpmn.behavior.MultiInstanceActivityBehavior;
@@ -42,8 +40,6 @@ public class ProcessController extends BaseController {
     private PowerProcessService powerProcessService;
     @Autowired
     private ManagementService managementService;
-    @Autowired
-    private CommonService commonService;
     @Autowired
     private HttpSession session;
 
@@ -269,47 +265,6 @@ public class ProcessController extends BaseController {
         return ResponseEntity.ok(list);
     }
 
-
-    /**
-     * 增加单个普通节点 - ----待删除
-     * @param processDefinitionId 流程定义Id
-     * @param sourceRef 源节点 一般来说都是新增的节点id
-     * @param targetRef 目标节点
-     * @param powerTask 新增的节点
-     * @return xx
-     */
-    @GetMapping("addSingleNode")
-    public ResponseEntity addNode(@RequestParam String processDefinitionId,
-                                  @RequestParam String sourceRef,
-                                  @RequestParam String targetRef,
-                                  @RequestBody PowerTask powerTask){
-       /*{"id":"addNode","name":"添加节点","assignee":"ZhangSan"}*/
-        //根据流程定义Id获取流程对象
-        Process process = managementService.executeCommand(new GetProcessCmd(processDefinitionId));
-        //创建用户任务节点
-        UserTask userTask = commonService.createUserTask(powerTask);
-
-        //添加图形信息
-        GraphicInfo graphicInfo = commonService.createGraphicInfo();
-
-        //创建流程输出信息
-        SequenceFlow sequenceFlow = commonService.createSequenceFlow(sourceRef, targetRef, processDefinitionId);
-        //将流程输出信息转化为List
-        List<SequenceFlow> sequenceFlows = Collections.singletonList(sequenceFlow);
-        //设置流程输出信息
-        userTask.setOutgoingFlows(sequenceFlows);
-        //更新Process中的信息
-        process.addFlowElement(userTask);
-
-        process.addFlowElement(sequenceFlow);
-        //更新缓存中的流程对象信息
-        commonService.updateProcess(process,processDefinitionId);
-
-        Collection<Artifact> artifacts = process.getArtifacts();
-        System.out.println(artifacts);
-        return ResponseEntity.ok(process);
-    }
-
     /**
      * 这里修改的是全局流程实例模板 -/.\-！
      * 风险太大，不能用，需要将其改成正在执行中的执行实例模板
@@ -333,7 +288,6 @@ public class ProcessController extends BaseController {
 
         return ResponseEntity.ok(process);
     }
-
 
 
     /**

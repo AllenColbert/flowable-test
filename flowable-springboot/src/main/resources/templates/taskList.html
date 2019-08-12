@@ -13,10 +13,9 @@
 <!--遮罩层div-->
 <div class="zhezhao"></div>
 
-<!--弹出层div-->
+<!--完成任务弹出层div-->
 <div class="remove"  >
     <button id="guanbi" onclick="hide()">关闭</button>
-
     <form id="form1" action="#" method="get" name="form1" >
         <table id="table1" style="display: none">
             <tr>
@@ -65,32 +64,55 @@
                 <td><input type="button" id="form1_submit" value="提交参数"></td>
             </tr>
         </table>
-
         <table id="table2" >
             <tbody>
             <tr>
-                <td>用户&nbsp;ID：</td>
-                <td><input type="text" placeholder="userId" name="userId"></td>
+                <td>设置任务办理人：</td>
+                <td><input type="text" placeholder="任务办理人的Id" name="userId"></td>
             </tr>
             <tr>
                 <td><input type="button" id="table2_submit" value="提交参数"></td>
             </tr>
             </tbody>
         </table>
-
     </form>
-
 </div>
 
+<div class="reject_task">
+  <p> <button  onclick="hide()">关闭</button></p>
+    <label>
+        <select name="sourceRefSelect" id="selects" >
+            <option value="">选择要退回的节点</option>
+            <!--playerRoleList后台获取到的集合th:each进行遍历,
+                playerRole作为集合对象的变量名称,
+                th:value="${playerRole.id}作为value值
+                th:text="${playerRole.name}"作为需要显示的内容-->
+            <option th:each="rejectInfo:${rejectInfos}"
+                    th:value="${rejectInfo.sourceRefId}"
+                    th:text="${rejectInfo.sourceRefName}"></option>
+        </select>
+    </label>
+</div>
+
+<!--流程节点跳转div-->
 <div class="singleNodeJump" >
-    <button onclick="hide()">关闭</button>
     <form action="#" id="node_jump_form">
-        <table id="node_jump_table" >
+        <table id="node_jump_table" style="margin:auto">
+            <thead>
+            <tr>
+                <th>
+                </th>
+                <th>
+                    <input type="button"  th:class="button-royal" style="float: right" onclick="hide()" value="关闭">
+                </th>
+            </tr>
+            </thead>
             <tbody>
             <tr>
                 <td>目标节点ID：</td>
                 <td><input  id="targetNodeId" type="text" placeholder="要跳转的节点Id" name="targetNodeId"></td>
             </tr>
+
             <tr>
                 <td><input type="button" id="node_jump_submit" value="执行跳转"></td>
             </tr>
@@ -122,9 +144,10 @@
             <td th:text="${task.suspensionState} eq 1? '运行中':'已挂起'"></td>
             <td th:text="${task.tenantId}"></td>
             <td >
-                <button  th:value="${task.id}" th:class="button3" onclick="completeMyTask(value)">完成任务</button>
-                <button  th:value="${task.id}" th:class="button3" onclick="nodeJump(value)">跳转节点</button>
-                <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1b6d85" onclick="showImage(value)">显示流程图</button>
+                <button  th:value="${task.id}" th:class="button3" onclick="completeTask(value)">完成</button>
+                <button  th:value="${task.processInstanceId}" th:class="button3" onclick="rejectTask(value)">退回</button>
+                <button  th:value="${task.id}" th:class="button3" onclick="nodeJump(value)">任务跳转</button>
+                <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1b6d85" onclick="showImage(value)">流程图</button>
                 <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1754c2" onclick="suspendTask(value)">挂起</button>
                 <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #c28c63" onclick="activateTask(value)">激活</button>
             </td>
@@ -142,21 +165,7 @@
 <script>
 
     $(function () {
-        $("#form1_submit").click(function () {
-            //调用SerializeArray()方法返回的是数组对象
-            // [{"name":"key1","value":"value1"},{"name":"key2","value":"value2"},...]
-             var formData = $("#form1").serializeArray();
-            //通过自定义JS方法将数组对象转化为map格式{"key1","value1",...}
-             var result = jsonArrayToMap(formData);
-            //console.log(result);
-            //再将Map对象转为字符串
-             var resultData =JSON.stringify(result);
 
-            $.post("/data",{"formData":resultData,"vars":result},function (result) {
-                console.log('返回结果:'+result);
-            });
-            hide()
-        })
     });
 
     function show() {
@@ -168,6 +177,7 @@
         $('.remove').css('display','none');
         $('.zhezhao').css('display', 'none');
         $('.singleNodeJump').css('display','none');
+        $('.reject_task').css('display','none');
     }
 
     function nodeJump(taskId) {
@@ -187,7 +197,7 @@
         })
     }
 
-    function completeMyTask(taskId) {
+    function completeTask(taskId) {
         show();
         $("#table2_submit").click(function (){
             var formData = $("#form1").serializeArray();
@@ -232,18 +242,13 @@
         })
     }
 
-    function completeTaskWithAssignee(taskId) {
+    function rejectTask(processInstanceId) {
+        $('.zhezhao').css('display', 'block');
 
-        var assignee = $("#assignee").val();
 
-        $.post("/task/completeTask",{"taskId":taskId,"assignee":assignee},function (result) {
-            if (result.code === 200){
-                reload();
-            }
-            if (result.code !== 200){
-                showMsg(result.msg);
-            }
-        })
+        $.get("/task/rejectTaskData",{"processInstanceId":processInstanceId},function (result) {
+        });
+        $('.reject_task').css('display','block');
     }
 
 </script>

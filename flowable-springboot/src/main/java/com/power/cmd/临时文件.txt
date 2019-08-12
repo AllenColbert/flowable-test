@@ -100,3 +100,63 @@
 
 
 #####################################################################################################################
+
+
+
+
+
+public void toCountersign (String processDefinitionId, String taskId) {
+
+        if (StringUtil.isEmpty(processDefinitionId, taskId)) {
+
+        }
+
+        // 根据任务ID获取当前任务对象.
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        if (null == task) {}
+
+        // 根据流程定义ID获取流程bpmnModel.
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
+        // 获取当前流程对象.
+        Process process = bpmnModel.getProcesses().get(0);
+        // 根据当前节点ID获取对应任务节点对象.
+        UserTask currenUserTask = (UserTask) process.getFlowElement(task.getTaskDefinitionKey());
+        // 获取当前节点出线信息.
+        SequenceFlow sequenceFlow = currenUserTask.getOutgoingFlows().get(0);
+        // 根据当前节点出线信息获取下一节点元素.
+        FlowElement flowElement = process.getFlowElement(sequenceFlow.getTargetRef());
+        // 判断下一节点元素是否为任务节点.
+        if (!(flowElement instanceof UserTask)) {
+
+        }
+
+        // 配置会签所需条件.
+        MultiInstanceLoopCharacteristics multiInstanceLoopCharacteristics = new MultiInstanceLoopCharacteristics();
+        // 配置节点人员办理顺序 串行:true 并行:false.
+        multiInstanceLoopCharacteristics.setSequential(false);
+        // 配置会签集合变量名称.
+        multiInstanceLoopCharacteristics.setInputDataItem("${assigneeList}");
+        // 配置会签集合遍历名称.
+        multiInstanceLoopCharacteristics.setElementVariable("assignee");
+        // 将下一节点元素转换为任务节点对象.
+        UserTask nextUserTask = (UserTask) flowElement;
+        // 设置下一节点处理人表达式 引用会签条件activiti:elementVariable="assignee".
+        nextUserTask.setAssignee("${assignee}");
+        // 下一任务节点设置会签循环特征.
+        nextUserTask.setLoopCharacteristics(multiInstanceLoopCharacteristics);
+
+        // 获取流程引擎配置实现类.
+        ProcessEngineConfigurationImpl processEngineConfiguration = (ProcessEngineConfigurationImpl) ProcessEngines.getDefaultProcessEngine().getProcessEngineConfiguration();
+        // 创建新的任务实例.
+        UserTaskActivityBehavior userTaskActivityBehavior = processEngineConfiguration.getActivityBehaviorFactory().createUserTaskActivityBehavior(nextUserTask);
+        // 创建BPMN 2.0规范中描述的多实例功能.
+        ParallelMultiInstanceBehavior behavior = new ParallelMultiInstanceBehavior(nextUserTask, userTaskActivityBehavior);
+        // 设置下一节点多实例行为.
+        nextUserTask.setBehavior(behavior);
+        // 设置多实例元素变量.
+        behavior.setCollectionElementVariable("assignee");
+        // 注入表达式.
+        ExpressionManager expressionManager = processEngineConfiguration.getExpressionManager();
+        // 设置多实例集合表达式.
+        behavior.setCollectionExpression(expressionManager.createExpression("${assigneeList}"));
+    }

@@ -15,7 +15,6 @@ import org.flowable.engine.RepositoryService;
 import org.flowable.engine.impl.bpmn.parser.factory.ActivityBehaviorFactory;
 import org.flowable.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.flowable.engine.impl.persistence.deploy.ProcessDefinitionCacheEntry;
-import org.flowable.idm.api.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -53,7 +52,7 @@ public class PowerModelServiceImpl implements PowerModelService {
         // 2.processDefinitionId能有对应的流程对象
         // 3.待添加的节点Id不重复
 
-        if (userTaskEntity == null){
+        if ("".equals(userTaskEntity.getId())){
             return Result.failure(ResultCode.DATA_IS_WRONG);
         }
 
@@ -71,6 +70,9 @@ public class PowerModelServiceImpl implements PowerModelService {
         sequenceFlow.setId(userTaskEntity.getSequenceFlowId());
         sequenceFlow.setSourceRef(userTaskEntity.getId());
         sequenceFlow.setTargetRef(userTaskEntity.getTargetRef());
+        if (!"".equals(userTaskEntity.getConditionExpression())) {
+            sequenceFlow.setConditionExpression(userTaskEntity.getConditionExpression());
+        }
         FlowElement targetFlowElement = process.getFlowElement(userTaskEntity.getTargetRef());
         FlowElement sourceFlowElement = process.getFlowElement(userTaskEntity.getId());
 

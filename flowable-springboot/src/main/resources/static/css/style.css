@@ -20,24 +20,42 @@
 
 .remove {
     display: none; /* 默认不显示弹出层*/
-    width: 400px;
-    height: 190px;
+    width: 300px;
+    height: auto;
     position: absolute;
-    top: 40%;
+    top: 25%;
     left: 40%;
     background: #fbf8ff;
     border-radius: 4px;
+    align-items: center;
+}
+
+.remove button{
+    align-content: center;
+    text-align: center;
 }
 
 .singleNodeJump {
     display: none; /* 默认不显示弹出层*/
-    width: 300px;
-    height: 100px;
+    width: auto;
+    height: auto;
     position: absolute;
-    top: 40%;
+    top: 25%;
     left: 40%;
     background: #fffffb;
     border-radius: 4px;
+}
+
+.reject_task {
+    display: none; /* 默认不显示弹出层*/
+    width: 300px;
+    height: auto;
+    position: absolute;
+    top: 25%;
+    left: 40%;
+    background: #fbf8ff;
+    border-radius: 4px;
+    align-items: center;
 }
 
 .removerChid {

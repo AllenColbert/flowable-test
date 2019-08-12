@@ -10,18 +10,16 @@
 <div th:fragment="header"  style="margin: 0 0 20px">
 <div style=" background-color: #1f3245; width: 100%;height: 100%;margin: 0 0 10px;min-height: 30px;text-align:left">
     <script th:src="@{/js/jquery-3.3.1.js}"></script>
-
     <link th:href="@{/css/buttons.css}" rel="stylesheet" type="text/css">
     <link th:href="@{/css/table.css}" rel="stylesheet" type="text/css">
-    <link th:href="@{/styles/common/style.css}" rel="stylesheet" type="text/css">
-
     <link th:href="@{/css/form.css}" rel="stylesheet" type="text/css">
     <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
-   <!-- <link th:href="@{/libs/bootstrap_3.1.1/css/bootstrap.min.css}" rel="stylesheet" type="text/css">-->
+    <link th:href="@{/styles/common/style.css}" rel="stylesheet" type="text/css">
 
     <a th:class="landing-logo">
         <img ng-src="images/flowable-logo.png" ng-srcset="images/flowable-logo.png 1x, images/flowable-logo@2x.png 2x" th:src="@{/images/flowable-logo.png}" >
     </a>
+
     <span style="float: left;font-size: 20px;margin: 0 20px 0">
         <span style="color:white ">当前用户：</span>
         <span id="userId" style="color: #8bc220;border: 1px"></span>
@@ -39,7 +37,6 @@
     <p id="MsgBox"  style="text-align: center;color: red;font-size: larger"></p>
     </div>
 
-
     <script>
 
         $(function () {
@@ -55,7 +52,14 @@
             });
         });
 
+        /*登出*/
         function logout() {
+
+            $.get("/idm/logout",function (result) {
+                console.log('result'+result);
+                window.location.href="/";
+            });
+
             $.ajax({
                 url:"/idm/logout",
                 success:function (data) {
@@ -70,7 +74,7 @@
 
         function showMsg(message) {
             $("#MsgBox").text(message);
-            window.setTimeout(reload,3000)
+            window.setTimeout(reload,2000)
         }
 
         function reload() {

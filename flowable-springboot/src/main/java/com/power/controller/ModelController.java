@@ -5,10 +5,12 @@ import com.power.entity.PowerUserTaskEntity;
 import com.power.service.PowerModelService;
 import com.power.util.Result;
 import com.power.util.ResultCode;
-import org.flowable.bpmn.model.UserTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * model控制
@@ -32,7 +34,6 @@ public class ModelController {
         } catch (Exception e) {
             return Result.failure(ResultCode.MODEL_DATA_WRONG_WARNING);
         }
-
         return powerModelService.addSingleNode(processDefinitionId,userTaskEntity);
     }
 

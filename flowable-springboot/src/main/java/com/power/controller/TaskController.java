@@ -133,4 +133,16 @@ public class TaskController extends BaseController{
     }
 
 
+    /**
+     * 点击 退回 时反馈给前端的数据 当前节点 & 可退回节点 & 。。。
+     * @param processInstanceId  执行实例Id
+     * @return Result
+     */
+    @GetMapping("rejectTaskData")
+    public String rejectTask(@RequestParam String processInstanceId,
+                             Model model){
+        powerTaskService.rejectTask(processInstanceId,model);
+        return "taskList";
+    }
+
 }
