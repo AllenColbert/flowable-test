@@ -8,10 +8,8 @@ import com.power.util.ListUtils;
 import com.power.util.Result;
 import com.power.util.ResultCode;
 import org.flowable.bpmn.constants.BpmnXMLConstants;
-import org.flowable.bpmn.model.BpmnModel;
+import org.flowable.bpmn.model.*;
 import org.flowable.bpmn.model.Process;
-import org.flowable.bpmn.model.SequenceFlow;
-import org.flowable.bpmn.model.UserTask;
 import org.flowable.engine.*;
 import org.flowable.engine.runtime.ActivityInstance;
 import org.flowable.engine.runtime.Execution;
@@ -212,8 +210,143 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         if (!taskStatus.getCode().equals(ResultCode.SUCCESS.code())) {
             return taskStatus;
         }
+        String processInstanceId = findInstanceIdByTaskId(taskId);
+        //完成任务的时候可以选中是否添加评论 ,防止 hi_comment表数据过大;
+        String comment = vars.get("message").toString();
+        if (!"".equals(comment)){
+            taskService.addComment(taskId,processInstanceId,comment);
+        }
         taskService.complete(taskId, vars);
         return Result.success();
+    }
+
+    @Override
+    public Result nodeJumpCmd(String taskId, String targetNodeId) {
+        try {
+            managementService.executeCommand(new NodeJumpCmd(taskId, targetNodeId));
+        } catch (Exception e) {
+            return Result.failure(ResultCode.CMD_ERROR_MESSAGE);
+        }
+        return Result.success();
+    }
+
+    @Override
+    public Result returnableNode(String processInstanceId) {
+
+        List<String> activityIds = findActivityIdsByInstanceId(processInstanceId);
+
+        if (activityIds.size() == 0){
+            return Result.failure(ResultCode.RESULT_DATA_NONE);
+        }
+
+        String processDefinitionId = findDefinitionIdByInstanceId(processInstanceId);
+
+        Process process = findProcessByProcessDefinitionId(processDefinitionId);
+
+        List<UserTask> userTasks = new ArrayList<>();
+        List<ParallelGateway> parallelGetways = new ArrayList<>();
+        //获取 List<UserTask> ，有的任务不止一个userTask
+        for (String activityId : activityIds) {
+            FlowElement flowElement = process.getFlowElement(activityId);
+            if (flowElement instanceof UserTask){
+                UserTask userTask = (UserTask) flowElement;
+                userTasks.add(userTask);
+            }
+            if (flowElement instanceof ParallelGateway){
+                ParallelGateway parallelGateway = (ParallelGateway) flowElement;
+                parallelGetways.add(parallelGateway);
+            }
+        }
+
+        List<Map<String,String>> selectList = new ArrayList<>();
+        for (UserTask userTask : userTasks) {
+            List<SequenceFlow> incomingFlows = userTask.getIncomingFlows();
+
+            for (SequenceFlow incomingFlow : incomingFlows) {
+                Map<String, String> map = new HashMap<>(10);
+                String sourceId = incomingFlow.getSourceRef();
+                String sourceName = process.getFlowElement(sourceId).getName();
+                //移除Name为空的节点（start节点名字经常为空）；
+                if (sourceName == null|| "".equals(sourceName)){
+                    continue;
+                }
+                map.put("value",sourceId);
+                map.put("key",sourceName);
+                selectList.add(map);
+            }
+        }
+        List<Map<String, String>> setList = ListUtils.removeDuplicates(selectList);
+
+        return Result.success(setList);
+
+    }
+
+    @Override
+    public Result executeReturn(String processInstanceId, String targetNodeId){
+        List<String> activityIds = findActivityIdsByInstanceId(processInstanceId);
+
+        if (activityIds.size() == 0){
+            return Result.failure(ResultCode.RESULT_DATA_NONE);
+        }
+
+        runtimeService.createChangeActivityStateBuilder()
+                .processInstanceId(processInstanceId)
+                .moveActivityIdsToSingleActivityId(activityIds,targetNodeId)
+                .changeState();
+
+        return Result.success();
+    }
+
+
+    /*#############################自定义方法区#############################*/
+
+    /**
+     * 根据执行实例Id找到 当前活动节点Ids
+     * @param processInstanceId 执行实例Id
+     * @return 当前活动节点List
+     */
+    private List<String> findActivityIdsByInstanceId(String processInstanceId){
+        List<Execution> executions = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).list();
+        //获取当前活动节点
+        List<String> activityIds = new ArrayList<>();
+        for (Execution execution : executions) {
+            activityIds.add(execution.getActivityId());
+            //移除掉开始节点
+            activityIds.remove(null);
+        }
+        System.out.println(activityIds);
+        return activityIds;
+    }
+
+    /**
+     * 根据任务ID返回流程实例Ids
+     * @param taskId 任务Id
+     * @return 流程实例Id
+     */
+    private String findInstanceIdByTaskId(String taskId){
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+       return task.getProcessInstanceId();
+    }
+
+    /**
+     * 根据流程实例Id找到对应的流程定义Id
+     * @param processInstanceId 流程执行Id
+     * @return 流程定义Id
+     */
+    private String findDefinitionIdByInstanceId(String processInstanceId){
+        //获取流程定义Id,一个流程执行实例Id只会对应一个流程定义Id
+        Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).list().get(0);
+        return task.getProcessDefinitionId();
+    }
+
+    /**
+     * 根据流程定义Id查询Process对象
+     * @param processDefinitionId 流程定义Id
+     * @return process
+     */
+    private Process findProcessByProcessDefinitionId(String processDefinitionId){
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
+        return bpmnModel.getMainProcess();
     }
 
     /**
@@ -252,98 +385,5 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         }
         return Result.success();
 
-    }
-
-    @Override
-    public Result nodeJumpCmd(String taskId, String targetNodeId) {
-        try {
-            managementService.executeCommand(new NodeJumpCmd(taskId, targetNodeId));
-        } catch (Exception e) {
-            return Result.failure(ResultCode.CMD_ERROR_MESSAGE);
-        }
-        return Result.success();
-    }
-
-    @Override
-    public Result returnableNode(String processInstanceId) {
-
-        List<String> activityIds = findActivityIdsByInstanceId(processInstanceId);
-
-        if (activityIds.size() == 0){
-            return Result.failure(ResultCode.RESULT_DATA_NONE);
-        }
-
-        //获取流程定义Id,一个流程执行实例Id只会对应一个流程定义Id
-        Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).list().get(0);
-        String processDefinitionId = task.getProcessDefinitionId();
-
-
-        BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
-        Process process = bpmnModel.getMainProcess();
-
-        List<UserTask> userTasks = new ArrayList<>();
-        //获取 List<UserTask> ，多实例任务不止一个userTask
-        for (String activityId : activityIds) {
-            UserTask userTask = (UserTask) process.getFlowElement(activityId);
-            userTasks.add(userTask);
-        }
-
-        //TODO 目前的问题--多实例任务节点退回会返回 n+1个重复的前置节点；（n=多实例循环的次数）
-        List<Map<String,String>> selectList = new ArrayList<>();
-        for (UserTask userTask : userTasks) {
-            List<SequenceFlow> incomingFlows = userTask.getIncomingFlows();
-
-            for (SequenceFlow incomingFlow : incomingFlows) {
-                Map<String, String> map = new HashMap<>(10);
-                String sourceId = incomingFlow.getSourceRef();
-                String sourceName = process.getFlowElement(sourceId).getName();
-
-                if (sourceName == null|| "".equals(sourceName)){
-                    continue;
-                }
-                map.put("value",sourceId);
-                map.put("key",sourceName);
-                selectList.add(map);
-            }
-        }
-        List<Map<String, String>> setList = ListUtils.removeDuplicates(selectList);
-
-        return Result.success(setList);
-
-    }
-
-    @Override
-    public Result executeReturn(String processInstanceId, String targetNodeId){
-        List<String> activityIds = findActivityIdsByInstanceId(processInstanceId);
-
-        if (activityIds.size() == 0){
-            return Result.failure(ResultCode.RESULT_DATA_NONE);
-        }
-
-        runtimeService.createChangeActivityStateBuilder()
-                .processInstanceId(processInstanceId)
-                .moveActivityIdsToSingleActivityId(activityIds,targetNodeId)
-                .changeState();
-
-        return Result.success();
-    };
-
-
-    /**
-     * 根据执行实例Id找到 当前活动节点Ids
-     * @param processInstanceId 执行实例Id
-     * @return 当前活动节点List
-     */
-    private List<String> findActivityIdsByInstanceId(String processInstanceId){
-        List<Execution> executions = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).list();
-        //获取当前活动节点
-        List<String> activityIds = new ArrayList<>();
-        for (Execution execution : executions) {
-            activityIds.add(execution.getActivityId());
-            //移除掉开始节点
-            activityIds.remove(null);
-        }
-        System.out.println(activityIds);
-        return activityIds;
     }
 }
