@@ -72,10 +72,17 @@ public interface PowerTaskService {
     Result nodeJumpCmd(String taskId, String targetNodeId);
 
     /**
-     * 驳回任务到上一步
+     * 显示所有可退到上一步的节点
      * @param processInstanceId 执行实例Id
-     * @param model model;
      * @return Result
      */
-    void rejectTask(String processInstanceId,Model model);
+    Result returnableNode(String processInstanceId);
+
+    /**
+     * 执行节点退回
+     * @param processInstanceId 执行实例Id
+     * @param targetNodeId 退回目标节点ID
+     * @return Result
+     */
+    Result executeReturn(String processInstanceId, String targetNodeId);
 }

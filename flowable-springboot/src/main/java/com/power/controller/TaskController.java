@@ -22,7 +22,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("task")
-public class TaskController extends BaseController{
+public class TaskController {
 
     @Autowired
     private PowerTaskService powerTaskService;
@@ -53,12 +53,10 @@ public class TaskController extends BaseController{
     @ResponseBody
     public Result completeTask(@RequestParam String taskId,
                                @RequestParam(value = "assignee", required = false, defaultValue = "admin") String assignee) {
-        Map<String, Object> vars = new HashMap<>(255);
+        Map<String, Object> vars = new HashMap<>(16);
         //这里还有完成任务，添加评论，表单填写等功能，还没想好怎么写，暂时先放着
-        vars.put("userId", assignee);
         vars.put("money",1800);
         vars.put("send_apply",true);
-        vars.put("assignee","ZhangSan");
         vars.put("approve",true);
         return powerTaskService.completeTask(taskId,assignee,vars);
     }
@@ -138,11 +136,17 @@ public class TaskController extends BaseController{
      * @param processInstanceId  执行实例Id
      * @return Result
      */
-    @GetMapping("rejectTaskData")
-    public String rejectTask(@RequestParam String processInstanceId,
-                             Model model){
-        powerTaskService.rejectTask(processInstanceId,model);
-        return "taskList";
+    @GetMapping("returnableNode")
+    @ResponseBody
+    public Result returnableNode(@RequestParam String processInstanceId){
+        return  powerTaskService.returnableNode(processInstanceId);
+    }
+
+    @GetMapping("executeReturn")
+    @ResponseBody
+    public Result executeReturn(@RequestParam String processInstanceId,
+                                @RequestParam String targetNodeId){
+        return powerTaskService.executeReturn(processInstanceId,targetNodeId);
     }
 
 }

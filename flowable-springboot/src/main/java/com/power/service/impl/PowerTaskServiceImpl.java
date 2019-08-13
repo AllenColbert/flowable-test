@@ -2,9 +2,9 @@ package com.power.service.impl;
 
 import com.power.cmd.NodeJumpCmd;
 import com.power.entity.PowerTask;
-import com.power.entity.RejectInfo;
 import com.power.mapper.TaskMapper;
 import com.power.service.PowerTaskService;
+import com.power.util.ListUtils;
 import com.power.util.Result;
 import com.power.util.ResultCode;
 import org.flowable.bpmn.constants.BpmnXMLConstants;
@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,14 +63,14 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         Result result = checkProcessStatusByProcessInstanceId(processInstanceId);
         //先判断查询到的任务的状态码
         //如果状态码不是200
-        if (!result.getCode().equals(ResultCode.SUCCESS.code())){
+        if (!result.getCode().equals(ResultCode.SUCCESS.code())) {
             //返回数据为空的结果
-            if (result.getCode().equals(ResultCode.RESULT_DATA_NONE.code())){
+            if (result.getCode().equals(ResultCode.RESULT_DATA_NONE.code())) {
                 return result;
             }
             //当查询的任务为多实例时
-            if (result.getCode().equals(ResultCode.TASK_TYPE_MULTIPLE_INSTANCES.code())){
-               result.setMsg("该任务为多实例任务，无法进行挂起操作");
+            if (result.getCode().equals(ResultCode.TASK_TYPE_MULTIPLE_INSTANCES.code())) {
+                result.setMsg("该任务为多实例任务，无法进行挂起操作");
                 return result;
             }
         }
@@ -87,13 +88,13 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         Result result = checkProcessStatusByProcessInstanceId(processInstanceId);
         //首先判断查询到的任务的状态码
         //如果状态码不是200
-        if (!result.getCode().equals(ResultCode.SUCCESS.code())){
+        if (!result.getCode().equals(ResultCode.SUCCESS.code())) {
             //返回数据为空的结果
-            if (result.getCode().equals(ResultCode.RESULT_DATA_NONE.code())){
+            if (result.getCode().equals(ResultCode.RESULT_DATA_NONE.code())) {
                 return result;
             }
             //当查询的任务为多实例时
-            if (result.getCode().equals(ResultCode.TASK_TYPE_MULTIPLE_INSTANCES.code())){
+            if (result.getCode().equals(ResultCode.TASK_TYPE_MULTIPLE_INSTANCES.code())) {
                 result.setMsg("该任务为多实例任务，无法进行激活操作");
                 return result;
             }
@@ -174,7 +175,7 @@ public class PowerTaskServiceImpl implements PowerTaskService {
     }
 
     @Override
-    public Result queryCurrentUserTasks(Model model,HttpServletResponse response) {
+    public Result queryCurrentUserTasks(Model model, HttpServletResponse response) {
 
         User user = (User) session.getAttribute("user");
 
@@ -190,7 +191,7 @@ public class PowerTaskServiceImpl implements PowerTaskService {
             return Result.failure(ResultCode.TASKS_IS_NULL);
         }
 
-       model.addAttribute("tasks",tasks);
+        model.addAttribute("tasks", tasks);
 
         return Result.success(tasks);
     }
@@ -217,25 +218,27 @@ public class PowerTaskServiceImpl implements PowerTaskService {
 
     /**
      * 根据流程实例Id判断流程是否存在和挂起状态，返回自定义Result
+     *
      * @param processInstanceId 流程实例Id
      * @return Result
      */
     private Result checkProcessStatusByProcessInstanceId(String processInstanceId) {
         List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
         //首先判断任务是否存在
-        if (tasks == null || tasks.size()==0) {
+        if (tasks == null || tasks.size() == 0) {
             return Result.failure(ResultCode.RESULT_DATA_NONE);
         }
         //再判断是不是多实例任务，如果是将全部的执行实例返回给上一层
-        if (tasks.size() > 1){
+        if (tasks.size() > 1) {
             return Result.failure(ResultCode.TASK_TYPE_MULTIPLE_INSTANCES);
         }
-        return   Result.success(tasks.get(0).isSuspended());
+        return Result.success(tasks.get(0).isSuspended());
 
     }
 
     /**
      * 根据任务Id，判断任务状态，返回自定义Result
+     *
      * @param taskId 任务Id
      * @return Result
      */
@@ -262,12 +265,77 @@ public class PowerTaskServiceImpl implements PowerTaskService {
     }
 
     @Override
-    public void rejectTask(String processInstanceId,Model model) {
+    public Result returnableNode(String processInstanceId) {
 
+        List<String> activityIds = findActivityIdsByInstanceId(processInstanceId);
+
+        if (activityIds.size() == 0){
+            return Result.failure(ResultCode.RESULT_DATA_NONE);
+        }
+
+        //获取流程定义Id,一个流程执行实例Id只会对应一个流程定义Id
+        Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).list().get(0);
+        String processDefinitionId = task.getProcessDefinitionId();
+
+
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
+        Process process = bpmnModel.getMainProcess();
+
+        List<UserTask> userTasks = new ArrayList<>();
+        //获取 List<UserTask> ，多实例任务不止一个userTask
+        for (String activityId : activityIds) {
+            UserTask userTask = (UserTask) process.getFlowElement(activityId);
+            userTasks.add(userTask);
+        }
+
+        //TODO 目前的问题--多实例任务节点退回会返回 n+1个重复的前置节点；（n=多实例循环的次数）
+        List<Map<String,String>> selectList = new ArrayList<>();
+        for (UserTask userTask : userTasks) {
+            List<SequenceFlow> incomingFlows = userTask.getIncomingFlows();
+
+            for (SequenceFlow incomingFlow : incomingFlows) {
+                Map<String, String> map = new HashMap<>(10);
+                String sourceId = incomingFlow.getSourceRef();
+                String sourceName = process.getFlowElement(sourceId).getName();
+
+                if (sourceName == null|| "".equals(sourceName)){
+                    continue;
+                }
+                map.put("value",sourceId);
+                map.put("key",sourceName);
+                selectList.add(map);
+            }
+        }
+        List<Map<String, String>> setList = ListUtils.removeDuplicates(selectList);
+
+        return Result.success(setList);
+
+    }
+
+    @Override
+    public Result executeReturn(String processInstanceId, String targetNodeId){
+        List<String> activityIds = findActivityIdsByInstanceId(processInstanceId);
+
+        if (activityIds.size() == 0){
+            return Result.failure(ResultCode.RESULT_DATA_NONE);
+        }
+
+        runtimeService.createChangeActivityStateBuilder()
+                .processInstanceId(processInstanceId)
+                .moveActivityIdsToSingleActivityId(activityIds,targetNodeId)
+                .changeState();
+
+        return Result.success();
+    };
+
+
+    /**
+     * 根据执行实例Id找到 当前活动节点Ids
+     * @param processInstanceId 执行实例Id
+     * @return 当前活动节点List
+     */
+    private List<String> findActivityIdsByInstanceId(String processInstanceId){
         List<Execution> executions = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).list();
-
-        if (executions == null || executions.size() == 0 ){ return; }
-
         //获取当前活动节点
         List<String> activityIds = new ArrayList<>();
         for (Execution execution : executions) {
@@ -275,46 +343,7 @@ public class PowerTaskServiceImpl implements PowerTaskService {
             //移除掉开始节点
             activityIds.remove(null);
         }
-        //获取流程定义Id
-        String processDefinitionId = null;
-        List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
-        if (tasks == null || tasks.size()==0){return ;}
-        for (Task task : tasks) {
-             processDefinitionId = task.getProcessDefinitionId();
-        }
-
-        if (processDefinitionId == null | "".equals(processDefinitionId)){ return;}
-
-        BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
-        Process process = bpmnModel.getMainProcess();
-        //获取 List<UserTask> ，多实例任务不止一个userTask
-        List<UserTask> userTasks = new ArrayList<>();
-
-        for (String activityId : activityIds) {
-            UserTask userTask =(UserTask) process.getFlowElement(activityId);
-            userTasks.add(userTask);
-        }
-
-        List<RejectInfo> rejectInfos = new ArrayList<>();
-
-        for (UserTask userTask : userTasks) {
-            List<SequenceFlow> incomingFlows = userTask.getIncomingFlows();
-            for (SequenceFlow incomingFlow : incomingFlows) {
-                RejectInfo rejectInfo = new RejectInfo();
-                String sourceRefId = incomingFlow.getSourceRef();
-                String sourceRefName = process.getFlowElement(sourceRefId).getName();
-                rejectInfo.setSourceRefName(sourceRefName);
-                rejectInfo.setSourceRefId(sourceRefId);
-
-                rejectInfos.add(rejectInfo);
-            }
-        }
-/*        runtimeService.createChangeActivityStateBuilder()
-                .processInstanceId(processInstanceId)
-                .moveActivityIdsToSingleActivityId(activityIds, targetTaskKey)
-                .changeState();*/
-        model.addAttribute("rejectInfos",rejectInfos);
-        //model.addAttribute("activityIds",activityIds);
-        return;
+        System.out.println(activityIds);
+        return activityIds;
     }
 }

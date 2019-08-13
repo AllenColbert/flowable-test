@@ -10,38 +10,35 @@
 </head>
 <body>
 <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
-<link th:href="@{/css/login.css}" rel="stylesheet">
-<script th:src="@{/js/jquery.js}"></script>
-<script th:src="@{/js/bootstrap.js}"></script>
+<link th:href="@{/css/customize.css}" rel="stylesheet">
 <script th:src="@{/js/jquery-3.3.1.js}"></script>
 
 <div class="container text-center">
-    <form class="form-signin" >
+    <form class="form-signin">
         <h2 class="form-signin-heading">登录页面</h2>
-        <input type="text" id="userId"  class="form-control" placeholder="用户名" required autofocus>
-        <input type="password" id="password"  class="form-control" placeholder="密码" required>
-        <button class="btn btn-lg btn-primary btn-block" type="button" onclick="ajax_ajax()">登录</button>
+        <input type="text" id="userId" class="form-control" placeholder="用户名" required autofocus>
+        <input type="password" id="password" class="form-control" placeholder="密码" required>
+        <button class="btn btn-lg btn-primary btn-block" type="button" onclick="login_ajax()">登录</button>
     </form>
 
-    <p id="errorMsg" style="min-height: 30px;min-width: 50px ;min-font-size: 25px;color: #ff2c52"> </p>
+    <p id="errorMsg" style="min-height: 30px;min-width: 50px ;min-font-size: 25px;color: #ff2c52"></p>
 </div>
 
 </body>
 <script>
-    function ajax_ajax() {
-        var userId =$("#userId").val();
+    function login_ajax() {
+        var userId = $("#userId").val();
 
         var password = $("#password").val();
 
-        $.post("/idm/login",{"userId":userId,"password":password},function (result) {
-            if (result.code === 200){
+        $.post("/idm/login", {"userId": userId, "password": password}, function (result) {
+            if (result.code === 200) {
                 window.location.href = "/";
             }
-            if (result.code !== 200){
+            if (result.code !== 200) {
                 $("#errorMsg").text(result.msg);
             }
         });
-
     }
 </script>
 </html>

@@ -32,7 +32,7 @@ import java.util.*;
 
 @Controller
 @RequestMapping("process")
-public class ProcessController extends BaseController {
+public class ProcessController {
 
     @Autowired
     private RuntimeService runtimeService;
@@ -185,7 +185,7 @@ public class ProcessController extends BaseController {
     @GetMapping("addMultiInstanceNode")
     public ResponseEntity addMulti(@RequestParam String activityId,
                                    @RequestParam String parentExecutionId) {
-        Map<String, Object> vars = new HashMap<>(255);
+        Map<String, Object> vars = new HashMap<>(16);
         vars.put("assignee", "LiSi");
 
         Execution execution = runtimeService.addMultiInstanceExecution(activityId, parentExecutionId, vars);
@@ -323,7 +323,7 @@ public class ProcessController extends BaseController {
      */
     @GetMapping("runNormalByKey")
     public ResponseEntity runNormalByKey(@RequestParam String processDefinitionKey){
-        Map<String, Object> vars = new HashMap<>(255);
+        Map<String, Object> vars = new HashMap<>(16);
 
         User user = (User) session.getAttribute("user");
         vars.put("userId", user.getId());

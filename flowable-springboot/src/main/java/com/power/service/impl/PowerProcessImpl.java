@@ -103,7 +103,7 @@ public class PowerProcessImpl implements PowerProcessService {
             processDefinitionId  = processDefinitionId.replaceAll(specialCharacters, replacementCharacter);
         }
         //为了方便测试，这里将"userId"设置为当前登录的用户Id
-        Map<String, Object> map = new HashMap<>(255);
+        Map<String, Object> map = new HashMap<>(16);
         User user = (User)session.getAttribute("user");
         if (user == null){
             return Result.failure(ResultCode.USER_NOT_LOGGED_IN);

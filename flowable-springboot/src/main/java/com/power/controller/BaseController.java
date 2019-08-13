@@ -8,6 +8,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -61,5 +65,20 @@ public class BaseController {
             System.out.println("从解析后的Map中取值："+map.get(o));
         }
         return Result.success(formData);
+    }
+
+    @GetMapping("select")
+    public String showSelect(HttpSession session){
+
+        Map<String, String> map = new HashMap<>(16);
+        List<Map<String, String>> list = new ArrayList<>();
+
+        map.put("key","value");
+        for (int i = 0; i < 10; i++) {
+            map.put("第"+i,"第"+i+"个数");
+            list.add(map);
+        }
+        session.setAttribute("lists",list);
+        return "web-test";
     }
 }

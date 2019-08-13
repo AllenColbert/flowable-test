@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-	<meta charset="UTF-8">
-	<title>index页面</title>
-	<script th:src="@{/js/jquery-3.3.1.js}"></script>
+    <meta charset="UTF-8">
+    <title>index页面</title>
+    <script th:src="@{/js/jquery-3.3.1.js}"></script>
 </head>
 <body>
 
 
 </body>
 <script>
-	$(function () {
-		$.get("/idm/checkCurrentUser",function (result) {
-			if (result.code !== 200){
-				window.location.href="/login"
-			}
-			if (result.code === 200) {
-				window.location.href="/process/processList"
-			}
-		});
-	})
+    $(function () {
+        $.get("/idm/checkCurrentUser", function (result) {
+            if (result.code !== 200) {
+                window.location.href = "/login"
+            }
+            if (result.code === 200) {
+                window.location.href = "/process/processList"
+            }
+        });
+    })
 </script>
 </html>

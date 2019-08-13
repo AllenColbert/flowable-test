@@ -102,7 +102,7 @@ public class PowerModelServiceImpl implements PowerModelService {
     public Result userTaskView(String processDefinitionId, String activityId) {
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
 
-        Map<String, Object> map = new HashMap<>(255);
+        Map<String, Object> map = new HashMap<>(16);
         int count = 1 ;
 
         List<Process> processes = bpmnModel.getProcesses();

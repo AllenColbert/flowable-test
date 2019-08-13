@@ -1,197 +1,54 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<!--suppress ThymeleafVariablesResolveInspection 压制表达式报错-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org" >
+
 <head>
     <meta charset="utf-8" />
     <title>自定义页面测试</title>
     <script th:src="@{/js/jquery-3.3.1.js}"></script>
-    <link th:href="@{/css/jquery-ui.css}" rel="stylesheet" type="text/css">
-    <script th:src="@{/js/jquery-ui.js}"></script>
-    <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
+    <link th:href="@{/css/buttons.css}" rel="stylesheet" type="text/css">
+    <link th:href="@{/css/customize.css}" rel="stylesheet" type="text/css">
+    <link th:href="@{/styles/common/style.css}" rel="stylesheet" type="text/css">
 </head>
 <body>
 
 
 <div class="col-1">
-    <input type="button" class="my-btn-blue" value="新建" onclick="newFile()">
+    <input type="button" class="my-btn-blue" value="新建" onclick="selects()">
     <input type="button" class="my-btn-blue" value="遮罩" onclick="show()">
     <input type="button" class="my-btn-blue" value="弹出" onclick="hide()">
 </div>
 
-<div id="hidebg" style="display: none"></div>
-
-<div id="hidebox" style="display: none"></div>
-
-<div id="my_dialog" title="新建公文"  style="display: none" >
-    <form>
-        <p>文件名：<input type="text" id="create_name" /></p>
-        <p>作&nbsp;&nbsp;者&nbsp;&nbsp;：<input type="text" id="create_author" /></p>
-        <p>文&nbsp;&nbsp;种&nbsp;&nbsp;：<select id="create_type" >
-            <option value ="总结报告">总结报告</option>
-            <option value ="辅助授课">辅助授课</option>
-            <option value ="其他">其他</option>
-        </select>
-        </p>
-        <div style="float: right;">
-            <button class="my-btn-gray" onclick="create_paper_cancel()">取消</button>
-            <button class="my-btn-blue" onclick="create_paper_save()">保存</button>
-        </div>
-    </form>
-</div>
-
-
-
-<!-- 简单测试提示框 -->
-<span>
-        <a class="delete" href="javascript:void(0);" userid="123" username="张">
-            <img th:src="@{/images/line.png}" alt="删除" title="删除" />
-        </a>
-    </span>
-
-
 <!--点击删除按钮后弹出的页面-->
 <div class="zhezhao"></div>
-<div class="remove" id="removeUse">
-    <div class="removerChid">
-        <!--<h2>提示</h2>
-        <div class="removeMain">
-            <p>你确定要删除该用户吗？</p>
-            <a href="#" id="yes">确定</a> <a href="#" id="no">取消</a>
-        </div>-->
+<div class="remove" >
+    <p> <button  onclick="hide()">关闭</button></p>
+        <label for="selects">"回显节点"</label>
+        <select name="selectList" id="selects">
+            <option value="">选择要退回的节点</option>
+            <option th:each="rejectInfo:${rejectInfos}" th:value="${rejectInfo.sourceRefId}" th:text="${rejectInfo.sourceRefName}">rejected</option>
+        </select>
 
-        <div class="container text-center">
-            <form class="form-signin" >
-                <h2 class="form-signin-heading">登录页面</h2>
-                <input type="text" id="userId"  class="form-control" placeholder="用户名" required autofocus>
-                <input type="password" id="password"  class="form-control" placeholder="密码" required>
-                <button class="btn btn-lg btn-primary btn-block" type="button" onclick="ajax_ajax()">登录</button>
-            </form>
+</div>
 
-            <p id="errorMsg" style="min-height: 30px;min-width: 50px ;min-font-size: 25px;color: #ff2c52"> </p>
-        </div>
-    </div>
 </div>
 
 
 <script type="text/javascript">
-    var obj = "dasdsd";
-    $(function(){
-        // 点击"删除"按钮触发
-        $(".delete").on("click",function(){
-            obj = $(this);
-            changeDLGContent("你确定要删除用户【"+obj.attr("username")+"】吗？");
-            openYesOrNoDLG();
-        });
-        // 点击提示框中的"取消"按钮触发
-        $('#no').click(function () {
-            $('.zhezhao').css('display', 'none');
-            $('#removeUse').fadeOut();
-        });
-        // 点击提示框中的"确定"按钮触发
-        $('#yes').click(function () {
-            deleteExecute(obj);
-        });
-    });
-    //发送ajax请求删除内容
-    function deleteExecute(obj){
-        console.log(boj);
-        /* $.ajax({
-             type:"GET",
-             url:path+"/delete/delUser",
-             data:{
-                 id:obj.attr("userid")
-             },
-             dataType:"json",
-             success:function(data){
-                 // 一些提示信息
-                 changeDLGContent("对不起，删除用户【"+obj.attr("username")+"】失败");
-             },
-             error:function(data){
-                 //一些错误提示信息
-                 changeDLGContent("对不起，删除失败");
-             }
-         });*/
-    }
-    // 显示提示框
-    function openYesOrNoDLG(){
+    function show() {
         $('.zhezhao').css('display', 'block');
-        $('#removeUse').fadeIn();
-    }
-    // 改变提示内容
-    function changeDLGContent(contentStr){
-        var p = $(".removeMain").find("p");
-        p.html(contentStr);
+        $('.remove').css('display','block')
     }
 
-
-    function show()  //显示隐藏层和弹出层
-    {
-        var hideobj=document.getElementById("hidebg");
-        hidebg.style.display="block";  //显示隐藏层
-        hidebg.style.height=document.body.clientHeight+"px";  //设置隐藏层的高度为当前页面高度
-        document.getElementById("hidebox").style.display="block";  //显示弹出层
-    }
-    function hide()  //去除隐藏层和弹出层
-    {
-        document.getElementById("hidebg").style.display="none";
-        document.getElementById("hidebox").style.display="none";
+    function hide() {
+        $('.remove').css('display','none');
+        $('.zhezhao').css('display', 'none');
     }
 
+    function selects() {
 
-    /*新建文件*/
-    function newFile(){
-        showdiv();
-        hideback();
-    };
-
-    function hideback() {
-        $('.col-1').css('display', 'block')
     }
 
-    function showdiv(){
-        $("#my_dialog").dialog({
-            modal:true,
-            width:"400",
-            height:"223"
-        });
-        document.getElementById("my_dialog").style.display="block";
-    }
-
-    //弹出框中的保存函数
-   function create_paper_cancel(){
-        console.info("取消");
-        $("#create_name").val("");
-        $("#create_author").val("");
-        $("#create_type").empty();
-        var ops={
-            "总结报告":"总结报告",
-            "辅助授课":"辅助授课",
-            "其他":"其他"
-        };
-        var parent=document.getElementById("create_type");
-        for(var key in ops)
-        {
-            var o = new Option(ops[key],key);
-            parent.appendChild(o);
-
-        }
-        $("#my_dialog").dialog("close");
-    };
-
-
-    //弹出框中的取消函数
-    function  create_paper_save(){
-        $("#my_dialog").dialog("close");
-        $scope.create_name = document.getElementById("create_name").value;
-        var create_author = document.getElementById("create_author").value;
-        var create_type = document.getElementById("create_type").value;
-        var data={filename:$scope.create_name,author:create_author,type:create_type};
-        Document.create_paper_save(data,$http, function (response) {
-            // 进一步的操作
-            newFileextend();
-        }, function () {
-            alert("保存失败！");
-        })
-    };
 
 </script>
 

@@ -1,0 +1,261 @@
+/*
+自定义CSS样式集
+*/
+
+/*#######################################################*/
+body {
+    padding-top: 40px;
+    padding-bottom: 40px;
+    background-color: #eee;
+}
+
+.form-signin {
+    max-width: 330px;
+    padding: 15px;
+    margin: 0 auto;
+}
+.form-signin .form-signin-heading,
+.form-signin .checkbox {
+    margin-bottom: 10px;
+}
+.form-signin .checkbox {
+    font-weight: normal;
+}
+.form-signin .form-control {
+    position: relative;
+    height: auto;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    padding: 10px;
+    font-size: 16px;
+}
+.form-signin .form-control:focus {
+    z-index: 2;
+}
+.form-signin input[type="email"] {
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+.form-signin input[type="password"] {
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+
+
+/*###########################测弹出层用##############################*/
+* {
+    margin: 0;
+    padding: 0;
+}
+
+/*点击删除按钮后弹出的层*/
+.zhezhao {
+    display: none; /* 修改这里可以让遮罩层消失*/
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    opacity: 0.7;
+    filter: alpha(opacity = 70);
+    overflow: hidden;
+}
+
+.remove {
+    display: none; /* 默认不显示弹出层*/
+    width: 300px;
+    height: auto;
+    position: absolute;
+    top: 25%;
+    left: 40%;
+    background: #fbf8ff;
+    border-radius: 4px;
+    align-items: center;
+}
+
+.remove button{
+    align-content: center;
+    text-align: center;
+}
+
+.singleNodeJump {
+    display: none; /* 默认不显示弹出层*/
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 25%;
+    left: 40%;
+    background: #fffffb;
+    border-radius: 4px;
+}
+
+.reject_task {
+    display: none; /* 默认不显示弹出层*/
+    width: 300px;
+    height: auto;
+    position: absolute;
+    top: 25%;
+    left: 40%;
+    background: #fbf8ff;
+    border-radius: 4px;
+    align-items: center;
+}
+
+.removerChid {
+    margin: 4px;
+    border: 1px solid #ccc;
+}
+
+.removerChid h2 {
+    padding-left: 8px;
+    font-size: 14px;
+    line-height: 30px;
+    margin: 4px 8px;
+    border-bottom: 1px solid #99cc33;
+}
+
+.removeMain {
+    margin-top: 38px;
+    text-align: center;
+    margin-bottom: 30px;
+    border-radius: 4px;
+}
+
+.removeMain a {
+    padding: 0 20px;
+    display: inline-block;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 4px;
+    border: 1px solid #5e8809;
+    margin-top: 30px;
+    background: #99cc33;
+    color: #fff;
+    text-decoration: none;
+}
+
+.removeMain a:hover,.removeMain a:active {
+    background: #679016;
+}
+
+/*#############################################################################*/
+
+
+table.gridtable {
+    font-family: verdana,arial,sans-serif;
+    font-size:14px;
+    color:#333333;
+    border-width: 1px;
+    border-color: #666666;
+    border-collapse: collapse;
+}
+table.gridtable th {
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #dedede;
+}
+table.gridtable td {
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #ffffff;
+}
+.flowableogo {
+    line-height: 40px;
+    height: 40px;
+    width: 180px;
+    float: left;
+    cursor: default;
+}
+
+/*@@################################################################################################*/
+
+.smart-green {
+    margin-left:auto;
+    margin-right:auto;
+    max-width: 500px;
+    background: #F8F8F8;
+    padding: 30px 30px 20px 30px;
+    font: 12px Arial, Helvetica, sans-serif;
+    color: #666;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+}
+.smart-green h1 {
+    font: 24px "Trebuchet MS", Arial, Helvetica, sans-serif;
+    padding: 20px 0px 20px 40px;
+    display: block;
+    margin: -30px -30px 10px -30px;
+    color: #FFF;
+    background: #9DC45F;
+    text-shadow: 1px 1px 1px #949494;
+    border-radius: 5px 5px 0px 0px;
+    -webkit-border-radius: 5px 5px 0px 0px;
+    -moz-border-radius: 5px 5px 0px 0px;
+    border-bottom:1px solid #89AF4C;
+
+}
+.smart-green h1>span {
+    display: block;
+    font-size: 11px;
+    color: #FFF;
+}
+
+.smart-green label {
+    display: block;
+    margin: 0px 0px 5px;
+}
+.smart-green label>span {
+    float: left;
+    margin-top: 10px;
+    color: #5E5E5E;
+}
+.smart-green input[type="text"], .smart-green input[type="email"], .smart-green textarea, .smart-green select {
+    color: #555;
+    height: 30px;
+    line-height:15px;
+    width: 100%;
+    padding: 0px 0px 0px 10px;
+    margin-top: 2px;
+    border: 1px solid #E5E5E5;
+    background: #FBFBFB;
+    outline: 0;
+    -webkit-box-shadow: inset 1px 1px 2px rgba(238, 238, 238, 0.2);
+    box-shadow: inset 1px 1px 2px rgba(238, 238, 238, 0.2);
+    font: normal 14px/14px Arial, Helvetica, sans-serif;
+}
+.smart-green textarea{
+    height:100px;
+    padding-top: 10px;
+}
+.smart-green select {
+    appearance:none;
+    -webkit-appearance:none;
+    -moz-appearance: none;
+    text-indent: 0.01px;
+    text-overflow: '';
+    width:100%;
+    height:30px;
+}
+.smart-green .button {
+    background-color: #9DC45F;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-border-radius: 5px;
+    border: none;
+    padding: 10px 25px 10px 25px;
+    color: #FFF;
+    text-shadow: 1px 1px 1px #949494;
+}
+.smart-green .button:hover {
+    background-color:#80A24A;
+}

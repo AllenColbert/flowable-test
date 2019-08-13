@@ -8,21 +8,21 @@
 </head>
 <body>
 <!--引入头列表-->
-<div id="heard"  th:replace="header.html :: header"></div>
+<div id="heard" th:replace="header.html :: header"></div>
 
 <!--遮罩层div-->
 <div class="zhezhao"></div>
 
 <!--完成任务弹出层div-->
-<div class="remove"  >
+<div class="remove">
     <button id="guanbi" onclick="hide()">关闭</button>
-    <form id="form1" action="#" method="get" name="form1" >
+    <form id="form1" action="#" method="get" name="form1">
         <table id="table1" style="display: none">
             <tr>
                 <td>用户id:</td>
                 <td>
                     <label>
-                    <input type="text" placeholder="用户id" name="userId" >
+                        <input type="text" placeholder="用户id" name="userId">
                     </label>
                 </td>
             </tr>
@@ -30,7 +30,7 @@
                 <td>申请金额:</td>
                 <td>
                     <label>
-                        <input type="text" placeholder="申请金额"  name="money" >
+                        <input type="text" placeholder="申请金额" name="money">
                     </label>
                 </td>
             </tr>
@@ -39,7 +39,7 @@
                 <td>
                     <label>
                         <input type="radio" placeholder="是否提交申请" name="send_apply" value="true" checked="checked">是
-                        <input type="radio" placeholder="是否提交申请" name="send_apply" value="false" >否
+                        <input type="radio" placeholder="是否提交申请" name="send_apply" value="false">否
                     </label>
                 </td>
             </tr>
@@ -56,7 +56,7 @@
                 <td>
                     <label>
                         <input type="radio" placeholder="是否通过" name="approve" value="true" checked="checked">通过
-                        <input type="radio" placeholder="是否通过" name="approve" value="false" >不通过
+                        <input type="radio" placeholder="是否通过" name="approve" value="false">不通过
                     </label>
                 </td>
             </tr>
@@ -64,7 +64,7 @@
                 <td><input type="button" id="form1_submit" value="提交参数"></td>
             </tr>
         </table>
-        <table id="table2" >
+        <table id="table2">
             <tbody>
             <tr>
                 <td>设置任务办理人：</td>
@@ -78,24 +78,23 @@
     </form>
 </div>
 
+<!--退回上一步弹出层-->
 <div class="reject_task">
-  <p> <button  onclick="hide()">关闭</button></p>
-    <label>
-        <select name="sourceRefSelect" id="selects" >
-            <option value="">选择要退回的节点</option>
-            <!--playerRoleList后台获取到的集合th:each进行遍历,
-                playerRole作为集合对象的变量名称,
-                th:value="${playerRole.id}作为value值
-                th:text="${playerRole.name}"作为需要显示的内容-->
-            <option th:each="rejectInfo:${rejectInfos}"
-                    th:value="${rejectInfo.sourceRefId}"
-                    th:text="${rejectInfo.sourceRefName}"></option>
+    <p>
+        <button onclick="hide()">关闭</button>
+    </p>
+    <div>
+        <label for="returnable_node_selects">选择要退回的节点</label>
+        <select name="returnableNode" id="returnable_node_selects">
+            <option disabled="disabled" value="">选择要退回的节点</option>
         </select>
-    </label>
+        <button id="execute_return" align="center">执行退回</button>
+
+    </div>
 </div>
 
 <!--流程节点跳转div-->
-<div class="singleNodeJump" >
+<div class="singleNodeJump">
     <form action="#" id="node_jump_form">
         <table id="node_jump_table" style="margin:auto">
             <thead>
@@ -103,14 +102,14 @@
                 <th>
                 </th>
                 <th>
-                    <input type="button"  th:class="button-royal" style="float: right" onclick="hide()" value="关闭">
+                    <input type="button" th:class="button-royal" style="float: right" onclick="hide()" value="关闭">
                 </th>
             </tr>
             </thead>
             <tbody>
             <tr>
                 <td>目标节点ID：</td>
-                <td><input  id="targetNodeId" type="text" placeholder="要跳转的节点Id" name="targetNodeId"></td>
+                <td><input id="targetNodeId" type="text" placeholder="要跳转的节点Id" name="targetNodeId"></td>
             </tr>
 
             <tr>
@@ -125,42 +124,49 @@
 <div id="bodyBox">
     <!--任务列表div-->
     <div id="mainBox" th:align="center">
-    <table th:class="gridtable" >
-        <thead>
-        <th>任务Id</th>
-        <th>任务名称</th>
-        <th>代理人</th>
-        <th>创建时间</th>
-        <th>任务状态</th>
-        <th>租户Id</th>
-        <th>操作空间</th>
-        </thead>
-        <tbody>
-        <tr th:each="task:${tasks}">
-            <td th:text="${task.id}" ></td>
-            <td th:text="${task.name}"></td>
-            <td th:text="${task.assignee}"></td>
-            <td th:text="${#dates.format(task.createTime, 'yyyy-MM-dd HH:mm:ss')}" ></td>
-            <td th:text="${task.suspensionState} eq 1? '运行中':'已挂起'"></td>
-            <td th:text="${task.tenantId}"></td>
-            <td >
-                <button  th:value="${task.id}" th:class="button3" onclick="completeTask(value)">完成</button>
-                <button  th:value="${task.processInstanceId}" th:class="button3" onclick="rejectTask(value)">退回</button>
-                <button  th:value="${task.id}" th:class="button3" onclick="nodeJump(value)">任务跳转</button>
-                <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1b6d85" onclick="showImage(value)">流程图</button>
-                <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1754c2" onclick="suspendTask(value)">挂起</button>
-                <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #c28c63" onclick="activateTask(value)">激活</button>
-            </td>
+        <table th:class="gridtable">
+            <thead>
+            <tr>
+                <th>任务Id</th>
+                <th>任务名称</th>
+                <th>代理人</th>
+                <th>创建时间</th>
+                <th>任务状态</th>
+                <th>租户Id</th>
+                <th>操作空间</th>
             </tr>
-           </tbody>
-      </table>
+            </thead>
+            <tbody>
+            <tr th:each="task:${tasks}">
+                <td th:text="${task.id}"></td>
+                <td th:text="${task.name}"></td>
+                <td th:text="${task.assignee}"></td>
+                <td th:text="${#dates.format(task.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                <td th:text="${task.suspensionState} eq 1? '运行中':'已挂起'"></td>
+                <td th:text="${task.tenantId}"></td>
+                <td>
+                    <button th:value="${task.id}" th:class="button3" onclick="completeTask(value)">完成</button>
+                    <button th:value="${task.processInstanceId}" th:class="button3" onclick="rejectTask(value)">退回
+                    </button>
+                    <button th:value="${task.id}" th:class="button3" onclick="nodeJump(value)">任务跳转</button>
+                    <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1b6d85"
+                            onclick="showImage(value)">流程图
+                    </button>
+                    <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #1754c2"
+                            onclick="suspendTask(value)">挂起
+                    </button>
+                    <button th:value="${task.processInstanceId}" th:class="button3" style="background-color: #c28c63"
+                            onclick="activateTask(value)">激活
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
     </div>
     <!--流程图div-->
     <div id="imgDiv" style="border-image-width: auto;text-align: center"></div>
 
 </div>
-
-</body>
 
 <script>
 
@@ -170,14 +176,14 @@
 
     function show() {
         $('.zhezhao').css('display', 'block');
-        $('.remove').css('display','block')
+        $('.remove').css('display', 'block')
     }
 
     function hide() {
-        $('.remove').css('display','none');
+        $('.remove').css('display', 'none');
         $('.zhezhao').css('display', 'none');
-        $('.singleNodeJump').css('display','none');
-        $('.reject_task').css('display','none');
+        $('.singleNodeJump').css('display', 'none');
+        $('.reject_task').css('display', 'none');
     }
 
     function nodeJump(taskId) {
@@ -187,10 +193,10 @@
         $("#node_jump_submit").click(function () {
             var formData = $("#node_jump_form").serializeArray();
             var result = jsonArrayToMap(formData);
-            var targetNodeId =result.targetNodeId;
+            var targetNodeId = result.targetNodeId;
 
             console.log(targetNodeId);
-            $.get("/task/jump",{"taskId":taskId,"targetNodeId":targetNodeId},function (result) {
+            $.get("/task/jump", {"taskId": taskId, "targetNodeId": targetNodeId}, function (result) {
                 showMsg(result.msg);
             });
             hide();
@@ -199,32 +205,32 @@
 
     function completeTask(taskId) {
         show();
-        $("#table2_submit").click(function (){
+        $("#table2_submit").click(function () {
             var formData = $("#form1").serializeArray();
             //通过自定义JS方法将数组对象转化为map格式{"key1","value1",...}
             var result = jsonArrayToMap(formData);
             //console.log(result);
             //再将Map对象转为字符串
-            var resultData =JSON.stringify(result);
-            $.get("/task/completeTaskWithData",{"taskId":taskId,"formData":resultData},function (result) {
+            var resultData = JSON.stringify(result);
+            $.get("/task/completeTaskWithData", {"taskId": taskId, "formData": resultData}, function (result) {
                 showMsg(result.msg);
             });
             hide();
-        } );
+        });
     }
 
     function showImage(processInstanceId) {
-        console.log('processInstanceId:'+processInstanceId);
-        $("#imgDiv").empty().append("<img src='/task/processDiagram?processInstanceId="+processInstanceId+"'>")
+        console.log('processInstanceId:' + processInstanceId);
+        $("#imgDiv").empty().append("<img src='/task/processDiagram?processInstanceId=" + processInstanceId + "'>")
     }
 
     function suspendTask(processInstanceId) {
-        $.get("/task/suspendProcessInstanceById",{"processInstanceId":processInstanceId},function (result) {
+        $.get("/task/suspendProcessInstanceById", {"processInstanceId": processInstanceId}, function (result) {
 
-            if (result.code === 200){
+            if (result.code === 200) {
                 reload();
             }
-            if (result.code !== 200){
+            if (result.code !== 200) {
                 showMsg(result.msg);
             }
 
@@ -232,11 +238,11 @@
     }
 
     function activateTask(processInstanceId) {
-        $.get("/task/activateProcessInstanceById",{"processInstanceId":processInstanceId},function (result) {
-            if (result.code === 200){
+        $.get("/task/activateProcessInstanceById", {"processInstanceId": processInstanceId}, function (result) {
+            if (result.code === 200) {
                 reload();
             }
-            if (result.code !== 200){
+            if (result.code !== 200) {
                 showMsg(result.msg);
             }
         })
@@ -244,12 +250,42 @@
 
     function rejectTask(processInstanceId) {
         $('.zhezhao').css('display', 'block');
-
-
-        $.get("/task/rejectTaskData",{"processInstanceId":processInstanceId},function (result) {
+        $('.reject_task').css('display', 'block');
+        $.get("/task/returnableNode", {"processInstanceId": processInstanceId}, function (result) {
+            if (result.code !== 200) {
+                hide();
+                showMsg(result.msg);
+            }
+            if (result.code === 200) {
+                var selects = result.data;
+                $("#returnable_node_selects").empty();
+                $("#returnable_node_selects").append("<option disabled='disabled' value=\"\">选择要退回的节点</option>");
+                console.log(selects);
+                for (var i = 0; i < selects.length; i++) {
+                    var sourceId = selects[i].value;
+                    var sourceName = selects[i].key;
+                    $("#returnable_node_selects").append("<option value='" + sourceId + "'>" + sourceName + "</option>");
+                }
+            }
         });
-        $('.reject_task').css('display','block');
+        $("#execute_return").click(function () {
+            executeReturn(processInstanceId);
+        })
+    }
+
+    function executeReturn(processInstanceId) {
+        var targetNodeId = $('#returnable_node_selects option:selected').val();
+        console.log(targetNodeId);
+        console.log(processInstanceId)
+        $.get("/task/executeReturn", {
+            "processInstanceId": processInstanceId,
+            "targetNodeId": targetNodeId
+        }, function (result_data) {
+            hide();
+            showMsg(result_data.msg);
+        })
     }
 
 </script>
+</body>
 </html>

@@ -13,11 +13,13 @@
 <div id="mainBox" th:align="center">
     <table th:class="gridtable">
         <thead>
-        <th>流程定义Id</th>
-        <th>流程定义名</th>
-        <th>流程实例key</th>
-        <th>状态</th>
-        <th>操作空间</th>
+        <tr>
+            <th>流程定义Id</th>
+            <th>流程定义名</th>
+            <th>流程实例key</th>
+            <th>状态</th>
+            <th>操作空间</th>
+        <tr>
         </thead>
         <tbody>
         <tr th:each="processDef:${processDefinitionList}">
@@ -27,10 +29,16 @@
             <td th:text="${processDef.suspensionState} eq 1? '运行中':'已挂起'"></td>
             <td>
                 <button th:value="${processDef.id}" th:class="button3" onclick="runProcess(value)">启动</button>
-                <button th:value="${processDef.id}" th:class="button3" style="background-color: #5e53e4" onclick="addSingleNode(value)">增加单节点</button>
+                <button th:value="${processDef.id}" th:class="button3" style="background-color: #5e53e4"
+                        onclick="addSingleNode(value)">增加单节点
+                </button>
                 <button th:value="${processDef.id}" th:class="button3" onclick="getProcess(value)">查询process</button>
-                <button th:value="${processDef.id}" th:class="button3" style="background-color: #1754c2" onclick="suspend(value)">挂起</button>
-                <button th:value="${processDef.id}" th:class="button3" style="background-color: #c28c63" onclick="activate(value)">激活</button>
+                <button th:value="${processDef.id}" th:class="button3" style="background-color: #1754c2"
+                        onclick="suspend(value)">挂起
+                </button>
+                <button th:value="${processDef.id}" th:class="button3" style="background-color: #c28c63"
+                        onclick="activate(value)">激活
+                </button>
                 <button th:value="${processDef.deploymentId}" th:class="button3" style="background-color: red"
                         onclick="deleteProcess(value)">删除
                 </button>
@@ -42,9 +50,7 @@
 
 <div class="zhezhao"></div>
 
-<div class="remove" >
-
-
+<div class="remove">
     <form id="add_single_node_form" action="#">
         <table style="margin:auto">
             <thead>
@@ -53,7 +59,8 @@
 
                 </td>
                 <td>
-                    <input type="button" id="guanbi" th:class="button-royal" style="float: right" onclick="hide()" value="关闭">
+                    <input type="button" id="guanbi" th:class="button-royal" style="float: right" onclick="hide()"
+                           value="关闭">
                 </td>
 
             </tr>
@@ -96,7 +103,8 @@
                 </label></td>
             </tr>
             <tr>
-                <td style="align-content: center"><input type="button" th:class="button-primary"   id="send_node_info" value="提交参数"></td>
+                <td style="align-content: center"><input type="button" th:class="button-primary" id="send_node_info"
+                                                         value="提交参数"></td>
             </tr>
             </tbody>
         </table>
@@ -105,8 +113,7 @@
 
 </div>
 
-</body>
-<script>
+<script type="text/javaScript">
 
     $(function () {
 
@@ -116,11 +123,11 @@
 
     function show() {
         $('.zhezhao').css('display', 'block');
-        $('.remove').css('display','block')
+        $('.remove').css('display', 'block')
     }
 
     function hide() {
-        $('.remove').css('display','none');
+        $('.remove').css('display', 'none');
         $('.zhezhao').css('display', 'none');
     }
 
@@ -130,9 +137,12 @@
         $("#send_node_info").click(function () {
             var formData = $("#add_single_node_form").serializeArray();
             var result = jsonArrayToMap(formData);
-            var userTaskData =JSON.stringify(result);
+            var userTaskData = JSON.stringify(result);
 
-            $.get("/model/addSingleNode",{"processDefinitionId":processDefinitionId,"userTaskData":userTaskData},function (result) {
+            $.get("/model/addSingleNode", {
+                "processDefinitionId": processDefinitionId,
+                "userTaskData": userTaskData
+            }, function (result) {
                 showMsg(result.msg);
                 hide();
             })
@@ -141,18 +151,14 @@
     }
 
     function runProcess(processDefinitionId) {
-        $.post("/process/startProcessById",{"processDefinitionId": processDefinitionId},function (result) {
+        $.post("/process/startProcessById", {"processDefinitionId": processDefinitionId}, function (result) {
             console.log(result);
             showMsg(result.msg);
         });
     }
 
     function getProcess(processDefinitionId) {
-        window.open('/process/showProcess?processDefinitionId='+processDefinitionId,false);
-        //window.location.href="/process/showProcess?processDefinitionId="+processDefinitionId;
-/*        $.get("/process/showProcess",{"processDefinitionId":processDefinitionId},function (result) {
-
-        })*/
+        window.open('/process/showProcess?processDefinitionId=' + processDefinitionId);
     }
 
     function deleteProcess(deploymentId) {
@@ -160,7 +166,6 @@
             url: "/process/deleteProcessById",
             data: {"deploymentId": deploymentId},
             type: "DELETE",
-            /*dataType: "JSON/a",*/
             async: true,
             success: function (result) {
                 console.log(result);
@@ -173,17 +178,19 @@
     }
 
     function suspend(processDefinitionId) {
-        $.get("/process/suspendProcessByProcessDefinitionId",{"processDefinitionId":processDefinitionId},function (result) {
+        $.get("/process/suspendProcessByProcessDefinitionId", {"processDefinitionId": processDefinitionId}, function (result) {
             showMsg(result.msg);
         });
     }
 
     function activate(processDefinitionId) {
-        $.get("/process/activateProcessByProcessDefinitionId",{"processDefinitionId":processDefinitionId},function (result) {
+        $.get("/process/activateProcessByProcessDefinitionId", {"processDefinitionId": processDefinitionId}, function (result) {
             showMsg(result.msg);
         })
 
     }
 
 </script>
+</body>
+
 </html>

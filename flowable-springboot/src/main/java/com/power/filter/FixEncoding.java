@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 /**
+ * 解决之前出现的编码错误  --废弃待删除
  * @author : xuyunfeng
  * @date :   2019/8/8 15:35
  */
