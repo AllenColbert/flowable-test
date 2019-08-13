@@ -244,7 +244,7 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         Process process = findProcessByProcessDefinitionId(processDefinitionId);
 
         List<UserTask> userTasks = new ArrayList<>();
-        List<ParallelGateway> parallelGetways = new ArrayList<>();
+        List<ParallelGateway> parallelGateways = new ArrayList<>();
         //获取 List<UserTask> ，有的任务不止一个userTask
         for (String activityId : activityIds) {
             FlowElement flowElement = process.getFlowElement(activityId);
@@ -254,8 +254,38 @@ public class PowerTaskServiceImpl implements PowerTaskService {
             }
             if (flowElement instanceof ParallelGateway){
                 ParallelGateway parallelGateway = (ParallelGateway) flowElement;
-                parallelGetways.add(parallelGateway);
+                parallelGateways.add(parallelGateway);
             }
+
+           if(flowElement instanceof ExclusiveGateway){
+               System.out.println("流程包含 排他网关");
+           }
+
+           if (flowElement instanceof InclusiveGateway){
+               System.out.println("流程包含 包容网关");
+           }
+
+
+        }
+
+        System.out.println(parallelGateways);
+
+        if (parallelGateways.size() > 0){
+
+            List<Execution> executions = runtimeService.createExecutionQuery().parentId(processInstanceId).list();
+            List<String> currentExecutionIds = new ArrayList<>();
+
+            for (Execution execution : executions) {
+                System.out.println("并行网关节点数："+execution.getActivityId());
+                currentExecutionIds.add(execution.getId());
+            }
+
+/*          执行退回到并行网关需要下面的程序
+            runtimeService.createChangeActivityStateBuilder()
+                    .moveExecutionsToSingleActivityId(currentExecutionIds, targetTaskKey)
+                    .changeState();*/
+
+            return Result.success();
         }
 
         List<Map<String,String>> selectList = new ArrayList<>();
