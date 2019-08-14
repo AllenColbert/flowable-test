@@ -29,7 +29,6 @@ public class RequestHandlerInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        System.out.println(request.getServletPath());
         Object user = null;
         user = session.getAttribute("user");
 

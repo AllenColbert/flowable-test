@@ -136,10 +136,10 @@ public class TaskController {
      * @param processInstanceId  执行实例Id
      * @return Result
      */
-    @GetMapping("returnableNode")
+    @GetMapping("returnSourceNode")
     @ResponseBody
-    public Result returnableNode(@RequestParam String processInstanceId){
-        return  powerTaskService.returnableNode(processInstanceId);
+    public Result returnSourceNode(@RequestParam String processInstanceId){
+        return  powerTaskService.returnSourceNode(processInstanceId);
     }
 
     @GetMapping("executeReturn")
@@ -147,6 +147,12 @@ public class TaskController {
     public Result executeReturn(@RequestParam String processInstanceId,
                                 @RequestParam String targetNodeId){
         return powerTaskService.executeReturn(processInstanceId,targetNodeId);
+    }
+
+    @GetMapping("findConditionExpression")
+    @ResponseBody
+    public Result findConditionExpression(@RequestParam String taskId){
+        return powerTaskService.findConditionExpression(taskId);
     }
 
 }

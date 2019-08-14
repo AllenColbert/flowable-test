@@ -17,55 +17,8 @@
 <div class="remove">
     <button id="guanbi" onclick="hide()">关闭</button>
     <form id="form1" action="#" method="get" name="form1">
-        <table id="table1" style="display: none">
-            <tr>
-                <td>用户id:</td>
-                <td>
-                    <label>
-                        <input type="text" placeholder="用户id" name="userId">
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <td>申请金额:</td>
-                <td>
-                    <label>
-                        <input type="text" placeholder="申请金额" name="money">
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <td>是否提交申请:</td>
-                <td>
-                    <label>
-                        <input type="radio" placeholder="是否提交申请" name="send_apply" value="true" checked="checked">是
-                        <input type="radio" placeholder="是否提交申请" name="send_apply" value="false">否
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <td>任务代办人：</td>
-                <td>
-                    <label>
-                        <input type="text" placeholder="设置任务代办人" name="assignee">
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <td>是否通过：</td>
-                <td>
-                    <label>
-                        <input type="radio" placeholder="是否通过" name="approve" value="true" checked="checked">通过
-                        <input type="radio" placeholder="是否通过" name="approve" value="false">不通过
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <td><input type="button" id="form1_submit" value="提交参数"></td>
-            </tr>
-        </table>
         <table id="table2">
-            <tbody>
+            <tbody id="add_condition">
             <tr>
                 <td>设置任务办理人：</td>
                 <td><input type="text" placeholder="任务办理人的Id" name="userId"></td>
@@ -88,13 +41,14 @@
         <button onclick="hide()">关闭</button>
     </p>
     <div>
-        <label for="returnable_node_selects">选择要退回的节点</label>
-        <select name="returnableNode" id="returnable_node_selects">
-            <option disabled="disabled" value="">选择要退回的节点</option>
+        <label for="return_source_node_selects">选择要退回的节点</label>
+        <select name="returnSourceNode" id="return_source_node_selects">
+            <option  value="">选择要退回的节点</option>
         </select>
-        <button id="execute_return" align="center">执行退回</button>
-
     </div>
+    <p>
+        <button id="execute_return" align="center">执行退回</button>
+    </p>
 </div>
 
 <!--流程节点跳转div-->
@@ -149,7 +103,7 @@
                 <td th:text="${task.suspensionState} eq 1? '运行中':'已挂起'"></td>
                 <td th:text="${task.tenantId}"></td>
                 <td>
-                    <button th:value="${task.id}" th:class="button3" onclick="completeTask(value)">完成</button>
+                    <button th:value="${task.id}" th:class="button3" onclick="fillForm(value)">完成</button>
                     <button th:value="${task.processInstanceId}" th:class="button3" onclick="rejectTask(value)">退回
                     </button>
                     <button th:value="${task.id}" th:class="button3" onclick="nodeJump(value)">任务跳转</button>
@@ -175,7 +129,19 @@
 <script>
 
     $(function () {
-
+        $("#table2_submit").click(function () {
+            var formData = $("#form1").serializeArray();
+            //通过自定义JS方法将数组对象转化为map格式{"key1","value1",...}
+            var result = jsonArrayToMap(formData);
+            //console.log(result);
+            //再将Map对象转为字符串
+            var resultData = JSON.stringify(result);
+            $.get("/task/completeTaskWithData", {"taskId": taskId, "formData": resultData}, function (result) {
+                showMsg(result.msg);
+                console.log(result.data);
+            });
+            hide();
+        })
     });
 
     function show() {
@@ -208,7 +174,6 @@
     }
 
     function completeTask(taskId) {
-        show();
         $("#table2_submit").click(function () {
             var formData = $("#form1").serializeArray();
             //通过自定义JS方法将数组对象转化为map格式{"key1","value1",...}
@@ -218,6 +183,7 @@
             var resultData = JSON.stringify(result);
             $.get("/task/completeTaskWithData", {"taskId": taskId, "formData": resultData}, function (result) {
                 showMsg(result.msg);
+                console.log(result.data);
             });
             hide();
         });
@@ -255,20 +221,20 @@
     function rejectTask(processInstanceId) {
         $('.zhezhao').css('display', 'block');
         $('.reject_task').css('display', 'block');
-        $.get("/task/returnableNode", {"processInstanceId": processInstanceId}, function (result) {
+        $.get("/task/returnSourceNode", {"processInstanceId": processInstanceId}, function (result) {
             if (result.code !== 200) {
                 hide();
                 showMsg(result.msg);
             }
             if (result.code === 200) {
                 var selects = result.data;
-                $("#returnable_node_selects").empty();
-                $("#returnable_node_selects").append("<option disabled='disabled' value=\"\">选择要退回的节点</option>");
+                $("#return_source_node_selects").empty();
+                $("#return_source_node_selects").append("<option disabled='disabled' value=\"\">选择要退回的节点</option>");
                 console.log(selects);
                 for (var i = 0; i < selects.length; i++) {
                     var sourceId = selects[i].value;
                     var sourceName = selects[i].key;
-                    $("#returnable_node_selects").append("<option value='" + sourceId + "'>" + sourceName + "</option>");
+                    $("#return_source_node_selects").append("<option value='" + sourceId + "'>" + sourceName + "</option>");
                 }
             }
         });
@@ -278,7 +244,7 @@
     }
 
     function executeReturn(processInstanceId) {
-        var targetNodeId = $('#returnable_node_selects option:selected').val();
+        var targetNodeId = $('#return_source_node_selects option:selected').val();
         console.log(targetNodeId);
         console.log(processInstanceId)
         $.get("/task/executeReturn", {
@@ -287,6 +253,36 @@
         }, function (result_data) {
             hide();
             showMsg(result_data.msg);
+        })
+    }
+
+    function fillForm(taskId) {
+        $.get("/task/findConditionExpression",{"taskId":taskId},function (result) {
+            console.log(result);
+            if (result.code === 200){
+                var conditions = result.data;
+                $("#add_condition").empty();
+                $("#add_condition").append("<tr>\n" +
+                    "                <td>设置任务办理人：</td>\n" +
+                    "                <td><input type=\"text\" placeholder=\"任务办理人的Id\" name=\"userId\"></td>\n" +
+                    "            </tr>");
+                for(var i =0;i<conditions.length;i++){
+                    $("#add_condition").append("<tr>\n"+
+                    "                 <td>"+conditions[i]+":</td>\n"+
+                    "                 <td><input type='text' name="+conditions[i]+"></td>\n"+
+                    "                 </tr>")
+                }
+
+                $("#add_condition").append("<tr>\n" +
+                    "                <td>添加评论：</td>\n" +
+                    "                <td><textarea  placeholder=\"评论\" name=\"message\"></textarea></td>\n" +
+                    "            </tr>\n" +
+                    "            <tr>\n" +
+                    "                <td><input type=\"button\" id=\"table2_submit\" value=\"提交参数\"></td>\n" +
+                    "            </tr>");
+
+                show();
+            }
         })
     }
 

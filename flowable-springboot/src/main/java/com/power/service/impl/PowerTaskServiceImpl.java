@@ -8,12 +8,13 @@ import com.power.util.ListUtils;
 import com.power.util.Result;
 import com.power.util.ResultCode;
 import org.flowable.bpmn.constants.BpmnXMLConstants;
-import org.flowable.bpmn.model.*;
 import org.flowable.bpmn.model.Process;
+import org.flowable.bpmn.model.*;
 import org.flowable.engine.*;
 import org.flowable.engine.runtime.ActivityInstance;
 import org.flowable.engine.runtime.Execution;
 import org.flowable.engine.runtime.ProcessInstance;
+import org.flowable.engine.task.Comment;
 import org.flowable.idm.api.User;
 import org.flowable.image.ProcessDiagramGenerator;
 import org.flowable.task.api.Task;
@@ -27,10 +28,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author : xuyunfeng
@@ -52,6 +50,10 @@ public class PowerTaskServiceImpl implements PowerTaskService {
     private HttpSession session;
     @Autowired
     private ManagementService managementService;
+    @Autowired
+    private HistoryService historyService;
+    @Autowired
+    private FormService formService;
     @Autowired
     private TaskMapper taskMapper;
 
@@ -212,9 +214,12 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         }
         String processInstanceId = findInstanceIdByTaskId(taskId);
         //完成任务的时候可以选中是否添加评论 ,防止 hi_comment表数据过大;
-        String comment = vars.get("message").toString();
-        if (!"".equals(comment)){
-            taskService.addComment(taskId,processInstanceId,comment);
+        String commentMsg = vars.get("message").toString();
+        String userId = vars.get("userId").toString();
+        if (!"".equals(commentMsg)) {
+            Comment comment = taskService.addComment(taskId, processInstanceId, commentMsg);
+            comment.setUserId(userId);
+            taskService.saveComment(comment);
         }
         taskService.complete(taskId, vars);
         return Result.success();
@@ -231,80 +236,38 @@ public class PowerTaskServiceImpl implements PowerTaskService {
     }
 
     @Override
-    public Result returnableNode(String processInstanceId) {
-
+    public Result returnSourceNode(String processInstanceId) {
+        //通过流程实例Id获取当前活动节点列表
         List<String> activityIds = findActivityIdsByInstanceId(processInstanceId);
-
-        if (activityIds.size() == 0){
-            return Result.failure(ResultCode.RESULT_DATA_NONE);
-        }
-
-        String processDefinitionId = findDefinitionIdByInstanceId(processInstanceId);
-
-        Process process = findProcessByProcessDefinitionId(processDefinitionId);
-
+        //获取process
+        Process process = findProcessByProcessInstanceId(processInstanceId);
         List<UserTask> userTasks = new ArrayList<>();
-        List<ParallelGateway> parallelGateways = new ArrayList<>();
-        //获取 List<UserTask> ，有的任务不止一个userTask
+        //只获取 List<UserTask>，且一般来说当前活动节点都不会是网关的
         for (String activityId : activityIds) {
             FlowElement flowElement = process.getFlowElement(activityId);
-            if (flowElement instanceof UserTask){
+            if (flowElement instanceof UserTask) {
                 UserTask userTask = (UserTask) flowElement;
                 userTasks.add(userTask);
             }
-            if (flowElement instanceof ParallelGateway){
-                ParallelGateway parallelGateway = (ParallelGateway) flowElement;
-                parallelGateways.add(parallelGateway);
-            }
-
-           if(flowElement instanceof ExclusiveGateway){
-               System.out.println("流程包含 排他网关");
-           }
-
-           if (flowElement instanceof InclusiveGateway){
-               System.out.println("流程包含 包容网关");
-           }
-
-
         }
-
-        System.out.println(parallelGateways);
-
-        if (parallelGateways.size() > 0){
-
-            List<Execution> executions = runtimeService.createExecutionQuery().parentId(processInstanceId).list();
-            List<String> currentExecutionIds = new ArrayList<>();
-
-            for (Execution execution : executions) {
-                System.out.println("并行网关节点数："+execution.getActivityId());
-                currentExecutionIds.add(execution.getId());
-            }
-
-/*          执行退回到并行网关需要下面的程序
-            runtimeService.createChangeActivityStateBuilder()
-                    .moveExecutionsToSingleActivityId(currentExecutionIds, targetTaskKey)
-                    .changeState();*/
-
-            return Result.success();
-        }
-
-        List<Map<String,String>> selectList = new ArrayList<>();
+        //返回该节点所有的流入流程
+        List<Map<String, String>> selectList = new ArrayList<>();
         for (UserTask userTask : userTasks) {
             List<SequenceFlow> incomingFlows = userTask.getIncomingFlows();
-
             for (SequenceFlow incomingFlow : incomingFlows) {
                 Map<String, String> map = new HashMap<>(10);
                 String sourceId = incomingFlow.getSourceRef();
                 String sourceName = process.getFlowElement(sourceId).getName();
                 //移除Name为空的节点（start节点名字经常为空）；
-                if (sourceName == null|| "".equals(sourceName)){
+                if (sourceName == null || "".equals(sourceName)) {
                     continue;
                 }
-                map.put("value",sourceId);
-                map.put("key",sourceName);
+                map.put("value", sourceId);
+                map.put("key", sourceName);
                 selectList.add(map);
             }
         }
+        //去重
         List<Map<String, String>> setList = ListUtils.removeDuplicates(selectList);
 
         return Result.success(setList);
@@ -312,30 +275,139 @@ public class PowerTaskServiceImpl implements PowerTaskService {
     }
 
     @Override
-    public Result executeReturn(String processInstanceId, String targetNodeId){
+    public Result executeReturn(String processInstanceId, String targetNodeId) {
         List<String> activityIds = findActivityIdsByInstanceId(processInstanceId);
+        //获取process
+        Process process = findProcessByProcessInstanceId(processInstanceId);
+        //获取到flowElement 流程元素对象
+        FlowElement flowElement = process.getFlowElement(targetNodeId);
+        //如果目标节点是一般的用户任务可以直接退回
+        if (flowElement instanceof UserTask) {
+            runtimeService.createChangeActivityStateBuilder().processInstanceId(processInstanceId)
+                    .moveActivityIdsToSingleActivityId(activityIds, targetNodeId).changeState();
+            return Result.success();
+        }
+        //如果是并行网关需要再进行判断
+        if (flowElement instanceof ParallelGateway) {
+            ParallelGateway parallelGateway = (ParallelGateway) flowElement;
+            List<SequenceFlow> incomingFlows = parallelGateway.getIncomingFlows();
+            //如果流入并行网关只有一条，说明它是并行网关开始节点，仅需要退回到上一个节点
+            if (incomingFlows.size() == 1) {
+                List<String> currentExecutionIds = new ArrayList<>();
+                List<Execution> executions = runtimeService.createExecutionQuery().parentId(processInstanceId).list();
+                for (Execution execution : executions) {
+                    currentExecutionIds.add(execution.getId());
+                }
 
-        if (activityIds.size() == 0){
-            return Result.failure(ResultCode.RESULT_DATA_NONE);
+                String targetNode = incomingFlows.get(0).getSourceRef();
+                runtimeService.createChangeActivityStateBuilder()
+                        .moveExecutionsToSingleActivityId(currentExecutionIds, targetNode)
+                        .changeState();
+                return Result.success();
+            }
+            //如果有多条流入，说明它是并行网关结束节点，需要退回到全部的并行节点
+            else {
+                List<String> targetTaskIds = new ArrayList<>();
+                for (SequenceFlow incomingFlow : incomingFlows) {
+                    String sourceNode = incomingFlow.getSourceRef();
+                    targetTaskIds.add(sourceNode);
+                }
+                //并行网关流出只会有一个节点
+                runtimeService.createChangeActivityStateBuilder()
+                        .processInstanceId(processInstanceId)
+                        .moveSingleActivityIdToActivityIds(activityIds.get(0), targetTaskIds)
+                        .changeState();
+
+                return Result.success();
+            }
+        }
+        //如果节点是包容网关
+        if (flowElement instanceof InclusiveGateway) {
+            InclusiveGateway inclusiveGateway = (InclusiveGateway) flowElement;
+            System.out.println(inclusiveGateway);
+            return Result.success();
+        }
+        //如果节点是排他网关
+        if (flowElement instanceof ExclusiveGateway) {
+            ExclusiveGateway exclusiveGateway = (ExclusiveGateway) flowElement;
+            List<SequenceFlow> incomingFlows = exclusiveGateway.getIncomingFlows();
+
+            List<String> targetTaskIds = new ArrayList<>();
+            for (SequenceFlow incomingFlow : incomingFlows) {
+                String sourceRef = incomingFlow.getSourceRef();
+                targetTaskIds.add(sourceRef);
+            }
+            runtimeService.createChangeActivityStateBuilder()
+                    .processInstanceId(processInstanceId)
+                    .moveSingleActivityIdToActivityIds(activityIds.get(0), targetTaskIds)
+                    .changeState();
+
+            return Result.success();
         }
 
-        runtimeService.createChangeActivityStateBuilder()
-                .processInstanceId(processInstanceId)
-                .moveActivityIdsToSingleActivityId(activityIds,targetNodeId)
-                .changeState();
+        return Result.failure(ResultCode.SYSTEM_INNER_ERROR);
 
-        return Result.success();
+    }
+
+    @Override
+    public Result findConditionExpression(String taskId) {
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        String currentNodeId = task.getTaskDefinitionKey();
+        Process process = findProcessByProcessInstanceId(task.getProcessInstanceId());
+        FlowElement flowElement = process.getFlowElement(currentNodeId);
+
+        Set<String> conditions = new HashSet<>();
+        List<String> targetNodes = new ArrayList<>();
+
+        //获取当前节点的输出流条件表达式和输出节点
+        UserTask currentTask = (UserTask) flowElement;
+        List<SequenceFlow> outgoingFlows = currentTask.getOutgoingFlows();
+        for (SequenceFlow outgoingFlow : outgoingFlows) {
+            String conditionExpression = outgoingFlow.getConditionExpression();
+            if (!"".equals(conditionExpression)&& conditionExpression != null){
+                conditions.add(conditionExpression);
+            }
+            String targetRef = outgoingFlow.getTargetRef();
+            targetNodes.add(targetRef);
+        }
+
+        for (String targetNode : targetNodes) {
+            FlowElement targetFlowElement = process.getFlowElement(targetNode);
+            if (targetFlowElement instanceof UserTask){
+                List<String> conditionList = parseData(conditions);
+                return Result.success(conditionList);
+            }
+
+            if (targetFlowElement instanceof Gateway){
+
+                List<SequenceFlow> gatewayOutgoingFlows = ((Gateway) targetFlowElement).getOutgoingFlows();
+
+                for (SequenceFlow outgoingFlow :gatewayOutgoingFlows) {
+                    String conditionExpression = outgoingFlow.getConditionExpression();
+                    if (!"".equals(conditionExpression)&& conditionExpression != null){
+                        conditions.add(conditionExpression);
+                    }
+                }
+                List<String> conditionList = parseData(conditions);
+                return Result.success(conditionList);
+            }
+        }
+
+
+
+        return null;
     }
 
 
     /*#############################自定义方法区#############################*/
 
     /**
-     * 根据执行实例Id找到 当前活动节点Ids
+     * 根据执行实例Id找到 当前活动节点Id list
+     *
      * @param processInstanceId 执行实例Id
      * @return 当前活动节点List
      */
-    private List<String> findActivityIdsByInstanceId(String processInstanceId){
+    private List<String> findActivityIdsByInstanceId(String processInstanceId) {
         List<Execution> executions = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).list();
         //获取当前活动节点
         List<String> activityIds = new ArrayList<>();
@@ -349,33 +421,24 @@ public class PowerTaskServiceImpl implements PowerTaskService {
     }
 
     /**
-     * 根据任务ID返回流程实例Ids
+     * 根据任务ID返回流程实例Id
+     *
      * @param taskId 任务Id
      * @return 流程实例Id
      */
-    private String findInstanceIdByTaskId(String taskId){
+    private String findInstanceIdByTaskId(String taskId) {
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-       return task.getProcessInstanceId();
+        return task.getProcessInstanceId();
     }
 
     /**
-     * 根据流程实例Id找到对应的流程定义Id
+     * 根据流程执行Id查询Process对象
      * @param processInstanceId 流程执行Id
-     * @return 流程定义Id
-     */
-    private String findDefinitionIdByInstanceId(String processInstanceId){
-        //获取流程定义Id,一个流程执行实例Id只会对应一个流程定义Id
-        Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).list().get(0);
-        return task.getProcessDefinitionId();
-    }
-
-    /**
-     * 根据流程定义Id查询Process对象
-     * @param processDefinitionId 流程定义Id
      * @return process
      */
-    private Process findProcessByProcessDefinitionId(String processDefinitionId){
-        BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
+    private Process findProcessByProcessInstanceId(String processInstanceId) {
+        Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).list().get(0);
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
         return bpmnModel.getMainProcess();
     }
 
@@ -416,4 +479,22 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         return Result.success();
 
     }
+
+
+    private List<String> parseData(Set<String> conditions){
+     List<String> strings = new ArrayList<>();
+        for (String conditionExpression : conditions) {
+
+            String[] split = conditionExpression.split("\\{")[1]
+                    .split("=")[0].split(">")[0].split("<")[0].split(" ");
+            String s = split[0];
+            strings.add(s);
+        }
+        HashSet<String> set = new HashSet<>(strings);
+        List<String> conditionList = new ArrayList<>(set);
+        System.out.println(conditionList);
+        return conditionList;
+    }
+
+
 }

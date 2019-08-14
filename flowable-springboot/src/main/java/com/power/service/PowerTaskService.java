@@ -76,7 +76,7 @@ public interface PowerTaskService {
      * @param processInstanceId 执行实例Id
      * @return Result
      */
-    Result returnableNode(String processInstanceId);
+    Result returnSourceNode(String processInstanceId);
 
     /**
      * 执行节点退回
@@ -85,4 +85,11 @@ public interface PowerTaskService {
      * @return Result
      */
     Result executeReturn(String processInstanceId, String targetNodeId);
+
+    /**
+     * 返回表单填充数据
+     * @param taskId 任务Id
+     * @return Result
+     */
+    Result findConditionExpression(String taskId);
 }
