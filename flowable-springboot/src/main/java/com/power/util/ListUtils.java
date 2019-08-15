@@ -1,5 +1,6 @@
 package com.power.util;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -16,4 +17,10 @@ public class ListUtils {
         list.addAll(set);
         return list;
     }
+
+    public static List<String> deDuplicationList (List<String> list){
+        HashSet<String> set = new HashSet<>(list);
+        return new ArrayList<>(set);
+    }
+
 }

@@ -125,7 +125,7 @@ public class TaskController {
     @ResponseBody
     public Result completeTaskWithData (@RequestParam String taskId,
                                         @RequestParam String formData){
-        Map vars = (Map) JSON.parse(formData);
+        Map<String,Object> vars = (Map<String,Object>) JSON.parse(formData);
 
        return powerTaskService.completeTask(taskId,vars);
     }
@@ -142,6 +142,12 @@ public class TaskController {
         return  powerTaskService.returnSourceNode(processInstanceId);
     }
 
+    /**
+     * 执行退回操作
+     * @param processInstanceId 流程执行Id
+     * @param targetNodeId 目标节点
+     * @return Result
+     */
     @GetMapping("executeReturn")
     @ResponseBody
     public Result executeReturn(@RequestParam String processInstanceId,
@@ -149,10 +155,37 @@ public class TaskController {
         return powerTaskService.executeReturn(processInstanceId,targetNodeId);
     }
 
+    /**
+     * 查询当前节点流出条件
+     * @param taskId 任务Id
+     * @return Result
+     */
     @GetMapping("findConditionExpression")
     @ResponseBody
     public Result findConditionExpression(@RequestParam String taskId){
         return powerTaskService.findConditionExpression(taskId);
+    }
+
+    /**
+     * 检验表单是否存在
+     * @param taskId 任务Id
+     * @return result
+     */
+    @GetMapping("checkFormExist")
+    @ResponseBody
+    public Result checkFormExist(@RequestParam String taskId){
+        return powerTaskService.checkFormExist(taskId);
+    }
+
+    /**
+     * 表单存在的情况下展示表单
+     * @param taskId 任务Id
+     * @return Result
+     */
+    @GetMapping("showForm")
+    @ResponseBody
+    public Result showForm(@RequestParam String taskId){
+        return powerTaskService.showForm(taskId);
     }
 
 }

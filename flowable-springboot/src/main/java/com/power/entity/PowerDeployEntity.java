@@ -37,7 +37,7 @@ public class PowerDeployEntity  {
 	"key":"外置表单",
 	"tenantId":"11",
 	"outerForm":true,
-	"formResource":["start.html","task.html","task2.html"]
+	"formResource":["start22.html","task22.html","task2.html"]
     }
 
      */

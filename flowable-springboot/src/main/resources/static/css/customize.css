@@ -94,6 +94,19 @@ body {
     border-radius: 4px;
 }
 
+
+.form_info_apply {
+    display: none; /* 默认不显示弹出层*/
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 25%;
+    left: 40%;
+    background: #fffffb;
+    border-radius: 4px;
+}
+
+
 .reject_task {
     display: none; /* 默认不显示弹出层*/
     width: 300px;

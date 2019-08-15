@@ -27,12 +27,14 @@
                 <td>添加评论：</td>
                 <td><textarea  placeholder="评论" name="message"></textarea></td>
             </tr>
-            <tr>
-                <td><input type="button" id="table2_submit" value="提交参数"></td>
-            </tr>
             </tbody>
         </table>
+        <input type="button" id="table2_submit" value="提交表单数据">
     </form>
+</div>
+<!--表单弹出层-->
+<div class="form_info_apply">
+
 </div>
 
 <!--退回上一步弹出层-->
@@ -103,7 +105,7 @@
                 <td th:text="${task.suspensionState} eq 1? '运行中':'已挂起'"></td>
                 <td th:text="${task.tenantId}"></td>
                 <td>
-                    <button th:value="${task.id}" th:class="button3" onclick="fillForm(value)">完成</button>
+                    <button th:value="${task.id}" th:class="button3" onclick="completeTask(value)">完成</button>
                     <button th:value="${task.processInstanceId}" th:class="button3" onclick="rejectTask(value)">退回
                     </button>
                     <button th:value="${task.id}" th:class="button3" onclick="nodeJump(value)">任务跳转</button>
@@ -128,13 +130,64 @@
 
 <script>
 
-    $(function () {
+    $(function () {});
+
+    function completeTask(taskId) {
+        $.get("/task/checkFormExist",{"taskId":taskId},function (result) {
+            if (result.code !== 200){fillForm(taskId)}
+            if (result.code === 200){showForm(taskId)}
+        })
+    }
+
+    //悬浮层展示外置表单
+    function showForm(taskId) {
+        $.get("/task/showForm",{"taskId":taskId},function (result) {
+            $('.zhezhao').css('display', 'block');
+            $('.form_info_apply').css('display','block');
+            $('.form_info_apply').empty();
+            $('.form_info_apply').append(result.data);
+            $("#tanchu_form_submit").click(function () {
+                var formData = $("#form2").serializeArray();
+                var result = jsonArrayToMap(formData);
+                var resultData = JSON.stringify(result);
+                $.get("/task/completeTaskWithData", {"taskId": taskId, "formData": resultData}, function (result) {
+                    showMsg(result.msg);
+                    console.log(result.data);
+                });
+                hide();
+        })
+
+        })
+    }
+
+    //点击完成按钮后先填充表单
+    function fillForm(taskId) {
+        $.get("/task/findConditionExpression",{"taskId":taskId},function (result) {
+            console.log(result);
+            if (result.code === 200){
+                var conditions = result.data;
+                $("#add_condition").empty();
+                $("#add_condition").append("<tr>\n" +
+                    "                <td>设置任务办理人：</td>\n" +
+                    "                <td><input type=\"text\" placeholder=\"任务办理人的Id\" name=\"userId\"></td>\n" +
+                    "            </tr>");
+                for(var i =0;i<conditions.length;i++){
+                    $("#add_condition").append("<tr>\n"+
+                        "                 <td>"+conditions[i]+":</td>\n"+
+                        "                 <td><input type='text' name="+conditions[i]+"></td>\n"+
+                        "                 </tr>")
+                }
+                $("#add_condition").append("<tr>\n" +
+                    "                <td>添加评论：</td>\n" +
+                    "                <td><textarea  placeholder=\"评论\" name=\"message\"></textarea></td>\n" +
+                    "                       </tr>\n");
+                show();
+            }
+        });
+
         $("#table2_submit").click(function () {
             var formData = $("#form1").serializeArray();
-            //通过自定义JS方法将数组对象转化为map格式{"key1","value1",...}
             var result = jsonArrayToMap(formData);
-            //console.log(result);
-            //再将Map对象转为字符串
             var resultData = JSON.stringify(result);
             $.get("/task/completeTaskWithData", {"taskId": taskId, "formData": resultData}, function (result) {
                 showMsg(result.msg);
@@ -142,20 +195,10 @@
             });
             hide();
         })
-    });
-
-    function show() {
-        $('.zhezhao').css('display', 'block');
-        $('.remove').css('display', 'block')
     }
 
-    function hide() {
-        $('.remove').css('display', 'none');
-        $('.zhezhao').css('display', 'none');
-        $('.singleNodeJump').css('display', 'none');
-        $('.reject_task').css('display', 'none');
-    }
 
+    //节点跳转
     function nodeJump(taskId) {
         $('.zhezhao').css('display', 'block');
         $('.singleNodeJump').css('display', 'block');
@@ -173,59 +216,32 @@
         })
     }
 
-    function completeTask(taskId) {
-        $("#table2_submit").click(function () {
-            var formData = $("#form1").serializeArray();
-            //通过自定义JS方法将数组对象转化为map格式{"key1","value1",...}
-            var result = jsonArrayToMap(formData);
-            //console.log(result);
-            //再将Map对象转为字符串
-            var resultData = JSON.stringify(result);
-            $.get("/task/completeTaskWithData", {"taskId": taskId, "formData": resultData}, function (result) {
-                showMsg(result.msg);
-                console.log(result.data);
-            });
-            hide();
-        });
-    }
-
+    //在前端页面展示流程图
     function showImage(processInstanceId) {
         console.log('processInstanceId:' + processInstanceId);
         $("#imgDiv").empty().append("<img src='/task/processDiagram?processInstanceId=" + processInstanceId + "'>")
     }
 
+    //挂起流程
     function suspendTask(processInstanceId) {
         $.get("/task/suspendProcessInstanceById", {"processInstanceId": processInstanceId}, function (result) {
-
-            if (result.code === 200) {
-                reload();
-            }
-            if (result.code !== 200) {
-                showMsg(result.msg);
-            }
-
-        })
+            if (result.code === 200) {reload();}
+            if (result.code !== 200) {showMsg(result.msg);}})
     }
 
+    //激活流程
     function activateTask(processInstanceId) {
         $.get("/task/activateProcessInstanceById", {"processInstanceId": processInstanceId}, function (result) {
-            if (result.code === 200) {
-                reload();
-            }
-            if (result.code !== 200) {
-                showMsg(result.msg);
-            }
-        })
+            if (result.code === 200) {reload();}
+            if (result.code !== 200) {showMsg(result.msg);}})
     }
 
+    //退回流程--先选中退回节点
     function rejectTask(processInstanceId) {
         $('.zhezhao').css('display', 'block');
         $('.reject_task').css('display', 'block');
         $.get("/task/returnSourceNode", {"processInstanceId": processInstanceId}, function (result) {
-            if (result.code !== 200) {
-                hide();
-                showMsg(result.msg);
-            }
+            if (result.code !== 200) {hide();showMsg(result.msg);}
             if (result.code === 200) {
                 var selects = result.data;
                 $("#return_source_node_selects").empty();
@@ -238,11 +254,10 @@
                 }
             }
         });
-        $("#execute_return").click(function () {
-            executeReturn(processInstanceId);
-        })
+        $("#execute_return").click(function () {executeReturn(processInstanceId);})
     }
 
+    //退回流程--执行退回节点操作
     function executeReturn(processInstanceId) {
         var targetNodeId = $('#return_source_node_selects option:selected').val();
         console.log(targetNodeId);
@@ -256,34 +271,38 @@
         })
     }
 
-    function fillForm(taskId) {
-        $.get("/task/findConditionExpression",{"taskId":taskId},function (result) {
-            console.log(result);
-            if (result.code === 200){
-                var conditions = result.data;
-                $("#add_condition").empty();
-                $("#add_condition").append("<tr>\n" +
-                    "                <td>设置任务办理人：</td>\n" +
-                    "                <td><input type=\"text\" placeholder=\"任务办理人的Id\" name=\"userId\"></td>\n" +
-                    "            </tr>");
-                for(var i =0;i<conditions.length;i++){
-                    $("#add_condition").append("<tr>\n"+
-                    "                 <td>"+conditions[i]+":</td>\n"+
-                    "                 <td><input type='text' name="+conditions[i]+"></td>\n"+
-                    "                 </tr>")
-                }
 
-                $("#add_condition").append("<tr>\n" +
-                    "                <td>添加评论：</td>\n" +
-                    "                <td><textarea  placeholder=\"评论\" name=\"message\"></textarea></td>\n" +
-                    "            </tr>\n" +
-                    "            <tr>\n" +
-                    "                <td><input type=\"button\" id=\"table2_submit\" value=\"提交参数\"></td>\n" +
-                    "            </tr>");
+    //展示遮罩层和弹出层
+    function show() {
+        $('.zhezhao').css('display', 'block');
+        $('.remove').css('display', 'block')
+    }
 
-                show();
-            }
-        })
+    //弹出层全部隐藏
+    function hide() {
+        $('.remove').css('display', 'none');
+        $('.zhezhao').css('display', 'none');
+        $('.singleNodeJump').css('display', 'none');
+        $('.reject_task').css('display', 'none');
+        $('.form_info_apply').css('display','none');
+    }
+
+
+
+    function completeTaskxxxx(taskId) {
+        $("#table2_submit").click(function () {
+            var formData = $("#form1").serializeArray();
+            //通过自定义JS方法将数组对象转化为map格式{"key1","value1",...}
+            var result = jsonArrayToMap(formData);
+            //console.log(result);
+            //再将Map对象转为字符串
+            var resultData = JSON.stringify(result);
+            $.get("/task/completeTaskWithData", {"taskId": taskId, "formData": resultData}, function (result) {
+                showMsg(result.msg);
+                console.log(result.data);
+            });
+            hide();
+        });
     }
 
 </script>

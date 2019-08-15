@@ -7,10 +7,11 @@ import com.power.entity.PowerDeployment;
 import com.power.entity.PowerProcessDefinition;
 import com.power.mapper.ProcessMapper;
 import com.power.service.PowerProcessService;
+import com.power.util.ListUtils;
 import com.power.util.Result;
 import com.power.util.ResultCode;
 import org.flowable.bpmn.converter.BpmnXMLConverter;
-import org.flowable.bpmn.model.BpmnModel;
+import org.flowable.bpmn.model.*;
 import org.flowable.bpmn.model.Process;
 import org.flowable.engine.ManagementService;
 import org.flowable.engine.RepositoryService;
@@ -30,10 +31,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author xuyunfeng
@@ -42,13 +40,15 @@ import java.util.Map;
 @Service
 public class PowerProcessImpl implements PowerProcessService {
 
-    private final static Integer SUCCESS_CODE = 200;
-    private final static Integer PROCESS_IS_SUSPENDED = 30002;
-
     /**
      * 默认存放bpmn20.xml文件的位置
      */
     private static final String BPMN_PREFIX = "upload/diagrams/";
+
+    /**
+     * 默认存放外置表单的位置
+     */
+    private static final String FORM_KEY_PREFIX = "upload/html/";
 
     @Autowired
     private RepositoryService repositoryService;
@@ -93,7 +93,7 @@ public class PowerProcessImpl implements PowerProcessService {
     public Result startProcessInstanceById(String processDefinitionId) {
         //这里需要先对流程状态进行判断，1.判断流程是否存在，2.流程是否挂起；
         Result result = checkStatusByProcessDefinitionId(processDefinitionId);
-        if (!result.getCode().equals(SUCCESS_CODE)){
+        if (!result.getCode().equals(ResultCode.SUCCESS.code())){
             return result;
         }
         //前端有些时候是GET请求 直接传流程定义Id时，会将 ':'编码为'%3A',这里加个判断自动适应GET请求或POST请求
@@ -118,7 +118,7 @@ public class PowerProcessImpl implements PowerProcessService {
     public Result deleteProcessByDeploymentId(String deploymentId, Boolean concatenation){
         //删前判断一下流程状态
         Result result = checkStatusByProcessDeploymentId(deploymentId);
-        if (!result.getCode().equals(SUCCESS_CODE)){
+        if (!result.getCode().equals(ResultCode.SUCCESS.code())){
             return result;
         }
         repositoryService.deleteDeployment(deploymentId,concatenation);
@@ -128,7 +128,7 @@ public class PowerProcessImpl implements PowerProcessService {
     @Override
     public Result suspendProcessByProcessDefinitionId(String processDefinitionId, Boolean suspendProcessInstances, Date suspensionDate) {
         Result result = checkStatusByProcessDefinitionId(processDefinitionId);
-        if (!result.getCode().equals(SUCCESS_CODE)){
+        if (!result.getCode().equals(ResultCode.SUCCESS.code())){
             return result;
         }
         repositoryService.suspendProcessDefinitionById(processDefinitionId,suspendProcessInstances,suspensionDate);
@@ -140,7 +140,7 @@ public class PowerProcessImpl implements PowerProcessService {
         Result result = checkStatusByProcessDefinitionId(processDefinitionId);
 
         //只有流程被挂起时才能进行激活操作
-        if (result.getCode().equals(PROCESS_IS_SUSPENDED)){
+        if (result.getCode().equals(ResultCode.PROCESS_IS_SUSPENDED.code())){
             repositoryService.activateProcessDefinitionById(processDefinitionId,suspendProcessInstances,suspensionDate);
             return Result.success();
         }
@@ -173,11 +173,41 @@ public class PowerProcessImpl implements PowerProcessService {
         //发布流程
         String processName = modelData.getName() + ".bpmn20.xml";
 
-        Deployment deploy = repositoryService.createDeployment()
+        DeploymentBuilder deploymentBuilder = repositoryService.createDeployment()
                 .name(modelData.getName())
-                .addString(processName, new String(bpmnBytes, StandardCharsets.UTF_8))
-                .deploy();
+                .addString(processName, new String(bpmnBytes, StandardCharsets.UTF_8));
+        //部署流程前先判断一下是否有外置表单
+        Process process = model.getMainProcess();
+        //获取流程里的全部元素
+        Collection<FlowElement> flowElements = process.getFlowElements();
+        //遍历元素，取开始节点和用户任务节点里的外置表单key
+        List<String> formKeys = new ArrayList<>();
+        for (FlowElement flowElement : flowElements) {
+            if (flowElement instanceof StartEvent){
+                String formKey = ((StartEvent) flowElement).getFormKey();
+               if (formKey != null){
+                   formKeys.add(formKey);
+               }
+            }
+            if (flowElement instanceof UserTask){
+                String formKey = ((UserTask) flowElement).getFormKey();
+                if (formKey != null){
+                    formKeys.add(formKey);
+                }
+            }
+        }
+        //去重
+        List<String> formKeyList = ListUtils.deDuplicationList(formKeys);
 
+        if (formKeyList.size() > 0 ){
+            for (String formKey : formKeyList) {
+                deploymentBuilder.addClasspathResource(formKey);
+            }
+            Deployment deploy = deploymentBuilder.deploy();
+            return Result.success(deploy);
+        }
+
+        Deployment deploy = deploymentBuilder.deploy();
         return Result.success(deploy);
     }
 
@@ -290,10 +320,5 @@ public class PowerProcessImpl implements PowerProcessService {
 
     }
 
-/*
-    public void testCmd(){
-        managementService.executeCommand(new AddMultiInstanceExecutionCmd(activityDefId, procId, variables));
-    }
-*/
 
 }

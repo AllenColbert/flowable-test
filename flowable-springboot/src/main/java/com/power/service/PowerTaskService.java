@@ -92,4 +92,18 @@ public interface PowerTaskService {
      * @return Result
      */
     Result findConditionExpression(String taskId);
+
+    /**
+     * 检查当前任务是否存在外置表单
+     * @param taskId 任务Id
+     * @return result
+     */
+    Result checkFormExist(String taskId);
+
+    /**
+     * 给前端展示表单
+     * @param taskId 任务Id
+     * @return Result
+     */
+    Result showForm(String taskId);
 }
