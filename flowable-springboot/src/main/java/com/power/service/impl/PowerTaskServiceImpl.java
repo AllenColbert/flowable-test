@@ -208,17 +208,26 @@ public class PowerTaskServiceImpl implements PowerTaskService {
 
     @Override
     public Result completeTask(String taskId, Map<String, Object> vars) {
+        //先判断任务状态，任务挂起或者任务不存在时无法完成任务
         Result taskStatus = checkTaskStatus(taskId);
         if (!taskStatus.getCode().equals(ResultCode.SUCCESS.code())) {
             return taskStatus;
         }
+
         String processInstanceId = findInstanceIdByTaskId(taskId);
-        //完成任务的时候可以选中是否添加评论 ,防止 hi_comment表数据过大;
-        if (vars.get("message") != null && vars.get("userId")!= null) {
-            String userId = vars.get("userId").toString();
-            String commentMsg = vars.get("message").toString();
+
+        //评论
+        String commentMsg = vars.get("message").toString();
+        //任务代办人
+        String userId = vars.get("userId").toString();
+        // #####这里方便测试，将任务代办人为空的时候默认设置为admin#####
+        String assignee = userId == null ? "admin": userId;
+        //这里设置的时当前任务办理人信息，完成任务后此信息就没用了，所有不能这么写
+        taskService.setAssignee(taskId,assignee);
+        //如果没有填写评论就不添加act_hi_comment数据
+        if (commentMsg != null && !"".equals(commentMsg)) {
             Comment comment = taskService.addComment(taskId, processInstanceId, commentMsg);
-            comment.setUserId(userId);
+            comment.setUserId(assignee);
             taskService.saveComment(comment);
         }
         taskService.complete(taskId, vars);
@@ -356,7 +365,7 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         Process process = findProcessByProcessInstanceId(task.getProcessInstanceId());
         FlowElement flowElement = process.getFlowElement(currentNodeId);
 
-       // Process process = ProcessDefinitionUtil.getProcess(processDefinitionId)
+        // Process process = ProcessDefinitionUtil.getProcess(processDefinitionId)
         Set<String> conditions = new HashSet<>();
         List<String> targetNodes = new ArrayList<>();
 
@@ -365,7 +374,7 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         List<SequenceFlow> outgoingFlows = currentTask.getOutgoingFlows();
         for (SequenceFlow outgoingFlow : outgoingFlows) {
             String conditionExpression = outgoingFlow.getConditionExpression();
-            if (!"".equals(conditionExpression)&& conditionExpression != null){
+            if (!"".equals(conditionExpression) && conditionExpression != null) {
                 conditions.add(conditionExpression);
             }
             String targetRef = outgoingFlow.getTargetRef();
@@ -376,27 +385,27 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         for (String targetNode : targetNodes) {
             FlowElement targetFlowElement = process.getFlowElement(targetNode);
             //如果下一个节点是用户任务就不用管了，当前节点到下一节点的流出条件已经被获取了
-            if (targetFlowElement instanceof UserTask){
+            if (targetFlowElement instanceof UserTask) {
                 List<FormProperty> formProperties = ((UserTask) targetFlowElement).getFormProperties();
                 System.out.println(formProperties);
                 System.out.println(targetFlowElement.getName());
             }
             //如果下一节点是网关类型的，要获取此网关所有的流出条件
-            if (targetFlowElement instanceof Gateway){
+            if (targetFlowElement instanceof Gateway) {
                 List<SequenceFlow> gatewayOutgoingFlows = ((Gateway) targetFlowElement).getOutgoingFlows();
                 //遍历流出线路
-                for (SequenceFlow outgoingFlow :gatewayOutgoingFlows) {
+                for (SequenceFlow outgoingFlow : gatewayOutgoingFlows) {
                     //取出流出条件
                     String conditionExpression = outgoingFlow.getConditionExpression();
                     //排除掉空的条件
-                    if (!"".equals(conditionExpression)&& conditionExpression != null){
+                    if (!"".equals(conditionExpression) && conditionExpression != null) {
                         conditions.add(conditionExpression);
                     }
                 }
             }
             //如果目标节点是结束节点，也可以直接结束了
-            if (targetFlowElement instanceof EndEvent){
-                System.out.println("endEvent："+((EndEvent) targetFlowElement).getEventDefinitions());
+            if (targetFlowElement instanceof EndEvent) {
+                System.out.println("endEvent：" + ((EndEvent) targetFlowElement).getEventDefinitions());
             }
         }
 
@@ -407,7 +416,7 @@ public class PowerTaskServiceImpl implements PowerTaskService {
     public Result checkFormExist(String taskId) {
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         String formKey = task.getFormKey();
-        if (formKey == null || "".equals(formKey)){
+        if (formKey == null || "".equals(formKey)) {
             return Result.failure(ResultCode.RESULT_DATA_NONE);
         }
         return Result.success(formKey);
@@ -417,7 +426,9 @@ public class PowerTaskServiceImpl implements PowerTaskService {
     public Result showForm(String taskId) {
         Object taskForm = formService.getRenderedTaskForm(taskId);
 
-        if (taskForm == null || "".equals(taskForm)){return Result.failure(ResultCode.RESULT_DATA_NONE);}
+        if (taskForm == null || "".equals(taskForm)) {
+            return Result.failure(ResultCode.RESULT_DATA_NONE);
+        }
 
         return Result.success(taskForm);
     }
@@ -456,6 +467,7 @@ public class PowerTaskServiceImpl implements PowerTaskService {
 
     /**
      * 根据流程执行Id查询Process对象
+     *
      * @param processInstanceId 流程执行Id
      * @return process
      */
@@ -503,8 +515,8 @@ public class PowerTaskServiceImpl implements PowerTaskService {
 
     }
 
-    private List<String> parseData(Set<String> conditions){
-     List<String> strings = new ArrayList<>();
+    private List<String> parseData(Set<String> conditions) {
+        List<String> strings = new ArrayList<>();
         for (String conditionExpression : conditions) {
 
             String[] split = conditionExpression.split("\\{")[1]

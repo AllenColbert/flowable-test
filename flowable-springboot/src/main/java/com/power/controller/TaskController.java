@@ -44,7 +44,7 @@ public class TaskController {
     }
 
     /**
-     * 完成当前任务
+     * 完成当前任务  --废弃
      * @param taskId   任务Id
      * @param assignee 任务代理人
      * @return 完成标记

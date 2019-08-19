@@ -16,6 +16,7 @@ import org.flowable.bpmn.model.Process;
 import org.flowable.engine.ManagementService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
+import org.flowable.engine.TaskService;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.repository.DeploymentBuilder;
 import org.flowable.engine.repository.ProcessDefinition;
@@ -45,10 +46,6 @@ public class PowerProcessImpl implements PowerProcessService {
      */
     private static final String BPMN_PREFIX = "upload/diagrams/";
 
-    /**
-     * 默认存放外置表单的位置
-     */
-    private static final String FORM_KEY_PREFIX = "upload/html/";
 
     @Autowired
     private RepositoryService repositoryService;
@@ -58,6 +55,9 @@ public class PowerProcessImpl implements PowerProcessService {
 
     @Autowired
     private ModelService modelService;
+
+    @Autowired
+    private TaskService taskService;
 
     @Autowired
     private ProcessMapper processMapper;
@@ -110,7 +110,9 @@ public class PowerProcessImpl implements PowerProcessService {
         }
         map.put("userId",user.getId());
 
+
         ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId,map);
+
         return Result.success(processInstance.getActivityId()+processInstance.getProcessDefinitionId()+"/"+processInstance.getRootProcessInstanceId());
     }
 
@@ -242,7 +244,6 @@ public class PowerProcessImpl implements PowerProcessService {
         return Result.success(model);
     }
 
-    /*############################################################################*/
 
     /*##################未重构部分代码#######################*/
     @Override
