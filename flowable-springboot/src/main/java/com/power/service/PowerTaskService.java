@@ -106,4 +106,11 @@ public interface PowerTaskService {
      * @return Result
      */
     Result showForm(String taskId);
+
+    /**
+     * 查询用户任务
+     * @param assignee 用户Id
+     * @return Result
+     */
+    Result queryTaskList(String assignee);
 }

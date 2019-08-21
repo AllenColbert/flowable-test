@@ -1,5 +1,6 @@
 package com.power.entity;
 
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import java.util.Date;
@@ -9,6 +10,7 @@ import java.util.Date;
  * @date :   2019/7/17 16:42
  */
 
+@ApiModel(value="Task对象",description="用户任务Task")
 @Data
 public class PowerTask {
 

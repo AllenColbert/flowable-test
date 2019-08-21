@@ -9,49 +9,9 @@
     <link th:href="@{/css/buttons.css}" rel="stylesheet" type="text/css">
     <link th:href="@{/css/customize.css}" rel="stylesheet" type="text/css">
     <link th:href="@{/styles/common/style.css}" rel="stylesheet" type="text/css">
+    <script th:src="@{/js/vue.js}"></script>
 </head>
 <body>
-
-
-<div class="col-1">
-    <input type="button" class="my-btn-blue" value="新建" onclick="selects()">
-    <input type="button" class="my-btn-blue" value="遮罩" onclick="show()">
-    <input type="button" class="my-btn-blue" value="弹出" onclick="hide()">
-</div>
-
-<!--点击删除按钮后弹出的页面-->
-<div class="zhezhao"></div>
-<div class="remove" >
-    <p> <button  onclick="hide()">关闭</button></p>
-        <label for="selects">"回显节点"</label>
-        <select name="selectList" id="selects">
-            <option value="">选择要退回的节点</option>
-            <option th:each="rejectInfo:${rejectInfos}" th:value="${rejectInfo.sourceRefId}" th:text="${rejectInfo.sourceRefName}">rejected</option>
-        </select>
-
-</div>
-
-</div>
-
-
-<script type="text/javascript">
-    function show() {
-        $('.zhezhao').css('display', 'block');
-        $('.remove').css('display','block')
-    }
-
-    function hide() {
-        $('.remove').css('display','none');
-        $('.zhezhao').css('display', 'none');
-    }
-
-    function selects() {
-
-    }
-
-
-</script>
-
 
 </body>
 </html>

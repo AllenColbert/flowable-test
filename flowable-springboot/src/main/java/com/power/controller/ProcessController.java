@@ -7,6 +7,9 @@ import com.power.entity.PowerDeployEntity;
 import com.power.service.PowerProcessService;
 import com.power.util.Result;
 import com.power.util.ResultCode;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.UserTask;
 import org.flowable.engine.ManagementService;
@@ -21,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpSession;
 import java.util.*;
@@ -29,7 +33,7 @@ import java.util.*;
  * @author xuyunfeng
  * @date 2019/7/9 14:20
  */
-
+@Api(value = "流程控制类",tags = {"流程控制接口"})
 @Controller
 @RequestMapping("process")
 public class ProcessController {
@@ -43,11 +47,8 @@ public class ProcessController {
     @Autowired
     private HttpSession session;
 
-    /**
-     * 获取流程模型列表
-     * @param model model
-     * @return 流程模型页面
-     */
+
+    @ApiOperation(value = "查看流程模型列表（暂未做分页）")
     @GetMapping("modelList")
     public String processModelList(Model model){
 
@@ -63,11 +64,8 @@ public class ProcessController {
         return  "modelList";
     }
 
-    /**
-     * 显示流程定义列表
-     * @param model model对象
-     * @return html文件名
-     */
+
+    @ApiOperation(value = "显示流程定义列表（暂未做分页）")
     @GetMapping("processList")
     public String processList(Model model){
         Result result =  powerProcessService.queryProcessDefinitionList();
@@ -82,94 +80,68 @@ public class ProcessController {
         return "processList";
     }
 
-    /**
-     * 根据流程定义Id启动流程;
-     * 默认当前登陆用户为流程启动人
-     *
-     * @param processDefinitionId 流程定义ID：processDefinitionId；
-     * @return 流程执行ID
-     */
+
+    @ApiOperation(value = "根据流程定义Id启动流程,默认当前登陆用户为流程启动人")
     @PostMapping("startProcessById")
     @ResponseBody
-    public Result startProcessById(@RequestParam String processDefinitionId) {
+    public Result startProcessById(@ApiParam(name = "processDefinitionId",value ="流程定义ID") @RequestParam String processDefinitionId) {
        return powerProcessService.startProcessInstanceById(processDefinitionId);
     }
 
-    /**
-     * 根据流程部署Id删除流程，默认开启级联删除
-     * 此处使用流程部署Id deploymentId；
-     * @param deploymentId  流程部署Id
-     * @param concatenation 是否开启级联删除，默认开启
-     * @return result
-     */
+
+    @ApiOperation(value = "根据流程部署Id删除流程，默认开启级联删除")
     @DeleteMapping("deleteProcessById")
     @ResponseBody
-    public Result deleteProcessById(@RequestParam String deploymentId,
-                                    @RequestParam(required = false,defaultValue = "true") Boolean concatenation) {
+    public Result deleteProcessById(@ApiParam(name = "deploymentId",value ="流程部署Id") @RequestParam String deploymentId,
+                                    @ApiParam(name = "concatenation",value ="是否开启级联删除") @RequestParam(required = false,defaultValue = "true") Boolean concatenation) {
       return powerProcessService.deleteProcessByDeploymentId(deploymentId,concatenation);
     }
 
-    /**
-     * 通过流程定义Id挂起整个流程
-     * @param processDefinitionId 流程定义Id
-     * @param suspendProcessInstances 是否挂起所有的流程实例,默认开启
-     * @param suspensionDate 流程定义将被暂停的日期，为null时，会立即激活
-     * @return result
-     */
+
+    @ApiOperation(value = "通过流程定义Id挂起整个流程")
     @GetMapping("suspendProcessByProcessDefinitionId")
     @ResponseBody
-    public Result suspendProcessByProcessDefinitionId(@RequestParam String processDefinitionId,
-                                                      @RequestParam(defaultValue = "true", required = false) Boolean suspendProcessInstances,
-                                                      @RequestParam(required = false)Date suspensionDate){
+    public Result suspendProcessByProcessDefinitionId(@ApiParam(name = "processDefinitionId",value ="流程定义Id") @RequestParam String processDefinitionId,
+                                                      @ApiParam(name = "suspendProcessInstances",value ="是否挂起所有的流程实例") @RequestParam(defaultValue = "true", required = false) Boolean suspendProcessInstances,
+                                                      @ApiParam(name = "suspensionDate",value ="流程挂起的日期，为null时立即挂起") @RequestParam(required = false)Date suspensionDate){
         return powerProcessService.suspendProcessByProcessDefinitionId(processDefinitionId,suspendProcessInstances,suspensionDate);
     }
 
-    /**
-     *通过流程定义Id激活整个流程
-     * @param processDefinitionId 流程定义Id
-     * @param suspendProcessInstances 是否激活所有的流程实例，默认开启
-     * @param suspensionDate 流程定义将被暂停的日期，为null时，会立即激活
-     * @return Result
-     */
+
+    @ApiOperation(value = "通过流程定义Id激活整个流程")
     @GetMapping("activateProcessByProcessDefinitionId")
     @ResponseBody
-    public Result activateProcessByProcessDefinitionId(@RequestParam String processDefinitionId,
-                                                       @RequestParam(defaultValue = "true", required = false) Boolean suspendProcessInstances,
-                                                       @RequestParam(required = false)Date suspensionDate){
+    public Result activateProcessByProcessDefinitionId(@ApiParam(name = "processDefinitionId",value ="流程定义Id") @RequestParam String processDefinitionId,
+                                                       @ApiParam(name = "suspendProcessInstances",value ="是否激活所有的流程实例") @RequestParam(defaultValue = "true", required = false) Boolean suspendProcessInstances,
+                                                       @ApiParam(name = "suspensionDate",value ="流程激活的日期，为null时立即激活") @RequestParam(required = false)Date suspensionDate){
         return powerProcessService.activateProcessByProcessDefinitionId(processDefinitionId,suspendProcessInstances,suspensionDate);
     }
 
-    /**
-     * 根据流程模型id部署流程
-     * @param modelId 流程模型id
-     * @return Result
-     */
+    @ApiOperation(value = "根据流程模型Id部署流程")
     @GetMapping("deployModelById")
     @ResponseBody
-    public Result deployModelByModelId(@RequestParam String modelId){
+    public Result deployModelByModelId(@ApiParam(name = "modelId",value ="流程模型Id") @RequestParam String modelId){
        return powerProcessService.deployModelByModelId(modelId);
     }
 
-    /**
-     * 根据流程模型Id删除流程模型
-     * @param modelId 模型Id
-     * @return Result
-     */
+    @ApiOperation(value = "根据流程模型Id删除流程模型")
     @GetMapping("deleteModelById")
     @ResponseBody
-    public Result deleteModelById(@RequestParam String modelId){
+    public Result deleteModelById(@ApiParam(name = "modelId",value ="流程模型Id") @RequestParam String modelId){
         return powerProcessService.deleteModelById(modelId);
     }
 
+    @ApiOperation(value = "查看process--JSON格式")
     @GetMapping("showProcess")
     @ResponseBody
-    public Result showProcess(@RequestParam String processDefinitionId){
+    public Result showProcess(@ApiParam(name = "processDefinitionId",value ="流程定义Id") @RequestParam String processDefinitionId){
         return powerProcessService.showProcess(processDefinitionId);
     }
 
+    @ApiOperation(value = "查看Model--JSON格式")
     @GetMapping("showModel")
     @ResponseBody
-    public Result showModel(@RequestParam String modelId){
+    public Result showModel(@ApiParam(name = "modelId",value ="流程模型Id") @RequestParam String modelId){
         return powerProcessService.showModel(modelId);
     }
 
@@ -182,6 +154,7 @@ public class ProcessController {
      * @param parentExecutionId 父任务Id act_ru_task表中的PROC_INST_ID_ 或 act_ru_execution中的ID_ where PARENT_ID_ == null;
      * @return execution_Id     多实例节点任务ID；
      */
+    @ApiIgnore()
     @GetMapping("addMultiInstanceNode")
     public ResponseEntity addMulti(@RequestParam String activityId,
                                    @RequestParam String parentExecutionId) {
@@ -199,6 +172,7 @@ public class ProcessController {
      * @param executionId 多实例节点任务ID
      * @return 标记
      */
+    @ApiIgnore()
     @GetMapping("deleteMultiInstanceNode")
     public ResponseEntity deleteMulti(@RequestParam String executionId) {
         runtimeService.deleteMultiInstanceExecution(executionId, true);
@@ -214,6 +188,7 @@ public class ProcessController {
      * @param newActivityId        目标节点id
      * @return 标记
      */
+    @ApiIgnore()
     @GetMapping("jump2")
     public ResponseEntity jump2(@RequestParam String procInstanceId,
                                 @RequestParam String currentActivityId,
@@ -232,6 +207,7 @@ public class ProcessController {
      * @param activityId 跳转目标Id   <userTask id="xxx"/>标签中的节点Id
      * @return 标记
      */
+    @ApiIgnore()
     @GetMapping("jump3")
     public ResponseEntity jump3(@RequestParam String executionId,
                                 @RequestParam String activityId){
@@ -247,6 +223,7 @@ public class ProcessController {
      * @param procDefId 流程实例ID
      * @return 标记
      */
+    @ApiIgnore()
     @GetMapping("validateTaskNodeType")
     public ResponseEntity validateTaskNodeType(@RequestParam String procDefId) {
         Process process = managementService.executeCommand(new GetProcessCmd(procDefId));
@@ -267,11 +244,12 @@ public class ProcessController {
 
     /**
      * 这里修改的是全局流程实例模板 -/.\-！
-     * 风险太大，不能用，需要将其改成正在执行中的执行实例模板
+     * 一个流程实例被修改后，从他这里启动的所有流程都会被修改--
      * @param processDefinitionId 流程定义Id
      * @param targetNodeId 目标节点Id
      * @return xx
      */
+    @ApiIgnore()
     @GetMapping("deleteNode")
     public ResponseEntity deleteNode(@RequestParam String processDefinitionId,
                                      @RequestParam String targetNodeId){
@@ -306,6 +284,7 @@ public class ProcessController {
     }
      * @return 流程部署对象 deploy属性  or 其他提示信息;
      */
+    @ApiIgnore()
     @GetMapping("deploy")
     public ResponseEntity<Object> deploy(@RequestParam String fileName,
                                          @RequestBody(required = false)PowerDeployEntity powerDeploy) {
@@ -321,6 +300,7 @@ public class ProcessController {
      * @param processDefinitionKey 流程定义key
      * @return 标记
      */
+    @ApiIgnore()
     @GetMapping("runNormalByKey")
     public ResponseEntity runNormalByKey(@RequestParam String processDefinitionKey){
         Map<String, Object> vars = new HashMap<>(16);

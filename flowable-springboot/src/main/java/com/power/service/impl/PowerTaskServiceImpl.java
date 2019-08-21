@@ -18,6 +18,7 @@ import org.flowable.engine.task.Comment;
 import org.flowable.idm.api.User;
 import org.flowable.image.ProcessDiagramGenerator;
 import org.flowable.task.api.Task;
+import org.flowable.task.api.TaskQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -431,6 +432,17 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         }
 
         return Result.success(taskForm);
+    }
+
+    @Override
+    public Result queryTaskList(String assignee){
+        TaskQuery taskQuery = taskService.createTaskQuery();
+
+        List<Task> tasks = taskQuery.taskCandidateOrAssigned(assignee).orderByTaskCreateTime().asc().list();
+
+        System.out.println(tasks);
+
+        return Result.success();
     }
 
     /*#############################自定义方法区#############################*/

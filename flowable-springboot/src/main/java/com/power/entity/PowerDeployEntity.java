@@ -1,5 +1,6 @@
 package com.power.entity;
 
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
  * @author xuyunfeng
  * @date 2019/7/9 14:25
  */
-
+@ApiModel
 @Data
 public class PowerDeployEntity  {
 
