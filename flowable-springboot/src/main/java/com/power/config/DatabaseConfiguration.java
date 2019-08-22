@@ -18,10 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -33,7 +33,7 @@ import java.util.Properties;
  * @author : ---
  * @date :   2019/7/31 16:42
  */
-@Component
+@Configuration
 public class DatabaseConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseConfiguration.class);
 
@@ -107,7 +107,7 @@ public class DatabaseConfiguration {
             properties.load(this.getClass().getClassLoader().getResourceAsStream("org.flowable.db.properties/" + databaseType + ".properties"));
 
             sqlSessionFactoryBean.setConfigurationProperties(properties);
-            //获取多个mapper，需要多个Resource
+            //sqlSessionFactoryBean添加的mapper是数组类型的，这里插入的是自定义的查询Mapper和flowable-ui的Model-mybatis-mappings
             Resource[] resources1 = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources("classpath:/META-INF/modeler-mybatis-mappings/*.xml");
             //自定义的mapper.xml路径
             Resource[] resources2 = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources("classpath:/mapper/*.xml");
@@ -123,7 +123,6 @@ public class DatabaseConfiguration {
     }
 
     @Bean(destroyMethod = "clearCache")
-    // destroyMethod: see https://github.com/mybatis/old-google-code-issues/issues/778
     public SqlSessionTemplate SqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
         return new SqlSessionTemplate(sqlSessionFactory);
     }

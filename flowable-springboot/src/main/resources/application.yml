@@ -9,7 +9,7 @@ spring:
     cache: false #关闭缓存
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/flowable-springboot?useUnicode=true&amp;characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/flowable-springboot2?useUnicode=true&amp;characterEncoding=UTF-8
     username: root
     password: 1234
     hikari:
