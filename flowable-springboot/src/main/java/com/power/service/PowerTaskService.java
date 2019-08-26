@@ -113,4 +113,11 @@ public interface PowerTaskService {
      * @return Result
      */
     Result queryTaskList(String assignee);
+
+    /**
+     * 条件查询用户任务
+     * @param vars 任务参数
+     * @return Result
+     */
+    Result queryTaskListByCondition(Map<String,String> vars);
 }

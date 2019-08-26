@@ -32,7 +32,7 @@ public class NodeJumpCmd implements Command<Void> {
         ExecutionEntityManager executionEntityManager = CommandContextUtil.getExecutionEntityManager();
         //获取任务实体管理类
         TaskEntityManager taskEntityManager = org.flowable.task.service.impl.util.CommandContextUtil.getTaskEntityManager();
-        //获取任务执行Id
+        //获取任务实体对象
         TaskEntity taskEntity = taskEntityManager.findById(taskId);
         //获取流程实例Id
         String processInstanceId = taskEntity.getProcessInstanceId();

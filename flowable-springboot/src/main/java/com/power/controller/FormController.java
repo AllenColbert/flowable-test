@@ -1,7 +1,6 @@
 package com.power.controller;
 
 import org.flowable.engine.FormService;
-import org.flowable.engine.TaskService;
 import org.flowable.engine.form.FormProperty;
 import org.flowable.engine.form.FormType;
 import org.flowable.engine.form.StartFormData;
@@ -33,9 +32,6 @@ import java.util.Map;
 public class FormController {
     @Autowired
     private FormService formService;
-
-    @Autowired
-    private TaskService taskService;
 
     /**
      * 通过流程定义Id获取表单信息

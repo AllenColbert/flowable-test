@@ -15,9 +15,6 @@ public class PowerProcessDefinition {
     private String rev;
     private String category;
     private String name;
-    /**
-     * key1 此处设置为key时 查询SQL语句会报错
-     */
     private String keyWord;
     private String version;
     private String deploymentId;

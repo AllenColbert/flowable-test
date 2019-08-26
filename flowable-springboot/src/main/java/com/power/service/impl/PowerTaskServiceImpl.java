@@ -445,6 +445,24 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         return Result.success();
     }
 
+    @Override
+    public Result queryTaskListByCondition(Map<String,String> vars){
+        TaskQuery taskQuery = taskService.createTaskQuery();
+        //根据任务name模糊查询
+        String taskName = vars.get("taskName");
+        if (taskName!= null && !"".equals(taskName)){
+            taskQuery.taskNameLike(taskName);
+        }
+        //还可以添加其他查询条件--
+
+        List<Task> list = taskQuery.list();
+
+        //Task查询出来的list无法直接序列化传递，需要自定义一个实体类来接收
+        System.out.println(list);
+
+        return Result.success();
+    }
+
     /*#############################自定义方法区#############################*/
 
     /**
