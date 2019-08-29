@@ -11,6 +11,7 @@ import org.flowable.engine.impl.cfg.ProcessEngineConfigurationImpl;
  * @author : xuyunfeng
  * @date :   2019/7/25 14:58
  */
+@Deprecated
 public class NodeUtil {
     /**
      * 生成连线信息

@@ -9,7 +9,8 @@ import org.flowable.idm.api.IdmManagementService;
  * @author : xuyunfeng
  * @date :   2019/8/23 10:29
  */
-public class ConstructorServiceImpl implements ConstructorService {
+@Deprecated
+public class  ConstructorServiceImpl implements ConstructorService {
 
     protected  final RepositoryService repositoryService;
     protected  final RuntimeService runtimeService;

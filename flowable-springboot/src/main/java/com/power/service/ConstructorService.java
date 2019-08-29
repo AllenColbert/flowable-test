@@ -5,5 +5,6 @@ package com.power.service;
  * @author : xuyunfeng
  * @date :   2019/8/23 10:26
  */
+@Deprecated
 public interface ConstructorService {
 }
