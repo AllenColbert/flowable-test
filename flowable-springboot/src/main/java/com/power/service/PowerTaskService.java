@@ -87,7 +87,7 @@ public interface PowerTaskService {
     Result executeReturn(String processInstanceId, String targetNodeId);
 
     /**
-     * 返回表单填充数据
+     * 根据任务Id查询条件表达式
      * @param taskId 任务Id
      * @return Result
      */

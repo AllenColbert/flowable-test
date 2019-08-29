@@ -75,7 +75,6 @@ public class PowerProcessImpl implements PowerProcessService {
         if (models == null || models.size() == 0){
             return Result.failure(ResultCode.RESULT_DATA_NONE);
         }
-
         return Result.success(models);
     }
 
@@ -86,7 +85,6 @@ public class PowerProcessImpl implements PowerProcessService {
             return Result.failure(ResultCode.RESULT_DATA_NONE);
         }
         return Result.success(processDefinitionList);
-
     }
 
     @Override
@@ -109,10 +107,7 @@ public class PowerProcessImpl implements PowerProcessService {
             return Result.failure(ResultCode.USER_NOT_LOGGED_IN);
         }
         map.put("userId",user.getId());
-
-
         ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId,map);
-
         return Result.success(processInstance.getActivityId()+processInstance.getProcessDefinitionId()+"/"+processInstance.getRootProcessInstanceId());
     }
 
@@ -148,29 +143,19 @@ public class PowerProcessImpl implements PowerProcessService {
         }
         //其他任何状态对于激活操作来说都是异常
         return Result.failure(ResultCode.PROCESS_STATUS_EXCEPTION,result.getMsg());
-
     }
 
     @Override
     public Result deployModelByModelId(String modelId) {
         //获取模型
-        Model modelData;
-        try {
-            modelData = modelService.getModel(modelId);
-        } catch (NotFoundException e) {
-            return Result.failure(ResultCode.RESULT_DATA_NONE);
-        }catch (Exception e){
-            return Result.failure(ResultCode.DATA_IS_WRONG);
-        }
+        Model modelData = modelService.getModel(modelId);
+
         byte[] bytes = modelService.getBpmnXML(modelData);
         if (bytes == null) {
             return Result.failure(ResultCode.MODEL_IS_EMPTY);
         }
-
         BpmnModel model=modelService.getBpmnModel(modelData);
-        if(model.getProcesses().size()==0){
-            return Result.failure(ResultCode.MODEL_DATA_WRONG_WARNING);
-        }
+
         byte[] bpmnBytes = new BpmnXMLConverter().convertToXML(model);
         //发布流程
         String processName = modelData.getName() + ".bpmn20.xml";
@@ -199,7 +184,7 @@ public class PowerProcessImpl implements PowerProcessService {
             }
         }
         //去重
-        List<String> formKeyList = ListUtils.deDuplicationList(formKeys);
+        List<String> formKeyList = ListUtils.removeStringDuplicates(formKeys);
 
         if (formKeyList.size() > 0 ){
             for (String formKey : formKeyList) {

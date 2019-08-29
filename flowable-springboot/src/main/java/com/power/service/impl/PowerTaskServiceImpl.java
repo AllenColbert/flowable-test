@@ -111,30 +111,23 @@ public class PowerTaskServiceImpl implements PowerTaskService {
     @Override
     public void getProcessDiagram(HttpServletResponse httpServletResponse, String processInstanceId) throws IOException {
         ProcessInstance pi = runtimeService.createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
-
         //流程走完的不显示图
         if (pi == null) {
             return;
         }
-        //
         List<Task> taskList = taskService.createTaskQuery().processInstanceId(pi.getId()).list();
-
         List<String> instanceIds = new ArrayList<>();
-
         //使用流程实例ID，查询正在执行的执行对象表，返回流程实例对象
         for (Task task : taskList) {
             String instanceId = task.getProcessInstanceId();
             instanceIds.add(instanceId);
         }
-
         List<Execution> executions = new ArrayList<>();
-
         //使用流程实例ID，查询正在执行的执行对象表，返回流程实例对象
         for (String instanceId : instanceIds) {
             List<Execution> executionList = runtimeService.createExecutionQuery().processInstanceId(instanceId).list();
             executions.addAll(executionList);
         }
-
         //得到正在执行的Activity的Id
         List<String> activityIds = new ArrayList<>();
         List<String> flows = new ArrayList<>();
@@ -142,21 +135,16 @@ public class PowerTaskServiceImpl implements PowerTaskService {
             List<String> ids = runtimeService.getActiveActivityIds(exe.getId());
             activityIds.addAll(ids);
         }
-
         List<ActivityInstance> flows2 = runtimeService.createActivityInstanceQuery()
                 .activityType(BpmnXMLConstants.ELEMENT_SEQUENCE_FLOW).processInstanceId(processInstanceId).list();
-
         for (ActivityInstance activityInstance : flows2) {
             String activityId = activityInstance.getActivityId();
             flows.add(activityId);
         }
-
         //获取流程图
         BpmnModel bpmnModel = repositoryService.getBpmnModel(pi.getProcessDefinitionId());
         ProcessDiagramGenerator diagramGenerator = processEngine.getProcessEngineConfiguration().getProcessDiagramGenerator();
-
         InputStream in = diagramGenerator.generateDiagram(bpmnModel, "png", activityIds, flows, "宋体", "宋体", "宋体", null, 1.0D, true);
-
         OutputStream out = null;
         byte[] buf = new byte[1024];
         int length = 0;
@@ -177,23 +165,16 @@ public class PowerTaskServiceImpl implements PowerTaskService {
 
     @Override
     public Result queryCurrentUserTasks(Model model, HttpServletResponse response) {
-
         User user = (User) session.getAttribute("user");
-
         if (user == null || user.getId() == null) {
-
             return Result.failure(ResultCode.USER_NOT_EXIST);
         }
         String userId = user.getId();
-
         List<PowerTask> tasks = taskMapper.queryUserTask(userId);
-
         if (tasks == null || tasks.size() == 0) {
             return Result.failure(ResultCode.TASKS_IS_NULL);
         }
-
         model.addAttribute("tasks", tasks);
-
         return Result.success(tasks);
     }
 
@@ -214,9 +195,7 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         if (!taskStatus.getCode().equals(ResultCode.SUCCESS.code())) {
             return taskStatus;
         }
-
         String processInstanceId = findInstanceIdByTaskId(taskId);
-
         //评论
         String commentMsg = vars.get("message").toString();
         //任务代办人
@@ -278,7 +257,7 @@ public class PowerTaskServiceImpl implements PowerTaskService {
             }
         }
         //去重
-        List<Map<String, String>> setList = ListUtils.removeDuplicates(selectList);
+        List<Map<String, String>> setList = ListUtils.removeMapDuplicates(selectList);
 
         return Result.success(setList);
 
@@ -308,7 +287,6 @@ public class PowerTaskServiceImpl implements PowerTaskService {
                 for (Execution execution : executions) {
                     currentExecutionIds.add(execution.getId());
                 }
-
                 String targetNode = incomingFlows.get(0).getSourceRef();
                 runtimeService.createChangeActivityStateBuilder()
                         .moveExecutionsToSingleActivityId(currentExecutionIds, targetNode)
@@ -317,18 +295,7 @@ public class PowerTaskServiceImpl implements PowerTaskService {
             }
             //如果有多条流入，说明它是并行网关结束节点，需要退回到全部的并行节点
             else {
-                List<String> targetTaskIds = new ArrayList<>();
-                for (SequenceFlow incomingFlow : incomingFlows) {
-                    String sourceNode = incomingFlow.getSourceRef();
-                    targetTaskIds.add(sourceNode);
-                }
-                //并行网关流出只会有一个节点
-                runtimeService.createChangeActivityStateBuilder()
-                        .processInstanceId(processInstanceId)
-                        .moveSingleActivityIdToActivityIds(activityIds.get(0), targetTaskIds)
-                        .changeState();
-
-                return Result.success();
+                execute(processInstanceId,incomingFlows,activityIds);
             }
         }
         //如果节点是包容网关
@@ -341,22 +308,24 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         if (flowElement instanceof ExclusiveGateway) {
             ExclusiveGateway exclusiveGateway = (ExclusiveGateway) flowElement;
             List<SequenceFlow> incomingFlows = exclusiveGateway.getIncomingFlows();
-
-            List<String> targetTaskIds = new ArrayList<>();
-            for (SequenceFlow incomingFlow : incomingFlows) {
-                String sourceRef = incomingFlow.getSourceRef();
-                targetTaskIds.add(sourceRef);
-            }
-            runtimeService.createChangeActivityStateBuilder()
-                    .processInstanceId(processInstanceId)
-                    .moveSingleActivityIdToActivityIds(activityIds.get(0), targetTaskIds)
-                    .changeState();
-
-            return Result.success();
+            //执行跳转
+            execute(processInstanceId,incomingFlows,activityIds);
         }
-
         return Result.failure(ResultCode.SYSTEM_INNER_ERROR);
+    }
 
+    public Result execute(String processInstanceId,List<SequenceFlow> incomingFlows,List<String> activityIds){
+        List<String> targetTaskIds = new ArrayList<>();
+        for (SequenceFlow incomingFlow : incomingFlows) {
+            String sourceRef = incomingFlow.getSourceRef();
+            targetTaskIds.add(sourceRef);
+        }
+        runtimeService.createChangeActivityStateBuilder()
+                .processInstanceId(processInstanceId)
+                .moveSingleActivityIdToActivityIds(activityIds.get(0), targetTaskIds)
+                .changeState();
+
+        return Result.success();
     }
 
     @Override
@@ -409,7 +378,6 @@ public class PowerTaskServiceImpl implements PowerTaskService {
                 System.out.println("endEvent：" + ((EndEvent) targetFlowElement).getEventDefinitions());
             }
         }
-
         return Result.success(parseData(conditions));
     }
 
