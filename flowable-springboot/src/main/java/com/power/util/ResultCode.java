@@ -105,15 +105,18 @@ public enum ResultCode {
         return this.name();
     }
 
-    //校验重复的code值
+    /**
+     * 校验重复的code值
+     * @param args 参数
+     */
     public static void main(String[] args) {
-        ResultCode[] ApiResultCodes = ResultCode.values();
+        ResultCode[] apiResultCodes = ResultCode.values();
         List<Integer> codeList = new ArrayList<Integer>();
-        for (ResultCode ApiResultCode : ApiResultCodes) {
-            if (codeList.contains(ApiResultCode.code)) {
-                System.out.println(ApiResultCode.code);
+        for (ResultCode apiResultCode : apiResultCodes) {
+            if (codeList.contains(apiResultCode.code)) {
+                System.out.println(apiResultCode.code);
             } else {
-                codeList.add(ApiResultCode.code());
+                codeList.add(apiResultCode.code());
             }
         }
     }

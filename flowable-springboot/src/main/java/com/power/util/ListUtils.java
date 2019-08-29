@@ -11,14 +11,24 @@ import java.util.Map;
  * @date :   2019/8/13 14:13
  */
 public class ListUtils {
-    public static List<Map<String,String>> removeDuplicates (List<Map<String,String>> list){
+    /**
+     * list去重静态方法
+     * @param list List<Map<String,String>> list列表
+     * @return 去重后的list
+     */
+    public static List<Map<String,String>> removeMapDuplicates (List<Map<String,String>> list){
         HashSet<Map<String,String>> set = new HashSet<>(list);
         list.clear();
         list.addAll(set);
         return list;
     }
 
-    public static List<String> deDuplicationList (List<String> list){
+    /**
+     * list去重静态方法
+     * @param list List<String> list列表
+     * @return 去重后的list
+     */
+    public static List<String> removeStringDuplicates (List<String> list){
         HashSet<String> set = new HashSet<>(list);
         return new ArrayList<>(set);
     }
