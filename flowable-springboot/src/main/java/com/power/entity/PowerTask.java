@@ -6,6 +6,7 @@ import lombok.Data;
 import java.util.Date;
 
 /**
+ * 任务实体类
  * @author : xuyunfeng
  * @date :   2019/7/17 16:42
  */

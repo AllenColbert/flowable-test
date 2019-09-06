@@ -3,3 +3,183 @@
 导致application.yml中的mybatis.mapper-location的配置会被覆盖掉
 具体位置在sqlSessionFactory方法中
 修改resource2的值 可以去自定义mapper的位置
+
+
+
+<select id="queryPageAllProcessDefPage" resultType="com.fxtcn.platform.entity.ProcessDefEntity" parameterType="com.fxtcn.platform.util.Parametermap">
+
+	SELECT
+	*
+FROM
+	(
+	SELECT
+		arp.KEY_ AS defKey,
+		arp.NAME_ AS processDefName,
+		a2.name_ AS processCategoryName,
+		a2.code_id AS processCategory,
+		arp.ID_  as processId
+	FROM
+		ACT_RE_PROCDEF arp
+		LEFT JOIN ACT_PROCESS_TYPE a2 ON arp.CATEGORY_ = a2.code_id
+		AND a2.state_ = 0
+
+	ORDER BY
+		arp.VERSION_ DESC
+	) a
+	where 1=1
+		<if test="processDefName !=null and processDefName !=''">
+			and processDefName LIKE concat(concat('%',#{processDefName,jdbcType=VARCHAR}),'%')
+		</if>
+
+		<if test="category != null and category != ''">
+			and processCategory = #{category ,jdbcType=VARCHAR}
+		</if>
+
+	</select>
+
+
+
+<mapper namespace="com.fxtcn.platform.dao.TaskDao">
+
+    <select id="queryByUserIdListPage" parameterType="java.lang.String" resultType="com.fxtcn.platform.entity.TaskData">
+    SELECT
+	t.TASK_ID_ taskId,
+	t.USER_ID_ taskAssigin,
+	a.CREATE_TIME_ startTime,
+	a.PROC_INST_ID_ processId,
+	a.NAME_ taskName,
+	a.SUSPENSION_STATE_ state,
+	a.`PRIORITY_` AS priority
+FROM
+	(
+		SELECT
+			art.ID_ AS TASK_ID_,
+			art.ASSIGNEE_ AS USER_ID_
+		FROM
+			act_ru_task art
+		WHERE
+			art.ID_ IS NOT NULL
+		AND art.ASSIGNEE_ IS NOT NULL
+		AND art.ASSIGNEE_ = #{userId}
+		UNION
+			SELECT
+				TASK_ID_,
+				USER_ID_
+			FROM
+				ACT_RU_IDENTITYLINK I,
+				ACT_RU_TASK T
+			WHERE
+				TASK_ID_ IS NOT NULL
+			AND USER_ID_ IS NOT NULL
+			AND I.TASK_ID_ = T.ID_
+			AND T.ASSIGNEE_ IS NULL
+			AND TYPE_ = 'candidate'
+		UNION
+			SELECT
+				T.ID_ AS TASK_ID_,
+				V.TEXT_ AS USER_ID_
+			FROM
+				ACT_RU_VARIABLE V,
+				ACT_RU_TASK T
+			WHERE
+				V.EXECUTION_ID_ = T.EXECUTION_ID_
+				AND V.PROC_INST_ID_=T.PROC_INST_ID_
+				AND V.TEXT_ = #{userId}
+	) t,
+	act_ru_task a
+WHERE
+	t.TASK_ID_ = a.ID_
+AND t.USER_ID_ = #{userId}
+  </select>
+
+      <select id="queryByUserIdPage" parameterType="java.lang.String" resultType="com.fxtcn.platform.entity.TaskAPIData">
+
+select * from (
+SELECT
+		taskId,
+		startTime,
+		endTime,
+		processInstanceId,
+		taskName,
+		priority,
+		processDefName,
+		startUserId,
+		applyTime,
+		stopTime,
+		processCategory,
+		processKey,
+		processInstanceName,
+		handerId
+		FROM(
+		SELECT
+		aht.ID_ AS taskId,
+		aht.START_TIME_ AS startTime,
+		aht.END_TIME_ AS endTime,
+		aht.PROC_INST_ID_ AS processInstanceId,
+		aht.NAME_ AS taskName,
+		aht.PRIORITY_ AS priority,
+		arp.NAME_ AS processDefName,
+		ahp.START_USER_ID_ AS startUserId,
+		ahp.START_TIME_ AS applyTime,
+		ahp.END_TIME_ AS stopTime,
+		arp.CATEGORY_ as processCategory,
+		arp.KEY_ as processKey,
+		ahp.NAME_ as processInstanceName,
+		aht.ASSIGNEE_ as handerId
+		FROM
+		act_hi_taskinst aht
+		LEFT JOIN act_re_procdef arp ON aht.PROC_DEF_ID_ = arp.ID_
+		LEFT JOIN act_hi_procinst ahp ON ahp.PROC_INST_ID_ = aht.PROC_INST_ID_
+		and aht.END_TIME_ is not null
+		) AS totalProcessInstance
+		)t
+		WHERE handerId=#{userId}
+  </select>
+</mapper>
+
+
+
+<select id="queryUserByGroup"
+		parameterType="org.flowable.idm.engine.impl.persistence.entity.GroupEntityImpl"
+		resultType="org.flowable.idm.engine.impl.persistence.entity.UserEntityImpl">
+		SELECT
+			aiu.ID_ as id,
+	      	aiu.DISPLAY_NAME_ as  displayName,
+	      	aiu.PWD_ as  password,
+	      	aiu.EMAIL_ as email,
+	      	aiu.FIRST_ as firstName,
+	      	aiu.LAST_  as lastName,
+	      	aiu.TENANT_ID_ as tenantId,
+	      	aiu.PICTURE_ID_ as picture
+		FROM
+			act_id_group aig
+		LEFT JOIN act_id_membership aim ON aig.ID_ = aim.GROUP_ID_
+		LEFT JOIN act_id_user aiu ON aiu.ID_ = aim.USER_ID_
+		<where>
+			<if test="id != null">
+				aig.ID_ = #{id}
+			</if>
+			<if test="id != null">
+				aig.NAME_ = #{name}
+			</if>
+		</where>
+	</select>
+	<select id="queryGroupByUser"
+		parameterType="org.flowable.idm.engine.impl.persistence.entity.UserEntityImpl"
+		resultType="org.flowable.idm.engine.impl.persistence.entity.GroupEntityImpl">
+		SELECT
+			aig.ID_ 	as id,
+		    aig.REV_ 	as revision,
+		    aig.NAME_ 	as name,
+		    aig.TYPE_ 	as type
+		FROM
+			act_id_group aig
+		LEFT JOIN act_id_membership aim ON aig.ID_ = aim.GROUP_ID_
+		LEFT JOIN act_id_user aiu ON aiu.ID_ = aim.USER_ID_
+		<where>
+			<if test="id != null">
+				aiu.ID_ = #{id}
+			</if>
+		</where>
+
+	</select>
