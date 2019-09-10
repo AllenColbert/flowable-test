@@ -110,7 +110,7 @@ public class DatabaseConfiguration {
             //sqlSessionFactoryBean添加的mapper是数组类型的，这里插入的是自定义的查询Mapper和flowable-ui的Model-mybatis-mappings
             Resource[] resources1 = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources("classpath:/META-INF/modeler-mybatis-mappings/*.xml");
             //自定义的mapper.xml路径
-            Resource[] resources2 = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources("classpath:/mapper/*.xml");
+            Resource[] resources2 = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources("classpath:/mybatis/mapper/*.xml");
             Resource[] resources3 = ArrayUtils.addAll(resources1, resources2);
             sqlSessionFactoryBean.setMapperLocations(resources3);
 

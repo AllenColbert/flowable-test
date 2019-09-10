@@ -10,5 +10,7 @@ import lombok.Data;
 @Data
 public class PowerHistoryTask {
 
+    private String id;
+    private String name;
 
 }

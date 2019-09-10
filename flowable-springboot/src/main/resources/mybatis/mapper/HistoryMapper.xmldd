@@ -5,7 +5,7 @@
    namespace：名称空间，由于映射文件可能有多个，为了防止crud语句的唯一标识被重复，需要设置空间名称。
  -->
 
-<mapper namespace="HistoryMapper">
+<mapper namespace="com.power.mapper.HistoryMapper">
     <!--
         select:查询的statement（声明），用来编写查询语句
         id:语句的唯一标识

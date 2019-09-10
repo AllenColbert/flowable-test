@@ -9,4 +9,8 @@ import com.power.util.Result;
 public interface PowerHistoryService {
 
     Result findHistoricProcessInstance();
+
+    Result findHistoryList(String processDefinitionId);
+
+    Result findMyHistoryTask(String assignee);
 }

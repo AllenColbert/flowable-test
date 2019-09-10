@@ -202,7 +202,6 @@ public class PowerTaskServiceImpl implements PowerTaskService {
         String userId = vars.get("userId").toString();
         // #####这里方便测试，将任务代办人为空的时候默认设置为admin#####
         String assignee = userId == null ? "admin": userId;
-        //这里设置的时当前任务办理人信息，完成任务后此信息就没用了，所有不能这么写
         taskService.setAssignee(taskId,assignee);
         //如果没有填写评论就不添加act_hi_comment数据
         if (commentMsg != null && !"".equals(commentMsg)) {
