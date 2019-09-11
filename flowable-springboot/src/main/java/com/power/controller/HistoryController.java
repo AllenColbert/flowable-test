@@ -23,12 +23,6 @@ public class HistoryController {
     @Autowired
     private PowerHistoryService powerHistoryService;
 
-    @ApiOperation(value = "历史实例表")
-    @GetMapping("processInstanceHistory")
-    @ResponseBody
-    public Result processInstanceHistory(){
-       return powerHistoryService.findHistoricProcessInstance();
-    }
 
     @ApiOperation(value = "查询我的历史任务")
     @GetMapping("myHistoryTask")
@@ -37,12 +31,6 @@ public class HistoryController {
         return powerHistoryService.findMyHistoryTask(assignee);
     }
 
-    @ApiOperation(value = "查询历史任务")
-    @GetMapping("list")
-    @ResponseBody
-    public Result queryHistoryList(@ApiParam(name = "processDefinitionId",value = "流程定义Id")@RequestParam String processDefinitionId){
-        return powerHistoryService.findHistoryList(processDefinitionId);
-    }
 
 
 }

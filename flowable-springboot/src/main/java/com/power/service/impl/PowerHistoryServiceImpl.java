@@ -1,16 +1,17 @@
 package com.power.service.impl;
 
+import com.power.entity.PowerHistoricActivity;
 import com.power.service.PowerHistoryService;
 import com.power.util.Result;
 import org.flowable.engine.HistoryService;
+import org.flowable.engine.TaskService;
 import org.flowable.engine.history.HistoricActivityInstance;
-import org.flowable.engine.history.HistoricDetail;
-import org.flowable.engine.history.HistoricProcessInstance;
-import org.flowable.task.api.history.HistoricTaskInstance;
-import org.flowable.task.api.history.HistoricTaskLogEntry;
+import org.flowable.engine.task.Comment;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,31 +23,36 @@ public class PowerHistoryServiceImpl implements PowerHistoryService {
     @Autowired
     private HistoryService historyService;
 
-    @Override
-    public Result findHistoricProcessInstance(){
-        List<HistoricProcessInstance> list = historyService.createHistoricProcessInstanceQuery().listPage(1,10);
-        List<HistoricDetail> historicDetails = historyService.createHistoricDetailQuery().listPage(1, 10);
-        List<HistoricTaskLogEntry> historicTaskLogEntries = historyService.createHistoricTaskLogEntryQuery().listPage(1, 10);
-        List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery().listPage(1, 10);
-        List<HistoricActivityInstance> historicActivityInstances = historyService.createHistoricActivityInstanceQuery().listPage(1, 10);
-
-        return Result.success();
-    }
+    @Autowired
+    private TaskService taskService;
 
     @Override
-    public Result findHistoryList(String processDefinitionId) {
-        List<HistoricProcessInstance> list = historyService.createHistoricProcessInstanceQuery().processDefinitionId(processDefinitionId).list();
-        list.forEach(historyTask ->
-            System.out.println("历史任务名称"+historyTask.getName()+";任务发起时间："+historyTask.getStartTime())
-        );
-        return Result.success();
+    public Result findMyHistoryTask(String assignee){
+        //分页需要的数据
+        int index = 0;
+        int limit = 10;
+
+        List<PowerHistoricActivity> powerHistoricActivities = new ArrayList<>();
+
+        //根据用户名查询办理过的历史任务
+        List<HistoricActivityInstance> historicActivity = historyService.createHistoricActivityInstanceQuery()
+                .taskAssignee(assignee).orderByHistoricActivityInstanceEndTime().desc().listPage(index, limit);
+        historicActivity.forEach(historicTask -> {
+            String taskId = historicTask.getTaskId();
+            List<Comment> taskComments = taskService.getTaskComments(taskId);
+            PowerHistoricActivity powerHistoricActivity = new PowerHistoricActivity();
+            //历史任务评论不为空时才添加
+            if (taskComments.size() > 0){
+                Comment taskComment = taskComments.get(0);
+                powerHistoricActivity.setMessage(taskComment.getFullMessage());
+            }
+            BeanUtils.copyProperties(historicTask,powerHistoricActivity);
+            powerHistoricActivities.add(powerHistoricActivity);
+
+        });
+
+        return Result.success(powerHistoricActivities);
     }
 
-    @Override
-    public Result findMyHistoryTask(String assignee) {
-        List<HistoricTaskInstance> list = historyService.createHistoricTaskInstanceQuery().taskAssignee(assignee).list();
 
-        list.forEach(task -> System.out.println("workTime:"+task.getWorkTimeInMillis()));
-        return Result.success();
-    }
 }

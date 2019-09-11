@@ -8,9 +8,10 @@ import com.power.util.Result;
  */
 public interface PowerHistoryService {
 
-    Result findHistoricProcessInstance();
-
-    Result findHistoryList(String processDefinitionId);
-
+    /**
+     * 查询我的历史任务
+     * @param assignee 用户ID
+     * @return 历史任务数据
+     */
     Result findMyHistoryTask(String assignee);
 }
