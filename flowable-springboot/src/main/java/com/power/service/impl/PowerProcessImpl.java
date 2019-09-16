@@ -11,12 +11,11 @@ import com.power.util.ListUtils;
 import com.power.util.Result;
 import com.power.util.ResultCode;
 import org.flowable.bpmn.converter.BpmnXMLConverter;
-import org.flowable.bpmn.model.*;
 import org.flowable.bpmn.model.Process;
+import org.flowable.bpmn.model.*;
 import org.flowable.engine.ManagementService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
-import org.flowable.engine.TaskService;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.repository.DeploymentBuilder;
 import org.flowable.engine.repository.ProcessDefinition;
@@ -46,7 +45,6 @@ public class PowerProcessImpl implements PowerProcessService {
      */
     private static final String BPMN_PREFIX = "upload/diagrams/";
 
-
     @Autowired
     private RepositoryService repositoryService;
 
@@ -55,9 +53,6 @@ public class PowerProcessImpl implements PowerProcessService {
 
     @Autowired
     private ModelService modelService;
-
-    @Autowired
-    private TaskService taskService;
 
     @Autowired
     private ProcessMapper processMapper;

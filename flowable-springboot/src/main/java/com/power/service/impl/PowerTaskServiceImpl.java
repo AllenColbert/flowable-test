@@ -52,8 +52,6 @@ public class PowerTaskServiceImpl implements PowerTaskService {
     @Autowired
     private ManagementService managementService;
     @Autowired
-    private HistoryService historyService;
-    @Autowired
     private FormService formService;
     @Autowired
     private TaskMapper taskMapper;

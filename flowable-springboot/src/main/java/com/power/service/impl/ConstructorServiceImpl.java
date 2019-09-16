@@ -12,8 +12,6 @@ import org.flowable.idm.api.IdmManagementService;
 @Deprecated
 public class  ConstructorServiceImpl implements ConstructorService {
 
-    protected  final RepositoryService repositoryService;
-    protected  final RuntimeService runtimeService;
     protected FormService formService;
     protected TaskService taskService;
     protected ProcessEngine processEngine;
@@ -25,8 +23,4 @@ public class  ConstructorServiceImpl implements ConstructorService {
     protected DynamicBpmnService dynamicBpmnService;
 
 
-    public ConstructorServiceImpl(RepositoryService repositoryService, RuntimeService runtimeService) {
-        this.repositoryService = repositoryService;
-        this.runtimeService = runtimeService;
-    }
 }

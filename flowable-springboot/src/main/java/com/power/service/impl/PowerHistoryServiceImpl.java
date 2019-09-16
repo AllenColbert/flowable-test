@@ -28,7 +28,7 @@ public class PowerHistoryServiceImpl implements PowerHistoryService {
 
     @Override
     public Result findMyHistoryTask(String assignee){
-        //分页需要的数据
+        //分页
         int index = 0;
         int limit = 10;
 
